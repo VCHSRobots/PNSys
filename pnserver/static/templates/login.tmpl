@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title> {{- .PageTitle -}} </title>
+<link rel="stylesheet" type="text/css" href="../css/global.css">
+<body>
+<h1> {{- .PageHeader -}} </h1>
+
+<div class="login_area">
+    <form action="LoginPost" method="post">
+        <div class="login_label"> Designer: </div> 
+        <div class="login_field"> <select name="name">
+           {{range .Designers}} <option value=" {{- . -}} "> {{- . -}} </option> {{end}}
+           <option value="guest">Guest</option>
+           <option value="admin">Admin</option>
+           </select></div> 
+        <div style="clear: both;"></div>
+        <div class="login_label"> Password: </div> 
+        <div class="login_field"> <input type="password" name="password"> </div>
+        <div style="clear: both;"></div>
+        <div style="margin-left: 140px; margin-top: 30px; margin-bottom: 50px;">
+            <input class="btn_backgnd" style="width: 208px;" type="submit" value="Log In">
+        </div>
+    </form>
+</div>
+
+{{if .BadPassword}} Bad Password {{end}}
+
+</body>
+</html>

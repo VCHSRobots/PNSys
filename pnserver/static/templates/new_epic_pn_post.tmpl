@@ -1,0 +1,85 @@
+{{/*
+// --------------------------------------------------------------------
+// new_epic_pn_post.tmpl -- template to display a new epic part number
+//
+// Created 2018-09-22 DLB
+// --------------------------------------------------------------------
+*/}}
+
+
+<script type="text/javascript">
+function copyToClipboard(str) {
+  const el = document.createElement('textarea');  // Create a <textarea> element
+  el.value = str;                                 // Set its value to the string that you want copied
+  el.setAttribute('readonly', '');                // Make it readonly to be tamper-proof
+  el.style.position = 'absolute';                 
+  el.style.left = '-9999px';                      // Move outside the screen to make it invisible
+  document.body.appendChild(el);                  // Append the <textarea> element to the HTML document
+  const selected =            
+    document.getSelection().rangeCount > 0        // Check if there is any content selected previously
+      ? document.getSelection().getRangeAt(0)     // Store selection if found
+      : false;                                    // Mark as false to know no selection existed before
+  el.select();                                    // Select the <textarea> content
+  document.execCommand('copy');                   // Copy - only works as a result of a user action (e.g. click events)
+  document.body.removeChild(el);                  // Remove the <textarea> element
+  if (selected) {                                 // If a selection existed before copying
+    document.getSelection().removeAllRanges();    // Unselect everything on the HTML document
+    document.getSelection().addRange(selected);   // Restore the original selection
+  }
+};
+
+function copyPNtoclipboard() {
+    copyToClipboard("{{.NewPN}}")
+}
+</script>
+
+<div class="content_area">
+<div class="page_title"> {{- .PageTitle -}}</div>
+
+<div class="inputform_area">
+
+    {{if .ErrorMsg}} 
+    <div id="epn_errmsg" class="errmsg"> {{.ErrorMsg}} </div>
+    {{else}}
+      {{if .NewPN}}<div id="epn_partnumber" class="partnumber">{{.NewPN}}</div>
+        <a id="epn_partnumber_copybtn" class="clipboard_btn" onclick="copyPNtoclipboard()">Copy</a>
+
+      {{end}}
+      
+      <div id="epn_project_block" class="param_block">
+      <div id="epn_project_label" class="param_label">Project:</div>
+      <div id="epn_proejct_value" class="param_value">{{.Project}}</div>
+      </div>
+
+      <div id="epn_subsystem_block" class="param_block">
+      <div id="epn_subsystem_label" class="param_label">Subsystem:</div>
+      <div id="epn_subsystem_value" class="param_value">{{.Subsystem}}</div>
+      </div>
+
+      <div id="epn_parttype_block" class="param_block">
+      <div id="epn_parttype_label" class="param_label">Part Type:</div>
+      <div id="epn_parttype_value" class="param_value">{{.PartType}}</div>
+      </div>
+
+      <div id="epn_designer_block" class="param_block">
+      <div id="epn_designer_label" class="param_label">Designer:</div>
+      <div id="epn_designer_value" class="param_value">{{.Designer}}</div>
+      </div>
+
+      <div id="epn_seqnum_block" class="param_block">
+      <div id="epn_seqnum_label" class="param_label">Seq Num:</div>
+      <div id="epn_seqnum_value" class="param_value">{{.SequenceNumber}}</div>
+      </div>
+
+      <div id="epn_description_block" class="param_block">
+      <div id="epn_description_label" class="param_label">Description:</div>
+      <div id="epn_description_value" class="param_value">{{.Description}}</div>
+      </div>
+
+      <div id="epn_datecreated_block" class="param_block">
+      <div id="epn_datecreated_label" class="param_label">Date Created:</div>
+      <div id="epn_datecreated_value" class="param_value">{{.DateCreated}}</div>
+      </div>
+    {{end}}
+</div>
+

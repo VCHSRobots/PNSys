@@ -1,0 +1,25 @@
+{{/*
+// --------------------------------------------------------------------
+// tablepage.tmpl -- Puts a table in the main content area.
+//
+// Created 2018-09-23 DLB
+// --------------------------------------------------------------------
+*/}}
+
+<div class="content_area">
+<div class="page_title"> {{- .PageTitle -}}</div>
+
+<div id="table_content" class="table_content">
+{{if .Rows}}
+    <table>
+        <thead><tr>{{range .Head}} <th> {{.}} </th> {{end}}</tr></thead>
+        <tbody>
+            {{range .Rows}} <tr> {{range .Cols}} <td> {{ . }} </td> {{end}} </tr> {{end}}
+        </tbody>
+    </table>
+{{else}}
+    {{if .EmptyMessage}} {{.EmptyMessage}} {{else}} Nothing Found. {{end}}
+{{end}}
+</div>
+
+

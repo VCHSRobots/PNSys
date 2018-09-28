@@ -1,0 +1,202 @@
+{{/*
+// --------------------------------------------------------------------
+// new_epic_pn.tmpl -- template to enter a new epic pn.
+//
+// Created 2018-09-24 DLB
+// --------------------------------------------------------------------
+*/}}
+
+<script type="application/json" id="projects">
+{{.ProjectsJson}}
+</script>
+
+<script type="application/json" id="designers">
+{{.DesignersJson}}
+</script>
+
+<script type="text/javascript">
+
+var gShowAllProjects = false
+var gShowAllDesigners = false
+
+function clearSelBox(sel) {
+    var n = sel.length;
+    var i;
+    for (i = 0; i < n; i++) {
+        sel.remove(0);
+    }
+}
+
+function fillSubsystem() {
+    var prjlst = JSON.parse(document.getElementById("projects").innerHTML);
+    var p = document.getElementById("nep_project_field");
+    var sel = document.getElementById("nep_subsystem_field");
+    clearSelBox(sel);
+    var i;
+    for (i = 0; i < prjlst.length; i++) {
+        if (prjlst[i].ProjectId == p.value) {
+            var j; 
+            var subs = prjlst[i].Subsystems;
+            for (j = 0; j < subs.length; j++) {
+                var option = document.createElement("option");
+                var label = subs[j].SubsystemId + " -- " + subs[j].Description;
+                option.text = label;
+                option.label = label;
+                option.value = subs[j].SubsystemId 
+                sel.add(option)
+            }
+            return;
+        }
+    }
+}
+
+function fillProjects() {
+    var prjlst = JSON.parse(document.getElementById("projects").innerHTML);
+    var sel = document.getElementById("nep_project_field");
+    clearSelBox(sel);
+    var i;
+    for(i = 0; i < prjlst.length; i++) {
+        prj = prjlst[i];
+        if (gShowAllProjects || prj.Active) {
+            var option = document.createElement("option");
+            var label = prj.ProjectId + " -- " + prj.Description;
+            option.text = label;
+            option.label = label;
+            option.value = prj.ProjectId;
+            sel.add(option)
+        }
+    }
+}
+
+function fillDesigners() {
+    var desingerlst = JSON.parse(document.getElementById("designers").innerHTML);
+    var sel = document.getElementById("nep_designer_field");
+    clearSelBox(sel);
+    var i;
+    for(i = 0; i < desingerlst.length; i++) {
+        d = desingerlst[i];
+        if (gShowAllDesigners || d.Active) {
+            var option = document.createElement("option");
+            var label = d.Name;
+            option.text = label;
+            option.label = label;
+            option.value = label;
+            sel.add(option)
+        }
+    }
+}
+
+function updateActiveUI() {
+    if (gShowAllProjects) {
+        document.getElementById("nep_project_active_btn").innerHTML = "Show Some";
+    } else {
+        document.getElementById("nep_project_active_btn").innerHTML = "Show All";
+    }
+    if (gShowAllDesigners) {
+        document.getElementById("nep_designer_active_btn").innerHTML = "Show Some";
+    } else {
+        document.getElementById("nep_designer_active_btn").innerHTML = "Show All";
+    }
+}
+
+function toggleActiveProjects() {
+    gShowAllProjects = !gShowAllProjects;
+    updateActiveUI();
+    fillProjects();
+    fillSubsystem();
+}
+
+function toggleActiveDesigners() {
+    gShowAllDesigners = !gShowAllDesigners;
+    updateActiveUI();
+    fillDesigners();
+}
+
+function startUp() {
+    updateActiveUI();
+    fillProjects();
+    fillSubsystem();
+    fillDesigners();
+}
+
+</script>
+
+
+<div class="content_area">
+<div class="page_title"> {{- .PageTitle -}}</div>
+
+<span id="dbmsg"></span>
+<div class="inputform_area">
+    <form action="SubmitNewEpicPN" method="post">
+        <div id="nep_project">
+            <div class="inputform_paramblock" id="nep_project_block">
+                <div class="inputform_label" id="nep_project_label">Project</div>
+                <div class="inputform_selection">
+                    <select id="nep_project_field" name="Project" onchange="fillSubsystem()">
+                    </select>
+                </div>
+                <div id="nep_project_active_div" class="active_btn_div">
+                    <button type="button" id="nep_project_active_btn" class="active_btn" onclick="toggleActiveProjects()">Show All</button>
+                </div>
+            </div>
+        </div>
+        <div id="nep_designer">
+            <div class="inputform_paramblock" id="nep_designer_block">
+                <div class="inputform_label" id="nep_designer_label">Designer</div>
+                <div class="inputform_selection">
+                    <select id="nep_designer_field" name="Designer">
+                    </select>
+                <div id="nep_designer_active_div" class="active_btn_div">
+                    <button type="button" id="nep_designer_active_btn" class="active_btn" onclick="toggleActiveDesigners()">Show All</button>
+                </div>
+
+                </div>
+            </div>
+        </div>
+        <div id="nep_subsystem">
+            <div class="inputform_paramblock" id="nep_subsystem_block">
+                <div class="inputform_label" id="nep_subsystem_label">Subsystem</div>
+                <div class="inputform_selection">
+                    <select id="nep_subsystem_field" name="Subsystem"></select>
+                </div>
+            </div>
+        </div>
+        <div id="nep_parttype">
+            <div class="inputform_paramblock" id="nep_parttype_block">
+                <div class="inputform_label" id="nep_parttype_label">Part Type</div>
+                <div class="inputform_selection">
+                    <select id="nep_parttype_field" name="PartType">
+                        {{range .PartTypes}}
+                            <option name="{{.}}" value="{{.}}">{{.}}</option> {{end}}
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div id="nep_desc">
+            <div class="inputform_paramblock"  id="nep_desc_block">
+                <div class="inputform_label" id="nep_desc_label">Description</div>
+                <div class="inputform_textarea">
+                    <textarea  id="nep_desc_field" name="Description"  rows="2" cols="45" >
+                    </textarea>
+                </div>
+            </div>
+        </div>
+
+        <div style="clear: both;"></div>
+        <div class="inputform_paramblock">
+
+        <div class="btn_form_submit_div">
+            <input class="btn_form_submit" type="submit" value="Submit">
+        </div>
+    </form>
+</div>
+
+{{if .Instructions}} 
+    <div class="inputfrom_instructions">
+    {{.Instructions}}
+    </div> 
+{{end}}
+
+</div>
+

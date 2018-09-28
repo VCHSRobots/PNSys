@@ -1,0 +1,69 @@
+{{/*
+// --------------------------------------------------------------------
+// header.tmpl -- For nav area that fits to left of most pages.
+//
+// Created: 12/29/14 DLB
+//
+//  This template produces html for a header that works with a footer.  It should be
+//  supplied with a sructure that defines: 
+//     PageTabTitle, StyleSheets, BrowserWidth, ContentWidth, IsLoggedIn, 
+//     UserFormattedName, IsAdmin
+//
+// --------------------------------------------------------------------
+*/}}
+
+<!DOCTYPE html>
+ 
+<html lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    {{if .PageTabTitle}} <title> {{- .PageTabTitle -}} </title> {{else}}
+    <title>EPIC PN Sys</title> {{end}}
+    {{range .StyleSheets}} 
+        <link rel="stylesheet" type="text/css" href="../css/ {{- . -}} .css">
+        {{end}}
+    <link rel="stylesheet" type="text/css" href="../css/global.css">
+    <link rel="stylesheet" type="text/css" href="../css/nav.css">
+     <style>
+        {{$bw := 960}}  {{$cw := 760}} 
+        {{if .BrowserWidth}} {{$bw = .BrowserWidth}} {{end}}
+        {{if .ContentWidth}} {{$cw = .ContentWidth}} {{end}}
+        #screen_area {width: {{$bw -}} px;}
+        .content_area {width: {{$cw -}} px;} 
+        .menubar_area {width: {{$cw -}} px;} 
+        </style>
+</head>
+ 
+<body {{if .OnLoadFuncJS}} onload="{{.OnLoadFuncJS}}()" {{end}}>
+<div id="screen_area">
+<div id="header_banner">
+    <div id="header_writeable_area">
+    <div id="header_icon"> <a href="welcome"> <img src="../img/epicicon120_new.jpg" height="50px"> </a></div>
+    <div id="header_website_name">EPIC Robotz Part Numbers</div>
+    {{if .IsLoggedIn}}
+        <div id="header_account_area">
+            <div id="header_username_div"> {{.UserFormattedName}} {{if .IsAdmin}}*{{end}} </div>
+            <div id="header_accoutmenu_div">
+                <div class="header_topbutton_div">
+                  <a class="header_topbutton" href="account_settings">Settings</a>
+                  </div>
+                <div class="header_topbutton_div">
+                  <a class="header_topbutton" href="Logout">Logout</a>
+                  </div>
+                </div>
+                </div>
+    {{else}}
+        <div id="header_account_area">
+            <div id="header_username_div"><br></div>
+            <div id="header_accoutmenu_div">
+                <div class="header_topbutton_div"></div>
+                <div class="header_topbutton_div">
+                  <a class="header_topbutton" href="Login">Login</a>
+                  </div>
+                </div>
+                </div>
+    {{end}}
+    </div>
+ </div>
+ <div style="clear: both;"></div>
+ <div id="middle_area">

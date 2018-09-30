@@ -36,7 +36,6 @@ func make_default_login_data() *LoginData {
 	data.PageTabTitle = "PnSys Login"
 	data.OnLoadFuncJS = "startUp"
 	data.HideLoginLink = true
-	data.HideAboutLink = true
 	return data
 }
 
@@ -115,6 +114,9 @@ func show_login_page(c *gin.Context, data *LoginData) {
 	des := make([]*pnsql.Designer, 0, len(dlst))
 	for _, d := range dlst {
 		if d.Name == "U. Unknown" {
+			continue
+		}
+		if !d.Active {
 			continue
 		}
 		des = append(des, d)

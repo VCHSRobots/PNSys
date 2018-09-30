@@ -11,22 +11,14 @@ import (
 )
 
 func init() {
-	RegisterPage("Logout", Invoke_GET, handle_logout)
+	RegisterPage("Logout", Invoke_GET, authorizer, handle_logout)
 }
 
 func handle_logout(c *gin.Context) {
-	// Dummy data for now.
+	kill_session(c)
 	data := &HeaderData{}
 	data.PageTabTitle = "Epic PN"
-	data.IsLoggedIn = false
-	data.IsAdmin = false
-
-	html, err := MakePage(data, "header", "logout", "footer")
-	if err != nil {
-		// Log has already been writen to...
-		c.AbortWithError(400, err)
-		return
-	}
-
-	c.Data(200, "text/html", html)
+	data.HideLoginLink = false
+	data.HideAboutLink = true
+	SendPage(c, data, "header", "logout", "footer")
 }

@@ -51,9 +51,6 @@ func init() {
 func handle_new_epic_pn(c *gin.Context) {
 	data := &EpicPNData{}
 	data.HeaderData = GetHeaderData(c)
-	if data.HeaderData == nil {
-		return
-	}
 	data.PageTitle = "Create New Epic Part Number"
 	data.Instructions = "Fill form out and click Submit."
 	data.StyleSheets = []string{"new_epic_pn"}
@@ -85,9 +82,6 @@ func handle_new_epic_pn(c *gin.Context) {
 func handle_new_epic_pn_post(c *gin.Context) {
 	data := &EpicPNDataPost{}
 	data.HeaderData = GetHeaderData(c)
-	if data.HeaderData == nil {
-		return
-	}
 
 	var sdata TEpicSubmitData
 	err := c.ShouldBind(&sdata)

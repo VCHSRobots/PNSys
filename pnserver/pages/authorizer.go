@@ -17,7 +17,7 @@ import (
 )
 
 func authorizer(c *gin.Context) {
-	// Here, we get data from the session and store it away if possible.
+	// If not logged in, redirect to login page.
 	cookie, err := c.Cookie("Cred")
 	ses, err := sessions.GetSessionByAuth(cookie)
 	if err != nil {
@@ -35,9 +35,36 @@ func authorizer(c *gin.Context) {
 	hdrdata.UserFormattedName = ses.Name
 	hdrdata.IsAdmin = ses.IsAdmin()
 	c.Set("HeaderData", hdrdata)
-
 }
 
+func guest_auth(c *gin.Context) {
+	cookie, err := c.Cookie("Cred")
+	ses, err := sessions.GetSessionByAuth(cookie)
+	if err != nil {
+		// We are not logged in!
+		// Provide a guest level version of the header.
+		hdrdata := &HeaderData{}
+		hdrdata.PageTabTitle = "Epic PN"
+		hdrdata.IsLoggedIn = false
+		hdrdata.UserFormattedName = ""
+		hdrdata.IsAdmin = false
+		c.Set("HeaderData", hdrdata)
+		return
+	}
+
+	// Session found. Fill up data.
+	hdrdata := &HeaderData{}
+	hdrdata.PageTabTitle = "Epic PN"
+	hdrdata.IsLoggedIn = true
+	hdrdata.UserFormattedName = ses.Name
+	hdrdata.IsAdmin = ses.IsAdmin()
+	c.Set("HeaderData", hdrdata)
+}
+
+// Note: GetHeaderDate should NEVER return nil for any
+// page that has used authorizer or guest_auth.  Therefore
+// don't bother checking for nil.  If nil is returned, allow
+// your code to painic.
 func GetHeaderData(c *gin.Context) *HeaderData {
 	hdrdata, ok := c.Get("HeaderData")
 	if !ok {

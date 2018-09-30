@@ -12,8 +12,6 @@
 
 <script type="text/javascript">
 
-var gShowAllDesigners = false
-
 function clearSelBox(sel) {
     var n = sel.length;
     var i;
@@ -34,7 +32,7 @@ function fillDesigners() {
     var i;
     for(i = 0; i < desingerlst.length; i++) {
         d = desingerlst[i];
-        if (gShowAllDesigners || d.Active) {
+        if (d.Active) {
             var option = document.createElement("option");
             var label = d.Name;
             option.text = label;
@@ -45,25 +43,8 @@ function fillDesigners() {
     }
 }
 
-function updateActiveUI() {
-    if (gShowAllDesigners) {
-        document.getElementById("lin_designer_active_btn").innerHTML = "Show Some";
-    } else {
-        document.getElementById("lin_designer_active_btn").innerHTML = "Show All";
-    }
-}
-
-function toggleActiveDesigners() {
-    gShowAllDesigners = !gShowAllDesigners;
-    updateActiveUI();
-    fillDesigners();
-}
-
 function startUp() {
-    updateActiveUI();
     fillDesigners();
-    //var sel = document.getElementById("lin_designer_field");
-    //sel.value = "D. Brandon"
 }
 
 </script>
@@ -79,9 +60,6 @@ function startUp() {
             <div class="login_field">
                 <select id="lin_designer_field" name="Designer" class="login_select">
                 </select>
-            <div id="lin_designer_active_div" class="active_btn_div">
-                <button type="button" id="lin_designer_active_btn" class="active_btn" onclick="toggleActiveDesigners()">Show All</button>
-            </div>
             </div>
         </div>
     </div>

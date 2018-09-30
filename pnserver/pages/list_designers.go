@@ -12,31 +12,21 @@ import (
 )
 
 func init() {
-	RegisterPage("ListDesigners", Invoke_GET, handle_list_designers)
+	RegisterPage("ListDesigners", Invoke_GET, authorizer, handle_list_designers)
 }
 
 func handle_list_designers(c *gin.Context) {
 	rows := pnsql.GetDesigners()
-	data := TablePageData{}
-	data.Head = []string{"Name", "Year0"}
+	data := &TablePageData{}
+	data.HeaderData = GetHeaderData(c)
+	data.Head = []string{"Name", "Year0", "Active"}
 	data.Rows = make([]TColumn, 0, len(rows))
 	for _, r := range rows {
-		data.Rows = append(data.Rows, TColumn{Cols: []string{r.Name, r.Year0}})
+		sactive := ""
+		if r.Active {
+			sactive = "Yes"
+		}
+		data.Rows = append(data.Rows, TColumn{Cols: []string{r.Name, r.Year0, sactive}})
 	}
-
-	// Other dummy data for now.
-	data.PageTabTitle = "Epic PN"
-	data.PageTitle = "Designers"
-	data.IsLoggedIn = true
-	data.UserFormattedName = "D. Brandon"
-	data.IsAdmin = true
-
-	html, err := MakePage(data, "header", "nav", "tablepage", "footer")
-	if err != nil {
-		// Log has already been writen to...
-		c.AbortWithError(400, err)
-		return
-	}
-
-	c.Data(200, "text/html", html)
+	SendPage(c, data, "header", "nav", "tablepage", "footer")
 }

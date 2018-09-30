@@ -28,7 +28,7 @@ type TColumn struct {
 }
 
 type TablePageData struct {
-	HeaderData
+	*HeaderData
 	Head         []string
 	Rows         []TColumn
 	EmptyMessage string

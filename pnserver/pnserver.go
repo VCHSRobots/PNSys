@@ -4,32 +4,11 @@
 // Created 2018-09-20 DLB
 // --------------------------------------------------------------------
 
-// package main
-
-// import (
-// 	"net/http"
-// 	"strings"
-// )
-
-// func sayHello(w http.ResponseWriter, r *http.Request) {
-// 	message := r.URL.Path
-// 	message = strings.TrimPrefix(message, "/")
-// 	message = "Hello " + message
-// 	w.Write([]byte(message))
-// }
-// func main() {
-// 	http.HandleFunc("/", sayHello)
-// 	if err := http.ListenAndServe(":8080", nil); err != nil {
-// 		panic(err)
-// 	}
-// }
-
 package main
 
 import (
 	"epic/lib/log"
 	"epic/lib/util"
-	"epic/lib/uuid"
 	"epic/pnserver/console"
 	"epic/pnserver/pages"
 	"epic/pnserver/pnsql"
@@ -79,8 +58,6 @@ func main() {
 	gServer = gin.Default()
 	gServer.Static("/css", "./static/css")
 	gServer.Static("/img", "./static/img")
-	gServer.GET("/PutCookie", PutCookie)
-	gServer.GET("/GetCookie", GetCookie)
 
 	// Load known pages
 	plst := pages.GetAllPages()
@@ -100,21 +77,6 @@ func main() {
 	fmt.Printf("Server running.  Should be able to access at %s\n", gHostAddr)
 	go console.ConsoleLoop() // Process console commands
 	<-make(chan int)         // Wait forever here
-}
-
-func PutCookie(c *gin.Context) {
-	id := uuid.New()
-	c.SetCookie("Cred", id.String(), 0, "/", "", false, true)
-	c.String(200, "Cookie set: %s for %s", id, c.ClientIP())
-}
-
-func GetCookie(c *gin.Context) {
-	cookie, err := c.Cookie("Cred")
-	if err != nil {
-		c.String(200, "Err getting cookie. %v", err)
-		return
-	}
-	c.String(200, "Getting Cookie... Found=%s", cookie)
 }
 
 func RunServer() {

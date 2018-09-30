@@ -16,7 +16,8 @@
         <span style="margin-left: 20px">2018/2019 Season</span>
     </div>
     <div id="footer_home_link">
-        <a href="About">About</a>
+        {{if .HideAboutLink}} {{else}}
+        <a href="About">About</a> {{end}}
     </div>
 </div>
 

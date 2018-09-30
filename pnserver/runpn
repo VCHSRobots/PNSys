@@ -1,0 +1,20 @@
+#!/bin/bash
+# Starts the part number server (pnserver) in background mode.
+# Use sudo to run this script if server normal http port 80
+#
+# Note, this command starts up the server, running in the
+# background, and disconnected from the termainal.  Once 
+# running, it is safe to exit the terminal.
+#
+# To find it's PID number, do:
+#
+#  ps -A | grep pnserver
+#
+# To kill it, do:
+#
+#  sudo kill -9 nnnn
+#
+# where nnnn is the PID number.
+#
+/home/dal/dev/src/epic/pnserver/pnserver </dev/null &>/dev/null &
+

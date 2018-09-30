@@ -1,0 +1,10 @@
+// Configuration file for Epic Robotz Part Number Server
+// EXAMPLE FILE -- For github
+
+// Provide the host address that will be served:
+// For a production system, this will normally be :80.  For testing :8080 or :8081
+hostaddr=:80
+
+// Provide the password that will be used with mysql
+pw=?????
+

@@ -7,19 +7,28 @@
 package sessions
 
 import (
+	"epic/lib/log"
 	"epic/lib/uuid"
 	"fmt"
 	"sync"
 	"time"
 )
 
+type SessionPrivilege string
+
+const (
+	Privilege_User  = "User"
+	Privilege_Admin = "Admin"
+)
+
 type TSession struct {
 	Name       string
 	ClientIP   string
+	Privilege  SessionPrivilege
 	LastAccess time.Time
 	LoginTime  time.Time
 	Data       map[string]interface{}
-	AuthCookie uuid.UUID
+	AuthCookie string
 }
 
 var gSessions []*TSession
@@ -45,6 +54,8 @@ func clean_sessions() {
 		elapsed := t.Sub(s.LastAccess)
 		if elapsed < time.Duration(gTimeToLive)*time.Second {
 			lst = append(lst, s)
+		} else {
+			log.Infof("Logging out %s (%s) due to inactivity.", s.Name, s.ClientIP)
 		}
 	}
 	gSessions = lst
@@ -58,20 +69,40 @@ func GetTimeToLive() int {
 	return gTimeToLive
 }
 
-func NewSession(name, ClientIP string) *TSession {
+func NewSession(name, ClientIP string, Privilege SessionPrivilege) *TSession {
 	session := new(TSession)
 	session.Name = name
 	session.ClientIP = ClientIP
+	session.Privilege = Privilege
+	session.LoginTime = time.Now()
 	session.LastAccess = time.Now()
-	session.Data = make(map[string]interface{})
-	session.AuthCookie = uuid.New()
+	session.Data = make(map[string]interface{}, 30)
+	session.AuthCookie = uuid.New().String()
 	gSessionLock.Lock()
 	defer gSessionLock.Unlock()
 	gSessions = append(gSessions, session)
 	return session
 }
 
-func GetSessionByAuth(AuthCookie uuid.UUID) (*TSession, error) {
+func KillSession(AuthCookie string) {
+	gSessionLock.Lock()
+	defer gSessionLock.Unlock()
+	i := -1
+	for j := 0; j < len(gSessions); j++ {
+		if gSessions[j].AuthCookie == AuthCookie {
+			i = j
+			break
+		}
+	}
+	if i < 0 {
+		return
+	}
+	copy(gSessions[i:], gSessions[i+1:])
+	gSessions[len(gSessions)-1] = nil
+	gSessions = gSessions[:len(gSessions)-1]
+}
+
+func GetSessionByAuth(AuthCookie string) (*TSession, error) {
 	gSessionLock.Lock()
 	defer gSessionLock.Unlock()
 	for _, ss := range gSessions {
@@ -90,4 +121,21 @@ func GetAllSessions() []*TSession {
 		lst = append(lst, s)
 	}
 	return lst
+}
+
+func (ses *TSession) GetStringValue(key string) string {
+	t, ok := ses.Data[key]
+	if !ok {
+		return ""
+	}
+	s, _ := t.(string)
+	return s
+}
+
+func (ses *TSession) SetStringValue(key, value string) {
+	ses.Data[key] = value
+}
+
+func (ses *TSession) IsAdmin() bool {
+	return ses.Privilege == Privilege_Admin
 }

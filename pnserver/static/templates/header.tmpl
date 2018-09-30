@@ -58,7 +58,8 @@
             <div id="header_accoutmenu_div">
                 <div class="header_topbutton_div"></div>
                 <div class="header_topbutton_div">
-                  <a class="header_topbutton" href="Login">Login</a>
+                 {{if .HideLoginLink}} {{else}}
+                  <a class="header_topbutton" href="Login">Login</a> {{end}}
                   </div>
                 </div>
                 </div>

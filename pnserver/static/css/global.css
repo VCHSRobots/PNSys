@@ -37,7 +37,7 @@ p {font-size: 14pt; font: Arial, Univers, sans-serif; padding: 5px; margin-right
 #header_website_name a:visited {text-decoration: none; }
 #header_website_name a:hover {color: yellow}
 #header_account_area {float: right; font-size: 12pt; color: black;  margin-right: 15px; margin-top: 5px; }
-#header_username_div {margin-left: 20px; margin-right: 0px;  float: left; text-align: right;}
+#header_username_div {margin-left: 20px; margin-right: 0px;  text-align: left;}
 #header_logout_div {margin-left: 20px;  text-align: right; font-size: 10pt;}
 .header_topbutton {font-size: 14pt; font-color: black; }
 .header_topbutton_div {float: left; margin-left: 20px; margin-top: 5px;}
@@ -56,9 +56,10 @@ p {font-size: 14pt; font: Arial, Univers, sans-serif; padding: 5px; margin-right
 
 /* ------------ For login.php */
 
-.login_area   {width: 500px; margin-left: 100px; margin-top: 20px;}
-.login_label  {width: 140px; float: left; font-size: 18pt; margin-top: 25px; padding-top: 0px;}
-.login_field  {width: 200px; float: left; height: 40px; font-size: 18pt; margin-top: 15px;}
+.login_area   {width: 500px; margin-left: 180px; margin-top: 20px;}
+.login_label  {width: 140px; float: left; font-size: 18pt; margin-top:25px; padding-top: 0px;}
+.login_field  {width: 216px; float: left; height: 70px; font-size: 18pt; margin-top: 15px;}
+.login_select {width: 214px; height: 40px;}
 .login_button {margin-top: 40px; margin-left: 140px;}
 .login_button input {width: 200px; font-size: 20pt;}
 .login_field input {font-size: 18pt; width: 200px;}

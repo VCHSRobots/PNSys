@@ -32,9 +32,12 @@ import (
 	"epic/lib/uuid"
 	"epic/pnserver/console"
 	"epic/pnserver/pages"
+	"epic/pnserver/pnsql"
 	"fmt"
 	"github.com/gin-gonic/gin"
+	"io/ioutil"
 	"os"
+	"strings"
 )
 
 var gVersion = "Fall 2018 v0.3"
@@ -44,25 +47,49 @@ var gHostAddr string = ":8081"
 func main() {
 	log.Infof("Part Number Server Staring Up. Version: %s", gVersion)
 	CheckDirs()
+	cparams, err := GetConfig("config.txt")
+	if err != nil {
+		err = fmt.Errorf("Cannot read config.txt file.  %v", err)
+		log.Errorf("%v", err)
+		fmt.Fprintf(os.Stderr, "%v\n", err)
+		return
+	}
+	var ok bool
+	gHostAddr, ok = cparams["hostaddr"]
+	if !ok {
+		log.Warnf("The hostaddr config parameter not found. Using ':8081'.\n")
+		gHostAddr = ":8081"
+	}
+	pw, ok := cparams["pw"]
+	if !ok {
+		err = fmt.Errorf("Mysql password not found in config file.")
+		log.Errorf("%v", err)
+		fmt.Fprintf(os.Stderr, "%v\n", err)
+		return
+	}
+	err = pnsql.OpenDatabase(pw)
+	if err != nil {
+		log.Errorf("%v", err)
+		fmt.Fprintf(os.Stderr, "%v\n", err)
+		return
+	}
+
 	console.RegistorCmd("version", "", "Gives the version of this server.", handle_version)
 
 	gServer = gin.Default()
 	gServer.Static("/css", "./static/css")
 	gServer.Static("/img", "./static/img")
-	gServer.Static("/html", "./static/html")
 	gServer.GET("/PutCookie", PutCookie)
 	gServer.GET("/GetCookie", GetCookie)
-	gServer.GET("/Login", pages.Login)
-	gServer.POST("/LoginPost", pages.LoginPost)
 
 	// Load known pages
 	plst := pages.GetAllPages()
 	for _, p := range plst {
 		if p.Invoke == pages.Invoke_GET {
-			gServer.GET(p.Route, p.Handler)
+			gServer.GET(p.Route, p.Handlers...)
 		}
 		if p.Invoke == pages.Invoke_POST {
-			gServer.POST(p.Route, p.Handler)
+			gServer.POST(p.Route, p.Handlers...)
 		}
 	}
 
@@ -96,8 +123,7 @@ func RunServer() {
 }
 
 func CheckDirs() {
-	paths := []string{"./static", "./static/css", "./static/html", "./static/img",
-		"./static/templates"}
+	paths := []string{"./static", "./static/css", "./static/templates", "./static/img"}
 	for _, p := range paths {
 		if !util.DirExists(p) {
 			err := fmt.Errorf("Static directory (%s) does not exist.", p)
@@ -111,62 +137,30 @@ func handle_version(cmdline string) {
 	fmt.Printf("Version: %s\n", gVersion)
 }
 
-// func ConsoleLoop() {
-// 	gConsole = liner.NewLiner()
-// 	defer gConsole.Close()
-// 	gConsole.SetCtrlCAborts(false)
-// 	if !liner.TerminalSupported() {
-// 		fmt.Printf("Terminal not supported. Editting commands won't work.\n")
-// 	}
-// 	fmt.Printf("Server running.  Should be able to access at %s\n", gHostAddr)
-// 	fmt.Printf("Use 'help' for a list of commands.\n")
-// 	for {
-// 		cmdline, err := gConsole.Prompt("PnSrv> ")
-// 		if err == liner.ErrPromptAborted {
-// 			continue
-// 		}
-// 		if err != nil {
-// 			fmt.Printf("Input error: %v\n", err)
-// 			continue
-// 		}
-// 		ExecuteCommand(cmdline)
-// 		if !util.Blank(cmdline) {
-// 			gConsole.AppendHistory(cmdline)
-// 		}
-// 	}
-// }
-
-// func ExecuteCommand(cmdline string) {
-// 	cmd := strings.ToLower(strings.TrimSpace(cmdline))
-// 	if util.Blank(cmd) {
-// 		return
-// 	}
-// 	switch cmd {
-// 	case "quit":
-// 		gConsole.Close()
-// 		os.Exit(0)
-// 		return
-// 	case "exit":
-// 		gConsole.Close()
-// 		os.Exit(0)
-// 		return
-// 	case "show-log":
-// 		log.UseConsole(true)
-// 		return
-// 	case "hide-log":
-// 		log.UseConsole(false)
-// 		return
-// 	case "help":
-// 		Cmd_Help(cmdline)
-// 		return
-// 	default:
-// 		fmt.Printf("Unknown command.\n")
-// 		return
-// 	}
-// }
-
-// func Cmd_Help(cmdline string) {
-// 	fmt.Printf("Commands: \n")
-// 	fmt.Printf("  help -- List commands\n")
-// 	fmt.Printf("  exit -- Shuts down server and exits program.\n")
-// }
+func GetConfig(filename string) (map[string]string, error) {
+	params := make(map[string]string, 10)
+	data, err := ioutil.ReadFile(filename)
+	if err != nil {
+		return params, err
+	}
+	lines := strings.Split(string(data), "\n")
+	ilinenum := 0
+	for _, ln := range lines {
+		ilinenum++
+		ln = strings.TrimSpace(ln)
+		if strings.HasPrefix(ln, "//") {
+			continue
+		}
+		if util.Blank(ln) {
+			continue
+		}
+		wrds := strings.Split(ln, "=")
+		if len(wrds) != 2 {
+			return params, fmt.Errorf("Bad syntax on line %d. One equal char not found.\n", ilinenum)
+		}
+		key := strings.TrimSpace(wrds[0])
+		val := strings.TrimSpace(wrds[1])
+		params[key] = val
+	}
+	return params, nil
+}

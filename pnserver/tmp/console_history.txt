@@ -530,3 +530,14 @@ show "D. Brandon"
 exit
 show "D. Brandon"
 exit
+help
+list-projects
+exit
+pwhash gi
+pwhash loveepic
+pwhash epic4fun
+exit
+show-sessions
+exit
+show-sessions
+exit

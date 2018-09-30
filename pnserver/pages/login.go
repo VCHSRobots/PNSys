@@ -7,101 +7,125 @@
 package pages
 
 import (
-	"bytes"
+	"encoding/json"
 	"epic/lib/log"
+	"epic/lib/pwhash"
 	"epic/pnserver/pnsql"
 	"epic/pnserver/sessions"
 	"github.com/gin-gonic/gin"
-	"html/template"
-	"io/ioutil"
+)
+
+const (
+	gPwAdmin = "JDJhJDA2JHNHWGt6SkM0RnVJL0EvZ25aNUlZai5wcC4uQWlxL1dNdlJDN2w5dkJJZHluR0xrZEd1djFT"
+	gPwUser  = "JDJhJDA2JHB0S2xmamVtL3k4OHpwZ1JEQzRYLy5qUWc1NjNqQWZzTUxOd3REUVFUM082UDVpTlZiWFpt"
 )
 
 type LoginData struct {
-	PageTitle   string
-	PageHeader  string
-	Designers   []string
-	BadPassword bool
+	*HeaderData
+	DesignersJson string
 }
 
-func Login(c *gin.Context) {
-	show_login_page(c, false)
+func init() {
+	RegisterPage("/Login", Invoke_GET, handle_login)
+	RegisterPage("/LoginPost", Invoke_POST, handle_login_post)
 }
 
-func show_login_page(c *gin.Context, badpassword bool) {
-	tmpl_name := "./static/templates/login.tmpl"
-	tmpl_bytes, err := ioutil.ReadFile(tmpl_name)
-	if err != nil {
-		log.Errorf("Missing template %s. Err=%v", tmpl_name, err)
-		c.AbortWithError(400, err)
-		return
-	}
-	tmpl, err := template.New("Login").Parse(string(tmpl_bytes))
-	if err != nil {
-		log.Errorf("Invalid template %s. Err=%v", tmpl_name, err)
-		c.AbortWithError(400, err)
-		return
-	}
-
-	data := LoginData{PageTitle: "PNSys", PageHeader: "Login"}
-	data.BadPassword = badpassword
-	dlst := pnsql.GetDesigners()
-	data.Designers = make([]string, 0, len(dlst))
-	for _, d := range dlst {
-		data.Designers = append(data.Designers, d.Name)
-	}
-	html := new(bytes.Buffer)
-	tmpl.Execute(html, data)
-	c.Data(200, "text/html", html.Bytes())
+func make_default_login_data() *LoginData {
+	data := &LoginData{}
+	data.HeaderData = &HeaderData{}
+	data.PageTabTitle = "PnSys Login"
+	data.OnLoadFuncJS = "startUp"
+	data.HideLoginLink = true
+	data.HideAboutLink = true
+	return data
 }
 
-type TLoginData struct {
-	Name     string `form:"name"`
-	Password string `form:"password"`
+func handle_login(c *gin.Context) {
+	kill_session(c)
+	data := make_default_login_data()
+	show_login_page(c, data)
 }
 
-func LoginPost(c *gin.Context) {
-	var ld TLoginData
+type LoginSubmitData struct {
+	Designer string `form:"Designer"`
+	Password string `form:"Password"`
+}
+
+func handle_login_post(c *gin.Context) {
+	kill_session(c)
+	data := make_default_login_data()
+
+	var ld LoginSubmitData
 	err := c.ShouldBind(&ld)
 	if err != nil {
 		log.Errorf("Login data failed to bind. Err=%v", err)
-		c.AbortWithError(400, err)
+		data.ErrorMessage = "Web app failure!  Programming problem?"
+		show_login_page(c, data)
 		return
 	}
-	if ld.Name == "admin" {
-		if ld.Password != "loveepic" {
-			log.Infof("Attempt to login to admin fails.")
-			show_login_page(c, true)
-			return
+	if !pnsql.IsDesigner(ld.Designer) {
+		if ld.Designer != "" {
+			log.Infof("Attempt to login with unknown designer (%q). Hacking attempt?", ld.Designer)
+		} else {
+			log.Infof("Attempt to login with blank designer.")
 		}
-		ses := sessions.NewSession("admin", c.ClientIP())
-		c.SetCookie("Cred", ses.AuthCookie.String(), 0, "/", "", false, true)
-		show_main_page(c)
-		return
-	}
-	if ld.Name == "guest" {
-		ses := sessions.NewSession("guest", c.ClientIP())
-		c.SetCookie("Cred", ses.AuthCookie.String(), 0, "/", "", false, true)
-		show_main_page(c)
-		return
-	}
-	if ld.Password != "epic4fun" {
-		show_login_page(c, true)
+		data.ErrorMessage = "Login Failed."
+		show_login_page(c, data)
 		return
 	}
 
-	haveit := false
-	designers := pnsql.GetDesigners()
-	for _, d := range designers {
-		if d.Name == ld.Name {
-			haveit = true
-			break
-		}
-	}
-	if !haveit {
-		show_login_page(c, true)
+	IsAdmin := pwhash.CheckPasswordHash(ld.Password, gPwAdmin)
+	if IsAdmin {
+		ses := sessions.NewSession(ld.Designer, c.ClientIP(), sessions.Privilege_Admin)
+		ses.SetStringValue("DesignerHint", ld.Designer)
+		c.SetCookie("Cred", ses.AuthCookie, 0, "/", "", false, true)
+		log.Infof("New Login: %s (%s) with privilege: Admin.", ld.Designer, c.ClientIP())
+		c.Redirect(302, "/NewEpicPN")
 		return
 	}
-	ses := sessions.NewSession(ld.Name, c.ClientIP())
-	c.SetCookie("Cred", ses.AuthCookie.String(), 0, "/", "", false, true)
-	show_main_page(c)
+
+	IsUser := pwhash.CheckPasswordHash(ld.Password, gPwUser)
+	if IsUser {
+		ses := sessions.NewSession(ld.Designer, c.ClientIP(), sessions.Privilege_User)
+		ses.SetStringValue("DesignerHint", ld.Designer)
+		c.SetCookie("Cred", ses.AuthCookie, 0, "/", "", false, true)
+		log.Infof("New Login: %s (%s) with privilege: User.", ld.Designer, c.ClientIP())
+		c.Redirect(302, "/NewEpicPN")
+		return
+	}
+
+	log.Infof("Login failed: bad password.")
+	data.ErrorMessage = "Login Failed."
+	show_login_page(c, data)
+}
+
+func kill_session(c *gin.Context) {
+	cookie, err := c.Cookie("Cred")
+	if err == nil {
+		ses, err := sessions.GetSessionByAuth(cookie)
+		if err == nil {
+			log.Infof("Logging off %s (%s).\n", ses.Name, ses.ClientIP)
+			sessions.KillSession(cookie)
+		}
+	}
+}
+
+func show_login_page(c *gin.Context, data *LoginData) {
+	dlst := pnsql.GetDesigners()
+	des := make([]*pnsql.Designer, 0, len(dlst))
+	for _, d := range dlst {
+		if d.Name == "U. Unknown" {
+			continue
+		}
+		des = append(des, d)
+	}
+	des_bytes, err := json.MarshalIndent(des, "", "  ")
+	if err != nil {
+		log.Errorf("Unable to convert to json. Err=%v", err)
+		c.AbortWithError(400, err)
+		return
+	}
+	data.DesignersJson = string(des_bytes)
+
+	SendPage(c, data, "header", "login", "footer")
 }

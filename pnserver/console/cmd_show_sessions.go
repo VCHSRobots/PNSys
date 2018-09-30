@@ -10,6 +10,7 @@ import (
 	"epic/lib/util"
 	"epic/pnserver/sessions"
 	"fmt"
+	"time"
 )
 
 func init() {
@@ -18,12 +19,14 @@ func init() {
 
 func handle_showsessions(cmdline string) {
 	lst := sessions.GetAllSessions()
-	tbl := util.NewTable("Ref#", "Name", "ClientIP", "Login Time", "Last Access", "Auth Cookie")
+	tbl := util.NewTable("Ref#", "Name", "ClientIP", "Login Time", "Last Access", "Elp (mins)", "Auth Cookie")
 	for i, c := range lst {
+		elp := time.Now().Sub(c.LastAccess)
 		tbl.AddRow(fmt.Sprintf("%d", i), c.Name, c.ClientIP,
 			c.LoginTime.Format("2006-01-02 15:04:05"),
 			c.LastAccess.Format("2006-01-02 15:04:05"),
-			c.AuthCookie.String())
+			fmt.Sprintf("%6.1f", elp.Minutes()),
+			c.AuthCookie)
 	}
 	fmt.Printf("\n%s\n", tbl.Text())
 }

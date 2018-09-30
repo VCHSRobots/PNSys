@@ -14,11 +14,13 @@ import (
 
 var m_db *sql.DB
 
-func init() {
+func OpenDatabase(pw string) error {
 	var err error
-	m_db, err = sql.Open("mysql", "root:loveepic@/PnSysData")
+	connection := fmt.Sprintf("root:%s@/PnSysData", pw)
+	m_db, err = sql.Open("mysql", connection)
 	if err != nil {
-		fmt.Printf("Unable to open database. Err=%v\n", err)
-		panic(err)
+		err := fmt.Errorf("Unable to open database. Err=%v\n", err)
+		return err
 	}
+	return nil
 }

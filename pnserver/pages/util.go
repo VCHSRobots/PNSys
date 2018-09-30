@@ -9,6 +9,7 @@ package pages
 import (
 	"bytes"
 	"epic/lib/log"
+	"github.com/gin-gonic/gin"
 	"io/ioutil"
 	"text/template"
 )
@@ -48,4 +49,14 @@ func MakePage(data interface{}, template_names ...string) ([]byte, error) {
 		}
 	}
 	return html.Bytes(), nil
+}
+
+func SendPage(c *gin.Context, data interface{}, template_names ...string) {
+	html, err := MakePage(data, template_names...)
+	if err != nil {
+		c.AbortWithError(400, err)
+		return
+	}
+
+	c.Data(200, "text/html", html)
 }

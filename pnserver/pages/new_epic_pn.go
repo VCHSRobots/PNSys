@@ -16,14 +16,14 @@ import (
 )
 
 type EpicPNData struct {
-	HeaderData
+	*HeaderData
 	ProjectsJson  string
 	DesignersJson string
 	PartTypes     []string
 }
 
 type EpicPNDataPost struct {
-	HeaderData
+	*HeaderData
 	NewPN          string
 	Project        string
 	Subsystem      string
@@ -44,17 +44,16 @@ type TEpicSubmitData struct {
 }
 
 func init() {
-	RegisterPage("NewEpicPN", Invoke_GET, handle_new_epic_pn)
-	RegisterPage("SubmitNewEpicPN", Invoke_POST, handle_new_epic_pn_post)
+	RegisterPage("/NewEpicPN", Invoke_GET, authorizer, handle_new_epic_pn)
+	RegisterPage("/SubmitNewEpicPN", Invoke_POST, authorizer, handle_new_epic_pn_post)
 }
 
 func handle_new_epic_pn(c *gin.Context) {
-	// Dummy data for now.
 	data := &EpicPNData{}
-	data.PageTabTitle = "Epic PN"
-	data.IsLoggedIn = true
-	data.UserFormattedName = "D. Brandon"
-	data.IsAdmin = true
+	data.HeaderData = GetHeaderData(c)
+	if data.HeaderData == nil {
+		return
+	}
 	data.PageTitle = "Create New Epic Part Number"
 	data.Instructions = "Fill form out and click Submit."
 	data.StyleSheets = []string{"new_epic_pn"}
@@ -80,25 +79,16 @@ func handle_new_epic_pn(c *gin.Context) {
 	}
 	data.DesignersJson = string(des_bytes)
 
-	html, err := MakePage(data, "header", "nav", "newpn_menubar", "new_epic_pn", "footer")
-	if err != nil {
-		// Log has already been writen to...
-		c.AbortWithError(400, err)
-		return
-	}
-
-	c.Data(200, "text/html", html)
-}
-
-func getword(x string) string {
-	wrds := strings.Split(x, " ")
-	if len(wrds) <= 0 {
-		return x
-	}
-	return strings.TrimSpace(wrds[0])
+	SendPage(c, data, "header", "nav", "newpn_menubar", "new_epic_pn", "footer")
 }
 
 func handle_new_epic_pn_post(c *gin.Context) {
+	data := &EpicPNDataPost{}
+	data.HeaderData = GetHeaderData(c)
+	if data.HeaderData == nil {
+		return
+	}
+
 	var sdata TEpicSubmitData
 	err := c.ShouldBind(&sdata)
 	if err != nil {
@@ -107,12 +97,6 @@ func handle_new_epic_pn_post(c *gin.Context) {
 		return
 	}
 
-	// Dummy data for now.
-	data := &EpicPNDataPost{}
-	data.PageTabTitle = "Epic PN"
-	data.IsLoggedIn = true
-	data.UserFormattedName = "D. Brandon"
-	data.IsAdmin = true
 	data.PageTitle = "New Epic Part Number"
 	data.StyleSheets = []string{}
 	data.Project = sdata.Project
@@ -125,10 +109,13 @@ func handle_new_epic_pn_post(c *gin.Context) {
 	data.NewPN = getword(sdata.Project) + "-" + getword(sdata.Subsystem) +
 		"-" + getword(sdata.PartType) + data.SequenceNumber
 
-	html, err := MakePage(data, "header", "nav", "newpn_menubar", "new_epic_pn_post", "footer")
-	if err != nil {
-		c.AbortWithError(400, err)
-		return
+	SendPage(c, data, "header", "nav", "newpn_menubar", "new_epic_pn_post", "footer")
+}
+
+func getword(x string) string {
+	wrds := strings.Split(x, " ")
+	if len(wrds) <= 0 {
+		return x
 	}
-	c.Data(200, "text/html", html)
+	return strings.TrimSpace(wrds[0])
 }

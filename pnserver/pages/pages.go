@@ -18,19 +18,19 @@ const (
 )
 
 type Page struct {
-	Route   string
-	Invoke  InvokeType
-	Handler func(c *gin.Context)
+	Route    string
+	Invoke   InvokeType
+	Handlers []gin.HandlerFunc
 }
 
 var gPages []*Page
 
 // Registor a web page
-func RegisterPage(route string, invoke InvokeType, handler func(c *gin.Context)) {
+func RegisterPage(route string, invoke InvokeType, handlers ...gin.HandlerFunc) {
 	if gPages == nil {
 		gPages = make([]*Page, 0, 50)
 	}
-	p := &Page{route, invoke, handler}
+	p := &Page{route, invoke, handlers}
 	gPages = append(gPages, p)
 }
 

@@ -17,6 +17,10 @@ type HeaderData struct {
 	OnLoadFuncJS      string   // Function to execute in js on page load
 	IsAdmin           bool     // True if user is admin
 	Instructions      string   // Instructions for the page -- not always used.
+	HideLoginLink     bool     // If true, Login link won't be shown in header
+	HideAboutLink     bool     // If true, about link won't be shown in footer
+	ErrorMessage      string   // For postback pages, when error occurs.
+	DesignerHint      string   // For setting sel boxes for desiger
 }
 
 type TColumn struct {

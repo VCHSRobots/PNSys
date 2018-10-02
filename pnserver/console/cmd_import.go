@@ -32,7 +32,7 @@ Epic csv files must have the following columns, in order, without any
 header:  sequence number, part number string, description, designer, and date.
 
 Supplier csv files must have the following columns, in order, without any
-header: sequence number, part number string, vendor name, vender part number,
+header: sequence number, part number string, vendor name, vendor part number,
 description, designer, date, weblink.
 
 In both cases the sequence number is simply a line number that is ignored. 

@@ -17,5 +17,5 @@ func init() {
 func handle_about(c *gin.Context) {
 	data := GetHeaderData(c)
 	data.HideAboutLink = true
-	SendPage(c, data, "header", "nav", "about", "footer")
+	SendPage(c, data, "header", "menubar", "about", "footer")
 }

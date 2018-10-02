@@ -8,9 +8,14 @@ package pages
 
 import (
 	"bytes"
+	"encoding/json"
 	"epic/lib/log"
+	"epic/lib/util"
+	"epic/pnserver/pnsql"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"io/ioutil"
+	"strings"
 	"text/template"
 )
 
@@ -59,4 +64,77 @@ func SendPage(c *gin.Context, data interface{}, template_names ...string) {
 	}
 
 	c.Data(200, "text/html", html)
+}
+
+func FixWebLinkAddr(slink string) string {
+	sout := slink
+	if !util.Blank(sout) {
+		s := strings.ToLower(sout)
+		if !strings.HasPrefix(s, "https://") && !strings.HasPrefix(s, "http://") {
+			sout = "http://" + sout
+		}
+	}
+	return sout
+}
+
+func GetSelectionBoxData() (*SelectionBoxData, error) {
+	data := new(SelectionBoxData)
+
+	des := pnsql.GetDesigners()
+	des_bytes, err := json.MarshalIndent(des, "", "  ")
+	if err != nil {
+		err = fmt.Errorf("Unable to convert to json. Err=%v", err)
+		log.Errorf("%v", err)
+		return nil, err
+	}
+	data.DesignersJson = string(des_bytes)
+
+	prjs := pnsql.GetProjects()
+	prj_bytes, err := json.MarshalIndent(prjs, "", "  ")
+	if err != nil {
+		err = fmt.Errorf("Unable to convert to json. Err=%v", err)
+		log.Errorf("%v", err)
+		return nil, err
+	}
+	data.ProjectsJson = string(prj_bytes)
+
+	catlst := pnsql.GetSupplierCategories()
+	cat_bytes, err := json.MarshalIndent(catlst, "", "  ")
+	if err != nil {
+		err = fmt.Errorf("Unable to convert to json. Err=%v", err)
+		log.Errorf("%v", err)
+		return nil, err
+	}
+	data.CategoriesJson = string(cat_bytes)
+
+	ptlst := pnsql.GetPartTypes()
+	pt_bytes, err := json.MarshalIndent(ptlst, "", "  ")
+	if err != nil {
+		err = fmt.Errorf("Unable to convert to json. Err=%v", err)
+		log.Errorf("%v", err)
+		return nil, err
+	}
+	data.PartTypesJson = string(pt_bytes)
+
+	vendorlst := pnsql.GetVendors()
+	vbytes, err := json.MarshalIndent(vendorlst, "", "  ")
+	if err != nil {
+		err = fmt.Errorf("Unable to convert to json. Err=%v", err)
+		log.Errorf("%v", err)
+		return nil, err
+	}
+	data.KnownVendorsJson = string(vbytes)
+	return data, nil
+}
+
+func SendErrorPage(c *gin.Context, err error) {
+	SendErrorPagef(c, "%v", err)
+}
+
+func SendErrorPagef(c *gin.Context, f string, args ...interface{}) {
+	data := &FindPartPost{}
+	data.HeaderData = GetHeaderData(c)
+	data.ErrorMessage = fmt.Sprintf(f, args...)
+	log.Errorf("Error Page Sent. Err: %s", data.ErrorMessage)
+	SendPage(c, data, "header", "menubar", "error", "footer")
 }

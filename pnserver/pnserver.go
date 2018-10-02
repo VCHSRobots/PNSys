@@ -58,6 +58,7 @@ func main() {
 	gServer = gin.Default()
 	gServer.Static("/css", "./static/css")
 	gServer.Static("/img", "./static/img")
+	gServer.Static("/js", "./static/js")
 
 	// Load known pages
 	plst := pages.GetAllPages()
@@ -85,7 +86,7 @@ func RunServer() {
 }
 
 func CheckDirs() {
-	paths := []string{"./static", "./static/css", "./static/templates", "./static/img"}
+	paths := []string{"./static", "./static/css", "./static/templates", "./static/img", "./static/js"}
 	for _, p := range paths {
 		if !util.DirExists(p) {
 			err := fmt.Errorf("Static directory (%s) does not exist.", p)

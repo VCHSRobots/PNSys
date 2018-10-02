@@ -17,6 +17,7 @@ import (
 type SessionPrivilege string
 
 const (
+	Privilege_Guest = "Guest"
 	Privilege_User  = "User"
 	Privilege_Admin = "Admin"
 )
@@ -81,6 +82,18 @@ func NewSession(name, ClientIP string, Privilege SessionPrivilege) *TSession {
 	gSessionLock.Lock()
 	defer gSessionLock.Unlock()
 	gSessions = append(gSessions, session)
+	return session
+}
+
+func NewGuestSession(ipaddr string) *TSession {
+	session := new(TSession)
+	session.Name = "Guest"
+	session.ClientIP = ipaddr
+	session.Privilege = "Privilege_Guest"
+	session.LoginTime = time.Now()
+	session.LastAccess = time.Now()
+	session.Data = make(map[string]interface{}, 30)
+	session.AuthCookie = ""
 	return session
 }
 

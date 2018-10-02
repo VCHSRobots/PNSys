@@ -1,0 +1,93 @@
+{{/*
+// --------------------------------------------------------------------
+// new_supplier_pn_post.tmpl -- template to display a new supplier part number
+//
+// Created 2018-09-30 DLB
+// --------------------------------------------------------------------
+*/}}
+
+
+<script type="text/javascript">
+function copyToClipboard(str) {
+  const el = document.createElement('textarea');  // Create a <textarea> element
+  el.value = str;                                 // Set its value to the string that you want copied
+  el.setAttribute('readonly', '');                // Make it readonly to be tamper-proof
+  el.style.position = 'absolute';                 
+  el.style.left = '-9999px';                      // Move outside the screen to make it invisible
+  document.body.appendChild(el);                  // Append the <textarea> element to the HTML document
+  const selected =            
+    document.getSelection().rangeCount > 0        // Check if there is any content selected previously
+      ? document.getSelection().getRangeAt(0)     // Store selection if found
+      : false;                                    // Mark as false to know no selection existed before
+  el.select();                                    // Select the <textarea> content
+  document.execCommand('copy');                   // Copy - only works as a result of a user action (e.g. click events)
+  document.body.removeChild(el);                  // Remove the <textarea> element
+  if (selected) {                                 // If a selection existed before copying
+    document.getSelection().removeAllRanges();    // Unselect everything on the HTML document
+    document.getSelection().addRange(selected);   // Restore the original selection
+  }
+};
+
+function copyPNtoclipboard() {
+    copyToClipboard("{{.NewPN}}")
+}
+</script>
+
+<div class="content_area">
+<div class="page_title"> {{- .PageTitle -}}</div>
+
+<div class="inputform_area">
+
+    {{if .ErrorMsg}} 
+    <div id="epn_errmsg" class="errmsg"> {{.ErrorMsg}} </div>
+    {{else}}
+      {{if .NewPN}}<div id="spn_partnumber" class="partnumber">{{.NewPN}}</div>
+        <a id="spn_partnumber_copybtn" class="clipboard_btn" onclick="copyPNtoclipboard()">Copy</a>
+
+      {{end}}
+      
+      <div id="spn_category_block" class="param_block">
+      <div id="spn_category_label" class="param_label">Category:</div>
+      <div id="spn_category_value" class="param_value">{{.Category}}</div>
+      </div>
+
+      <div id="spn_vendor_block" class="param_block">
+      <div id="spn_vendor_label" class="param_label">Vendor:</div>
+      <div id="spn_vendor_value" class="param_value">{{.Vendor}}</div>
+      </div>
+
+      <div id="spn_vendorpn_block" class="param_block">
+      <div id="spn_vendorpn_label" class="param_label">Vendor PN:</div>
+      <div id="spn_vendorpn_value" class="param_value">{{.VendorPN}}</div>
+      </div>
+
+      <div id="spn_weblink_block" class="param_block">
+      <div id="spn_weblink_label" class="param_label">Web Link:</div>
+      <div id="spn_weblink_value" class="param_value">
+        {{if .WebLinkAddr}} <a href="{{.WebLinkAddr}}" target="_blank">{{.WebLink}}</a>{{else}}
+        {{.WebLink}}{{end}}
+      </div>
+      </div>
+
+      <div id="epn_designer_block" class="param_block">
+      <div id="epn_designer_label" class="param_label">Designer:</div>
+      <div id="epn_designer_value" class="param_value">{{.Designer}}</div>
+      </div>
+
+      <div id="epn_seqnum_block" class="param_block">
+      <div id="epn_seqnum_label" class="param_label">Seq Num:</div>
+      <div id="epn_seqnum_value" class="param_value">{{.SequenceNumber}}</div>
+      </div>
+
+      <div id="epn_description_block" class="param_block">
+      <div id="epn_description_label" class="param_label">Description:</div>
+      <div id="epn_description_value" class="param_value">{{.Description}}</div>
+      </div>
+
+      <div id="epn_datecreated_block" class="param_block">
+      <div id="epn_datecreated_label" class="param_label">Date Created:</div>
+      <div id="epn_datecreated_value" class="param_value">{{.DateCreated}}</div>
+      </div>
+    {{end}}
+</div>
+

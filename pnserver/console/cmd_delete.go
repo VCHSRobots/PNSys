@@ -62,7 +62,11 @@ func handle_delete_thing(cmdline string) {
 
 	if pt == pnsql.PNType_Supplier {
 		part, err := pnsql.GetSupplierPart(thing)
-		if err != nil || part == nil {
+		if err != nil {
+			fmt.Printf("Database error while searching for %s. Err=%v\n", thing, err)
+			return
+		}
+		if part == nil {
 			fmt.Printf("Part %s not found.\n", thing)
 			return
 		}
@@ -74,7 +78,11 @@ func handle_delete_thing(cmdline string) {
 		pn, err := pnsql.StrToEpicPN(thing)
 		if err == nil {
 			part, err := pnsql.GetEpicPart(pn.PNString())
-			if err != nil || part == nil {
+			if err != nil {
+				fmt.Printf("Database error on search for part. Err=%v\n", err)
+				return
+			}
+			if part == nil {
 				fmt.Printf("Part %s not found.\n", pn.PNString())
 				return
 			}

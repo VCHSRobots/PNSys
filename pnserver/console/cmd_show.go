@@ -60,7 +60,11 @@ func handle_show_thing(cmdline string) {
 func print_supplier_info(pns string) {
 	part, err := pnsql.GetSupplierPart(pns)
 	if err != nil {
-		fmt.Printf("%v\n", err)
+		fmt.Printf("Database error while searching for %s. Err=%v\n", pns, err)
+		return
+	}
+	if part == nil {
+		fmt.Printf("Part %s does not exist.\n", pns)
 		return
 	}
 	fmt.Printf("\n")
@@ -79,7 +83,11 @@ func print_supplier_info(pns string) {
 func print_partnumber_info(pn *pnsql.EpicPN) {
 	part, err := pnsql.GetEpicPart(pn.PNString())
 	if err != nil {
-		fmt.Printf("%v\n", err)
+		fmt.Printf("Database error while searching for part %s. Err=%v\n", pn.PNString(), err)
+		return
+	}
+	if part == nil {
+		fmt.Printf("Part %s not found.", pn.PNString())
 		return
 	}
 	fmt.Printf("\n")

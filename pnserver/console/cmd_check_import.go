@@ -105,7 +105,11 @@ func check_supplier_csv(fn string) {
 		sdate := record[6]     // Date
 		slink := record[7]     // Web link
 
-		pn, _ := pnsql.GetSupplierPart(spn)
+		pn, err := pnsql.GetSupplierPart(spn)
+		if err != nil {
+			fmt.Printf("Database error while searching for %s. Err=%v\n", spn, err)
+			continue
+		}
 		if pn != nil {
 			fmt.Printf("Part %s already exsits, on line %d\n", pn.PNString(), ilinenum)
 			continue
@@ -141,7 +145,7 @@ func check_supplier_csv(fn string) {
 			fmt.Printf("Illegal chars in Vendor on line %d\n", ilinenum)
 		}
 		if svendorpn != util.CleanStr(svendorpn, "|") {
-			fmt.Printf("Illegal chars in VenderPN on line %d\n", ilinenum)
+			fmt.Printf("Illegal chars in VendorPN on line %d\n", ilinenum)
 		}
 		if slink != util.CleanStr(slink, "|") {
 			fmt.Printf("Illegal chars in WebLink on line %d\n", ilinenum)
@@ -191,7 +195,11 @@ func check_epic_import(fn string) {
 			continue
 		}
 
-		pn, _ := pnsql.GetEpicPart(spn)
+		pn, err := pnsql.GetEpicPart(spn)
+		if err != nil {
+			fmt.Printf("Database error on search for part. Err=%v\n", err)
+			continue
+		}
 		if pn != nil {
 			fmt.Printf("Part %s already exsits, on line %d\n", pn.PNString(), ilinenum)
 			continue

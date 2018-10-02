@@ -14,11 +14,10 @@ p {font-size: 14pt; font: Arial, Univers, sans-serif; padding: 5px; margin-right
 
 .page_title {font-size: 18pt; color: #222222; margin-top: 5px; margin-right: 5px; margin-bottom: 10px;}
 
-/* ------------ For header.php */
 /* width of screen_area, menubar_area, and content_area set in header.php */
 #screen_area{ border: 4px; border-color: white; border-style: solid; 
               background-color: #558c89; margin: 0 auto; }
-#middle_area {margin: 10px 5px 5px 5px; width: 100%}
+#middle_area {margin: 10px 5px 5px 15px; width: 100%}
 #nav_area { height: 500px; width: 160px; float: left; padding: 5px}
 
 #login_link {width: 100px; margin-left: 100px;  height: 30px; 
@@ -26,7 +25,7 @@ p {font-size: 14pt; font: Arial, Univers, sans-serif; padding: 5px; margin-right
             font-size: 20pt; color: yellow; margin-top: 50px; margin-bottom: 30px;
             background-color: blue; }
 
-.content_area {float: left; padding: 5px;  background-color: #dcdcda; min-height: 600px;}
+.content_area {float: left; padding: 5px;  background-color: #dcdcda; min-height: 400px;}
 
 #header_banner {height: 60px; background-color: #74afad; margin-left: 0; margin-right: 0; margin-top: 0;}
 #header_writeable_area{width: 100%; }
@@ -43,22 +42,18 @@ p {font-size: 14pt; font: Arial, Univers, sans-serif; padding: 5px; margin-right
 .header_topbutton_div {float: left; margin-left: 20px; margin-top: 5px;}
 #header_accountmenu_div {margin-top: 10px;}
 
-/* ------------ For footer.php */
-
 #footer_area {margin-left: 30px; margin-right: 30px; width: 100%; height: 40px; clear: both;}
 #footer_msg  {color: yellow; font-size: 12pt; font: Arial, Univers, sans-serif; 
         width:70%; margin-top: 20px; float: left;}
-#footer_home_link {margin-top: 15px; margin-left: 10px; margin-right: 40px; float: right;}
+#footer_home_link {margin-top: 15px; margin-left: 10px; margin-right: 60px; float: right;}
 #footer_masquerader {float: left; margin-top: 21px; font-size: 10pt; color: black; }
 #footer_timer {float: left; margin-top: 21px; margin-left: 20px; font-size: 10pt; color: black; }
 #footer_test_link { float: right; margin-right: 50px; position: relative; top: 10px; font-size: 18px; }
 #footer_test_link a {color: white;}
 
-/* ------------ For login.php */
-
-.login_area   {width: 500px; margin-left: 180px; margin-top: 20px;}
+.login_area   {width: 500px; margin-left: 180px; margin-top: 40px;}
 .login_label  {width: 140px; float: left; font-size: 18pt; margin-top:25px; padding-top: 0px;}
-.login_field  {width: 216px; float: left; height: 70px; font-size: 18pt; margin-top: 15px;}
+.login_field  {width: 216px; float: left; height: 50px; font-size: 18pt; margin-top: 15px;}
 .login_select {width: 214px; height: 40px;}
 .login_button {margin-top: 40px; margin-left: 140px;}
 .login_button input {width: 200px; font-size: 20pt;}
@@ -67,7 +62,6 @@ p {font-size: 14pt; font: Arial, Univers, sans-serif; padding: 5px; margin-right
 #login_fail {margin-left: 100px; color: red; font-size: 20pt; font-weight: bold; position: relative; top: 10px;}
 #welcome_area { margin-left: 20px; width: 90%; }
 
-/* ------------ For logout.php */
 .msg_background { font-size: 20pt; }
 #logout_msg {width: 500px; margin-left: 100px;}
 #login_link {width: 100px; margin-left: 100px;  height: 30px; 
@@ -87,16 +81,25 @@ p {font-size: 14pt; font: Arial, Univers, sans-serif; padding: 5px; margin-right
 .embedded_btn a {margin-top: 5px; padding: 5px 10px 5px 10px; text-decoration: none; color: #BBBBBB; position: relative; top: 4px;}
 .embedded_btn a:hover {font-weight: bold; color: black;}
 
-.clipboard_btn {font-size: 12pt; border: 1px solid; border-color: #BBBBBB; width: 140px;  height: 30px; position: relative; left: 600px; top: -60px;}
-.clipboard_btn a {margin-top: 5px; padding: 3px 5px 3px 5px; text-decoration: none; color: #BBBBBB; position: relative; top: 4px;}
-.clipboard_btn a:hover {font-weight: bold; color: red; background-color: red}
-.clipboard_btn:hover { text-decoration: underline; font-weight: bold; background-color: red}
-.clipboard_btn:active { text-decoration: underline; font-weight: bold; background-color: red; top: -58px; left: 602px;}
+.partnum_btn {font-size: 12pt; border: 1px solid; border-color: #888888; width: 45px;  height: 20px; color: blue; margin-left: 10px; background-color: #CCCCCC;}
+.partnum_btn {margin-top: 5px; padding: 3px 5px 3px 5px; text-decoration: none; }
+.partnum_btn:link {text-decoration: none; }
+.partnum_btn:visited {text-decoration: none; }
+.partnum_btn:hover {font-weight: bold; text-decoration: underline;}
+.partnum_btn:active { text-decoration: underline; font-weight: bold; background-color: red; }
 
 
-.active_btn_div {float: right;  }
-.active_btn {font-size: 8pt; width: 100px;  height: 20px; }
+.active_btn_div {float: right;  position: relative; top: -60px;}
+.active_btn {font-size: 8pt; width: 90px;  line-height: 1px; height: 17px; }
 
+
+.table_content {}
+.table_content table {font-size: 8pt; border-spacing: 0px; border-color: red; padding: 0px;}
+.table_content th, td {padding: 4px; line-height: 10px;}
+.table_content a:link {text-decoration: none; color: blue; }
+.table_content a:visited {text-decoration: none; color: blue;}
+.table_content a:hover {text-decoration: underline; color: black;}
+.table_limit_msg {font-size: 10pt; position: relative; top: -20px; left: 200px;}
 
 /* ------------ For workorders_showworkorder_form.php */
 .workorders_listdiv   {display: block; height: 25px;}

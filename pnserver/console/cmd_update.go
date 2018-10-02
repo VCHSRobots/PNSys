@@ -92,7 +92,11 @@ func handle_update_thing(cmdline string) {
 func update_epic_part(pn *pnsql.EpicPN, params map[string]string) {
 	part, err := pnsql.GetEpicPart(pn.PNString())
 	if err != nil {
-		fmt.Printf("%v\n", err)
+		fmt.Printf("Database error while searching for part %s. Err=%v\n", pn.PNString(), err)
+		return
+	}
+	if part == nil {
+		fmt.Printf("Part %s not found.\n", pn.PNString())
 		return
 	}
 	nupdates := 0
@@ -202,7 +206,11 @@ func update_designer(name string, params map[string]string) {
 func update_supplier_part(pns string, params map[string]string) {
 
 	part, err := pnsql.GetSupplierPart(pns)
-	if err != nil || part == nil {
+	if err != nil {
+		fmt.Printf("Database error while searching for part %s. Err=%v\n", pns, err)
+		return
+	}
+	if part == nil {
 		fmt.Printf("Part %s not found.\n", pns)
 		return
 	}

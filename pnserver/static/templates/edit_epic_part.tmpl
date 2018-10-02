@@ -1,0 +1,125 @@
+{{/*
+// --------------------------------------------------------------------
+// edit_epic_part.tmpl -- template to edit a part number
+//
+// Created 2018-10-01 DLB
+// --------------------------------------------------------------------
+*/}}
+
+
+<script src="js/fill_selbox.js"></script>
+
+<script type="application/json" id="designers">
+{{.DesignersJson}}
+</script>
+
+<script type="text/javascript">
+
+var gShowAllDesigners = false
+
+function updateActiveUI() {
+    if (gShowAllDesigners) {
+        document.getElementById("ept_designer_active_btn").innerHTML = "Show Some";
+    } else {
+        document.getElementById("ept_designer_active_btn").innerHTML = "Show All";
+    }
+}
+
+function toggleActiveDesigners() {
+    gShowAllDesigners = !gShowAllDesigners;
+    updateActiveUI();
+    fillDesigners("ept_designer_field", gShowAllDesigners);
+}
+
+function startUp() {
+    updateActiveUI();
+    fillDesigners("ept_designer_field", gShowAllDesigners);
+    var ok = setSelectionBox("ept_designer_field", "{{.Designer}}");
+    if (!ok) {
+        toggleActiveDesigners()
+        setSelectionBox("ept_designer_field", "{{.Designer}}");
+    }
+    setTextBox("ept_desc_field", "{{.Description}}");
+}
+
+</script>
+
+<div class="content_area">
+<div class="page_title"> {{- .PageTitle -}}</div>
+
+<div id="ept_partinfo_area">
+  <div id="ept_partnumber" class="partnumber">{{.PartNumber}}</div>
+
+
+  <div id="ept_project_block" class="param_block">
+  <div id="ept_project_label" class="param_label">Project:</div>
+  <div id="ept_proejct_value" class="param_value">{{.Project}}</div>
+  </div>
+
+
+  <div id="ept_seqnum_block" class="param_block">
+  <div id="ept_seqnum_label" class="param_label">Seq Num:</div>
+  <div id="ept_seqnum_value" class="param_value">{{.SequenceNumber}}</div>
+  </div>
+
+  <div id="ept_subsystem_block" class="param_block">
+  <div id="ept_subsystem_label" class="param_label">Subsystem:</div>
+  <div id="ept_subsystem_value" class="param_value">{{.Subsystem}}</div>
+  </div>
+
+   <div id="ept_parttype_block" class="param_block">
+  <div id="ept_parttype_label" class="param_label">Part Type:</div>
+  <div id="ept_parttype_value" class="param_value">{{.PartType}}</div>
+  </div>
+
+  <div id="ept_dateissued_block" class="param_block">
+  <div id="ept_dateissued_label" class="param_label">Date Issued:</div>
+  <div id="ept_dateissued_value" class="param_value">{{.DateIssued}}</div>
+  </div>
+
+  <div id="ept_pid_block" class="param_block">
+  <div id="ept_pid_label" class="param_label">PID:</div>
+  <div id="ept_pid_value" class="param_value">{{.PID}}</div>
+  </div>
+</div>
+
+<div class="inputform_area">
+    <form action="EditEpicPNPost" method="post">
+
+    <div id="ept_designer">
+        <div class="inputform_paramblock" id="ept_designer_block">
+            <div class="inputform_label" id="ept_designer_label">Designer</div>
+            <div class="inputform_selection">
+                <select id="ept_designer_field" name="Designer">
+                </select>
+            <div id="ept_designer_active_div" class="active_btn_div">
+                <button type="button" id="ept_designer_active_btn" class="active_btn" onclick="toggleActiveDesigners()">Show All</button>
+            </div>
+
+            </div>
+        </div>
+    </div>
+
+    <div id="ept_desc">
+        <div class="inputform_paramblock"  id="ept_desc_block">
+            <div class="inputform_label" id="ept_desc_label">Description</div>
+            <div class="inputform_textarea">
+                <textarea  id="ept_desc_field" name="Description"  rows="2" cols="45" >
+                </textarea>
+            </div>
+        </div>
+    </div>
+
+    <div id="ept_partnumber_hidden" style="display: none;">
+        <input type="text" name="PartNumber" value="{{.PartNumber}}">
+    </div>
+
+    <div style="clear: both;"></div>
+    <div class="inputform_paramblock">
+    <div class="btn_form_submit_div">
+        <input class="btn_form_submit" type="submit" value="Submit">
+    </div>
+    </form>
+</div>
+
+</div>

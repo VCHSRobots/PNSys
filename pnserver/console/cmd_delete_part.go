@@ -42,7 +42,11 @@ func handle_delete_part(cmdline string) {
 	spn := args[1]
 	part, err := pnsql.GetEpicPart(spn)
 	if err != nil {
-		fmt.Printf("Part %q does not exist.\n")
+		fmt.Printf("Database error while searching for part %s. Err=%v.\n", spn, err)
+		return
+	}
+	if part == nil {
+		fmt.Printf("Part %q does not exist.\n", spn)
 		return
 	}
 

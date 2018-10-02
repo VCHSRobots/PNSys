@@ -27,9 +27,17 @@ type TColumn struct {
 	Cols []string
 }
 
-type TablePageData struct {
-	*HeaderData
+type TableData struct {
 	Head         []string
 	Rows         []TColumn
 	EmptyMessage string
+	LimitMsg     string
+}
+
+type SelectionBoxData struct {
+	DesignersJson    string
+	ProjectsJson     string
+	CategoriesJson   string
+	PartTypesJson    string
+	KnownVendorsJson string
 }

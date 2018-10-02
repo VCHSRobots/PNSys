@@ -11,6 +11,7 @@ import (
 	"epic/lib/util"
 	"epic/lib/uuid"
 	"fmt"
+	"sort"
 	"strconv"
 	"strings"
 	"sync"
@@ -109,7 +110,7 @@ func (pn *SupplierPartPN) SamePN(pn2 *SupplierPartPN) bool {
 func (p *SupplierPart) CategoryDesc() string {
 	for _, c := range GetSupplierCategories() {
 		if c.Category == p.Category {
-			return c.Description
+			return fmt.Sprintf("%s -- %s", c.Category, c.Description)
 		}
 	}
 	return ""
@@ -157,6 +158,8 @@ func GetSupplierParts() []*SupplierPart {
 }
 
 // Retrieve an supplier part given its part number string (SP-cc-0000)
+// Note, it is valid to return nil for the part without an error, which
+// means the part doesn't exist!
 func GetSupplierPart(pns string) (*SupplierPart, error) {
 	pn, err := StrToSupplierPartPN(pns)
 	if err != nil {
@@ -167,7 +170,7 @@ func GetSupplierPart(pns string) (*SupplierPart, error) {
 			return p, nil
 		}
 	}
-	return nil, fmt.Errorf("Part %s not found.", pn.PNString())
+	return nil, nil
 }
 
 func DeleteSupplierPart(p *SupplierPart) error {
@@ -566,4 +569,22 @@ func FilterSupplierParts(params map[string]string) []*SupplierPart {
 	}
 
 	return mainlst
+}
+
+// GetVendors returns a list of known vendors, alphbized.
+func GetVendors() []string {
+	vmap := make(map[string]int, 200)
+	for _, p := range GetSupplierParts() {
+		v := strings.TrimSpace(p.Vendor)
+		if util.Blank(v) {
+			continue
+		}
+		vmap[v]++
+	}
+	lst := make([]string, 0, len(vmap))
+	for k, _ := range vmap {
+		lst = append(lst, k)
+	}
+	sort.Strings(lst)
+	return lst
 }

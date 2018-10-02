@@ -19,13 +19,13 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     {{if .PageTabTitle}} <title> {{- .PageTabTitle -}} </title> {{else}}
     <title>EPIC PN Sys</title> {{end}}
+    <link rel="stylesheet" type="text/css" href="../css/global.css">
+    <link rel="stylesheet" type="text/css" href="../css/nav.css">
     {{range .StyleSheets}} 
         <link rel="stylesheet" type="text/css" href="../css/ {{- . -}} .css">
         {{end}}
-    <link rel="stylesheet" type="text/css" href="../css/global.css">
-    <link rel="stylesheet" type="text/css" href="../css/nav.css">
      <style>
-        {{$bw := 960}}  {{$cw := 760}} 
+        {{$bw := 800}}  {{$cw := 760}} 
         {{if .BrowserWidth}} {{$bw = .BrowserWidth}} {{end}}
         {{if .ContentWidth}} {{$cw = .ContentWidth}} {{end}}
         #screen_area {width: {{$bw -}} px;}
@@ -44,9 +44,11 @@
         <div id="header_account_area">
             <div id="header_username_div"> {{.UserFormattedName}} {{if .IsAdmin}}*{{end}} </div>
             <div id="header_accoutmenu_div">
+                <!--
                 <div class="header_topbutton_div">
                   <a class="header_topbutton" href="account_settings">Settings</a>
                   </div>
+                -->
                 <div class="header_topbutton_div">
                   <a class="header_topbutton" href="Logout">Logout</a>
                   </div>

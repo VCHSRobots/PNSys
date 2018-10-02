@@ -61,6 +61,10 @@ func handle_add_part(cmdline string) {
 
 func add_epic_part(spn string, params map[string]string) {
 	part, err := pnsql.GetEpicPart(spn)
+	if err != nil {
+		fmt.Printf("Database error while searching for part. Err=%v", err)
+		return
+	}
 	if part != nil {
 		fmt.Printf("Part %q current exists.  Cannot overwrite.\n", part.PNString())
 		return
@@ -118,7 +122,11 @@ func add_epic_part(spn string, params map[string]string) {
 }
 
 func add_supplier_part(spn string, params map[string]string) {
-	part, _ := pnsql.GetSupplierPart(spn)
+	part, err := pnsql.GetSupplierPart(spn)
+	if err != nil {
+		fmt.Printf("Database error while searching for %s. Err=%v\n", part.PNString(), err)
+		return
+	}
 	if part != nil {
 		fmt.Printf("Part %q current exists.  Cannot overwrite.\n", part.PNString())
 		return

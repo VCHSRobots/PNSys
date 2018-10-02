@@ -72,7 +72,7 @@ func StrToEpicPN(s string) (*EpicPN, error) {
 func (p *EpicPart) ProjectDesc() string {
 	for _, prj := range GetProjects() {
 		if prj.ProjectId == p.ProjectId {
-			return prj.Description
+			return fmt.Sprintf("%s -- %s", prj.ProjectId, prj.Description)
 		}
 	}
 	return ""
@@ -83,7 +83,7 @@ func (p *EpicPart) SubsystemDesc() string {
 		if prj.ProjectId == p.ProjectId {
 			for _, sub := range prj.Subsystems {
 				if p.SubsystemId == sub.SubsystemId {
-					return sub.Description
+					return fmt.Sprintf("%s -- %s", sub.SubsystemId, sub.Description)
 				}
 			}
 			return ""
@@ -95,7 +95,7 @@ func (p *EpicPart) SubsystemDesc() string {
 func (p *EpicPart) PartTypeDesc() string {
 	for _, pt := range GetPartTypes() {
 		if pt.Digit == p.PartType {
-			return pt.Description
+			return fmt.Sprintf("%s -- %s", pt.Digit, pt.Description)
 		}
 	}
 	return ""
@@ -182,6 +182,8 @@ func GetEpicParts() []*EpicPart {
 }
 
 // Retrieve an epic part given its part number string (XX-YYY-ZZZZ)
+// Note, it is valid to return nil for the part without an error, which
+// means the part doesn't exist!
 func GetEpicPart(pns string) (*EpicPart, error) {
 	pn, err := StrToEpicPN(pns)
 	if err != nil {
@@ -192,7 +194,7 @@ func GetEpicPart(pns string) (*EpicPart, error) {
 			return p, nil
 		}
 	}
-	return nil, fmt.Errorf("Part %s not found.", pn.PNString())
+	return nil, nil
 }
 
 func DeleteEpicPart(p *EpicPart) error {

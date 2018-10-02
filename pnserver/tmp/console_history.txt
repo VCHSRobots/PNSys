@@ -541,3 +541,30 @@ show-sessions
 exit
 show-sessions
 exit
+help
+list-parts 
+list-parts designer="D. Brandon"
+list-parts designer="D. Brandon" after=2017
+list-parts designer="D. Brandon" after=2017 before=2018
+list-parts designer="D. Brandon" after=2017 before=2018 desc="arm"
+list-designers
+set-active "J .Wu"
+set-active "J. Wu"
+set-active "J .Wu"
+list-designers
+set-inactive "J. Wu"
+list-designers
+list-sessions
+show-sessions
+pexit
+exit
+help list-parts
+exit
+exit 
+exit
+eixt
+exit
+exexit
+exit
+exot
+exit

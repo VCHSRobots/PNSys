@@ -121,3 +121,22 @@ func CleanStr(s, replace string) string {
 	}
 	return sout
 }
+
+// CleanForWeb replaces dangerous chars with *.  For right now,
+// this is only a double quote and unprintable chars.
+func CleanForWeb(s string) string {
+	n := len(s)
+	sout := ""
+	replace := "*"
+	for i := 0; i < n; i++ {
+		c := s[i]
+		if c < 32 || c >= 127 {
+			sout += replace
+		} else if c == 34 {
+			sout += replace
+		} else {
+			sout += string(c)
+		}
+	}
+	return sout
+}

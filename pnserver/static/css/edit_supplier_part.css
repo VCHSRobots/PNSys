@@ -1,0 +1,51 @@
+/* --------------------------------------------------------------------
+** edit_supplier_part.css -- CSS to layout edit_part page.
+**
+** Created 2018-10-01 DLB
+** --------------------------------------------------------------------
+*/
+
+.param_block {float:left; width: 400px; height: 30px;}
+.param_label {width: 120px;}
+#ept_partinfo_area {height: 130px;}
+
+#ept_seqnum_block {float: left; width: 250px; margin-left: 0px;}
+#ept_seqnum_label {}
+#ept_seqnum_value {}
+#ept_dateissued_block {float: left; width: 400px; margin-left: 0px; top: 0px;}
+#ept_dateissued_label {}
+#ept_dateissued_field {}
+#ept_pid_block {float: left; width: 350px; margin-left: 0px; top: 0px;}
+#ept_pid_label {font-size: 10pt; width: 40px;}
+#ept_pid_value {font-size: 10pt;}
+
+#ept_designer {height: 75px;}
+#ept_designer_block {width: 300px; margin-left: 0px; margin-bottom: 0px;}
+#ept_designer_label {}
+#ept_designer_field {}
+
+#ept_vendor {float: left; height: 75px; width: 400px;}
+#ept_vendor_txtbox {float: left; width: 400px; margin-left: 0px; margin-top: -3px;}
+#ept_vendor_selbox {float: left; width: 400px; margin-left: 0px; margin-top: -3px;}
+#ept_vendor_block1 {}
+#ept_vendor_label1 {martin-top: 0px;}
+#ept_vendor_field1 {float: left; width: 305px;}
+#ept_vendor_block2 {}
+#ept_vendor_label2 {margin-top: 0px;}
+#ept_vendor_field2 {}
+.restore_btn {float: left; height: 35px;}
+
+#ept_vendorpn {float: left; width: 250px; margin-left: 0px; }
+#ept_vendorpn_block {margin-top: 0px; }
+#ept_vendorpn_label {margin-top: 0px;}
+#ept_vendorpn_field {}
+
+#ept_weblink {float: left; width: 695px; margin-left: 0px; height: 80px;}
+#ept_weblink_block {}
+#ept_weblink_label {margin-top: 0px;}
+#ept_weblink_field {font-size: 12pt;}
+
+#ept_desc {clear: both;}
+#ept_desc_block {margin-top: 0px;}
+#ept_desc_label {margin-top: 0px;}
+#ept_desc_field {font-size: 12pt;  font-family: monospace;}

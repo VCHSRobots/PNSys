@@ -1,0 +1,37 @@
+/* --------------------------------------------------------------------
+** edit_epic_part.css -- CSS to layout edit_part page.
+**
+** Created 2018-10-01 DLB
+** --------------------------------------------------------------------
+*/
+
+.param_block {float:left; width: 400px; height: 30px;}
+.param_label {width: 120px;}
+#ept_partinfo_area {height: 160px;}
+
+#ept_project_block {float: left; width: 400px; }
+#ept_project_label {}
+#ept_project_value {}
+#ept_seqnum_block {float: left; width: 250px; margin-left: 0px;}
+#ept_seqnum_label {}
+#ept_seqnum_value {}
+#ept_subsystem_block {float: left; width: 400px; margin-left: 0px;}
+#ept_subsystem_label {}
+#ept_subsystem_value {}
+#ept_parttype_block {float: left; width: 250px; margin-left: 0px;}
+#ept_parttype_label {}
+#ept_parttype_value {}
+#ept_dateissued_block {float: left; width: 400px; margin-left: 0px; top: 0px;}
+#ept_dateissued_label {}
+#ept_dateissued_field {}
+#ept_pid_block {float: left; width: 350px; margin-left: 0px; top: 0px;}
+#ept_pid_label {font-size: 10pt; width: 40px;}
+#ept_pid_value {font-size: 10pt;}
+
+#ept_designer_block {clear: both;  width: 300px; margin-left: 0px; margin-bottom: 0px; height: 90px;}
+#ept_designer_label {}
+#ept_designer_field {}
+
+#ept_desc_block {margin-top: 0px;}
+#ept_desc_label {}
+#ept_desc_value { font-size: 16px;  font-family: monospace;}

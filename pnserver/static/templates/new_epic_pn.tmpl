@@ -6,6 +6,8 @@
 // --------------------------------------------------------------------
 */}}
 
+<script src="js/fill_selbox.js"></script>
+
 <script type="application/json" id="projects">
 {{.ProjectsJson}}
 </script>
@@ -14,77 +16,15 @@
 {{.DesignersJson}}
 </script>
 
+<script type="application/json" id="parttypes">
+{{.PartTypesJson}}
+</script>
+
 <script type="text/javascript">
 
 var gShowAllProjects = false
 var gShowAllDesigners = false
 
-function clearSelBox(sel) {
-    var n = sel.length;
-    var i;
-    for (i = 0; i < n; i++) {
-        sel.remove(0);
-    }
-}
-
-function fillSubsystem() {
-    var prjlst = JSON.parse(document.getElementById("projects").innerHTML);
-    var p = document.getElementById("nep_project_field");
-    var sel = document.getElementById("nep_subsystem_field");
-    clearSelBox(sel);
-    var i;
-    for (i = 0; i < prjlst.length; i++) {
-        if (prjlst[i].ProjectId == p.value) {
-            var j; 
-            var subs = prjlst[i].Subsystems;
-            for (j = 0; j < subs.length; j++) {
-                var option = document.createElement("option");
-                var label = subs[j].SubsystemId + " -- " + subs[j].Description;
-                option.text = label;
-                option.label = label;
-                option.value = subs[j].SubsystemId 
-                sel.add(option)
-            }
-            return;
-        }
-    }
-}
-
-function fillProjects() {
-    var prjlst = JSON.parse(document.getElementById("projects").innerHTML);
-    var sel = document.getElementById("nep_project_field");
-    clearSelBox(sel);
-    var i;
-    for(i = 0; i < prjlst.length; i++) {
-        prj = prjlst[i];
-        if (gShowAllProjects || prj.Active) {
-            var option = document.createElement("option");
-            var label = prj.ProjectId + " -- " + prj.Description;
-            option.text = label;
-            option.label = label;
-            option.value = prj.ProjectId;
-            sel.add(option)
-        }
-    }
-}
-
-function fillDesigners() {
-    var desingerlst = JSON.parse(document.getElementById("designers").innerHTML);
-    var sel = document.getElementById("nep_designer_field");
-    clearSelBox(sel);
-    var i;
-    for(i = 0; i < desingerlst.length; i++) {
-        d = desingerlst[i];
-        if (gShowAllDesigners || d.Active) {
-            var option = document.createElement("option");
-            var label = d.Name;
-            option.text = label;
-            option.label = label;
-            option.value = label;
-            sel.add(option)
-        }
-    }
-}
 
 function updateActiveUI() {
     if (gShowAllProjects) {
@@ -102,21 +42,26 @@ function updateActiveUI() {
 function toggleActiveProjects() {
     gShowAllProjects = !gShowAllProjects;
     updateActiveUI();
-    fillProjects();
-    fillSubsystem();
+    fillProjects("nep_project_field", gShowAllProjects );
+    fillSubsystem("nep_subsystem_field", "nep_project_field");
 }
 
 function toggleActiveDesigners() {
     gShowAllDesigners = !gShowAllDesigners;
     updateActiveUI();
-    fillDesigners();
+    fillDesigners("nep_designer_field", gShowAllDesigners);
+}
+
+function dofillSubsystem() {
+    fillSubsystem("nep_subsystem_field", "nep_project_field");
 }
 
 function startUp() {
     updateActiveUI();
-    fillProjects();
-    fillSubsystem();
-    fillDesigners();
+    fillProjects("nep_project_field", gShowAllProjects);
+    fillSubsystem("nep_subsystem_field", "nep_project_field");
+    fillDesigners("nep_designer_field", gShowAllDesigners);
+    fillPartTypes("nep_parttype_field");
 }
 
 </script>
@@ -132,7 +77,7 @@ function startUp() {
             <div class="inputform_paramblock" id="nep_project_block">
                 <div class="inputform_label" id="nep_project_label">Project</div>
                 <div class="inputform_selection">
-                    <select id="nep_project_field" name="Project" onchange="fillSubsystem()">
+                    <select id="nep_project_field" name="Project" onchange="dofillSubsystem()">
                     </select>
                 </div>
                 <div id="nep_project_active_div" class="active_btn_div">
@@ -165,10 +110,7 @@ function startUp() {
             <div class="inputform_paramblock" id="nep_parttype_block">
                 <div class="inputform_label" id="nep_parttype_label">Part Type</div>
                 <div class="inputform_selection">
-                    <select id="nep_parttype_field" name="PartType">
-                        {{range .PartTypes}}
-                            <option name="{{.}}" value="{{.}}">{{.}}</option> {{end}}
-                    </select>
+                    <select id="nep_parttype_field" name="PartType"></select>
                 </div>
             </div>
         </div>

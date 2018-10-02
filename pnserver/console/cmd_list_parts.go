@@ -32,8 +32,8 @@ results.  The possible parameters are:
   DateBefore, datebefore, date0, before    -- for parts before a date,
   DateAfter, dateafter, date1, after       -- for parts after a date,
   Category, category, Cat, cat             -- for parts with a supplier category,
-  Vender, vender, ven                      -- for parts of a vender name (lazy match),
-  VenderPN, vendernp, vpn                  -- for parts of a vender's PN (lazy match),
+  Vendor, vendor, ven                      -- for parts of a vendor name (lazy match),
+  VendorPN, vendornp, vpn                  -- for parts of a vendor's PN (lazy match),
   WebLink, Weblink, weblink                -- for the web line (lazy match),
   Description, description, desc           -- for the description (lazy match).
 
@@ -81,8 +81,8 @@ func handle_list_parts(cmdline string) {
 	_, havesub := util.MapAlias(params, "SubsystemId", "subsystemid", "subsystem", "sub")
 	_, havept := util.MapAlias(params, "PartType", "parttype", "part")
 	_, havecat := util.MapAlias(params, "Category", "category", "Cat", "cat")
-	_, havevendor := util.MapAlias(params, "Vender", "vender", "ven")
-	_, havevendorpn := util.MapAlias(params, "VenderPN", "vendernp", "vpn")
+	_, havevendor := util.MapAlias(params, "Vendor", "vendor", "ven")
+	_, havevendorpn := util.MapAlias(params, "VendorPN", "vendornp", "vpn")
 	_, haveweblink := util.MapAlias(params, "WebLink", "Weblink", "weblink")
 
 	if haveprj || havesub || havept {

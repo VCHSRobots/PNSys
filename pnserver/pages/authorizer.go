@@ -29,6 +29,7 @@ func authorizer(c *gin.Context) {
 	}
 
 	// Session found. Fill up data.
+	c.Set("Session", ses)
 	hdrdata := &HeaderData{}
 	hdrdata.PageTabTitle = "Epic PN"
 	hdrdata.IsLoggedIn = true
@@ -41,6 +42,7 @@ func guest_auth(c *gin.Context) {
 	cookie, err := c.Cookie("Cred")
 	ses, err := sessions.GetSessionByAuth(cookie)
 	if err != nil {
+		c.Set("Session", sessions.NewGuestSession(c.ClientIP()))
 		// We are not logged in!
 		// Provide a guest level version of the header.
 		hdrdata := &HeaderData{}
@@ -53,6 +55,7 @@ func guest_auth(c *gin.Context) {
 	}
 
 	// Session found. Fill up data.
+	c.Set("Session", ses)
 	hdrdata := &HeaderData{}
 	hdrdata.PageTabTitle = "Epic PN"
 	hdrdata.IsLoggedIn = true
@@ -81,4 +84,25 @@ func GetHeaderData(c *gin.Context) *HeaderData {
 		return nil
 	}
 	return hdr
+}
+
+// GetSession returns session data for the current session.
+// This call should always return a valid session for any
+// page that used authorizer or guest_auth.
+func GetSession(c *gin.Context) *sessions.TSession {
+	x, ok := c.Get("Session")
+	if !ok {
+		err := fmt.Errorf("Session data not avaliable after authincation!?")
+		log.Errorf("%v\n", err)
+		c.AbortWithError(400, err)
+		return nil
+	}
+	ses, ok := x.(*sessions.TSession)
+	if !ok {
+		err := fmt.Errorf("Session Data assert error! Programming BUG.")
+		log.Errorf("%v\n", err)
+		c.AbortWithError(400, err)
+		return nil
+	}
+	return ses
 }

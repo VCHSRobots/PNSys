@@ -1,0 +1,166 @@
+{{/*
+// --------------------------------------------------------------------
+// new_supplier_pn.tmpl -- template to enter a new su0plier pn.
+//
+// Created 2018-09-30 DLB
+// --------------------------------------------------------------------
+*/}}
+
+<script src="js/fill_selbox.js"></script>
+
+<script type="application/json" id="designers">
+{{.DesignersJson}}
+</script>
+
+<script type="application/json" id="categories">
+{{.CategoriesJson}}
+</script>
+
+<script type="application/json" id="vendors">
+{{.KnownVendorsJson}}
+</script>
+
+<script type="text/javascript">
+
+var gShowAllDesigners = false
+
+function updateActiveUI() {
+    if (gShowAllDesigners) {
+        document.getElementById("nsp_designer_active_btn").innerHTML = "Show Some";
+    } else {
+        document.getElementById("nsp_designer_active_btn").innerHTML = "Show All";
+    }
+}
+
+function toggleActiveDesigners() {
+    gShowAllDesigners = !gShowAllDesigners;
+    updateActiveUI();
+    fillDesigners("nsp_designer_field", gShowAllDesigners);
+}
+
+function proc_vendor() {
+    sel = document.getElementById("nsp_vendor_field2");
+    if (sel.value == "<new vendor>") {
+        d = document.getElementById("nsp_vendor_selbox");
+        d.style.display = "none";
+        txt = document.getElementById("nsp_vendor_txtbox");
+        txt.style.display="block";
+        txtbox = document.getElementById("nsp_vendor_field1");
+        txtbox.value = "<put vendor name here>";
+        return
+    }
+
+    txt = document.getElementById("nsp_vendor_field1");
+    txt.value = sel.value;
+}
+
+function restore_vendor_selbox() {
+    d = document.getElementById("nsp_vendor_selbox");
+    d.style.display = "block";
+    txt = document.getElementById("nsp_vendor_txtbox");
+    txt.style.display="none";
+    fillVendors("nsp_vendor_field2", false, true);
+}
+
+function startUp() {
+    updateActiveUI();
+    fillDesigners("nsp_designer_field", gShowAllDesigners);
+    fillCategories("nsp_category_field");
+    fillVendors("nsp_vendor_field2", false, true);
+    txt = document.getElementById("nsp_vendor_txtbox");
+    txt.style.display = "none";
+}
+
+</script>
+
+
+<div class="content_area">
+<div class="page_title"> {{- .PageTitle -}}</div>
+
+<span id="dbmsg"></span>
+<div class="inputform_area">
+    <form action="SubmitNewSupplierPN" method="post">
+        <div id="nsp_category">
+            <div class="inputform_paramblock" id="nsp_category_block">
+                <div class="inputform_label" id="nsp_category_label">Category</div>
+                <div class="inputform_selection">
+                    <select id="nsp_category_field" name="Category"></select>
+                </div>
+            </div>
+        </div>
+        <div id="nsp_designer">
+            <div class="inputform_paramblock" id="nsp_designer_block">
+                <div class="inputform_label" id="nsp_designer_label">Designer</div>
+                <div class="inputform_selection">
+                    <select id="nsp_designer_field" name="Designer">
+                    </select>
+                <div id="nsp_designer_active_div" class="active_btn_div">
+                    <button type="button" id="nsp_designer_active_btn" class="active_btn" onclick="toggleActiveDesigners()">Show All</button>
+                </div>
+
+                </div>
+            </div>
+        </div>
+         <div id="nsp_vendor_txtbox">
+            <div class="inputform_paramblock" id="nsp_vendor_block1">
+                <div class="inputform_label" id="nsp_vendor_label1">Vendor</div>
+                <div class="inputform_text_field">
+                    <input type="text"  id="nsp_vendor_field1" name="Vendor"> </textarea>
+                </div>
+                <div class="restore_sel_btn">
+                    <button type="button" id="nsp_restore_sel_btn" class="restore_btn"
+                    onclick="restore_vendor_selbox()">^</button>
+                </div>
+
+            </div>
+        </div>
+        <div id="nsp_vendor_selbox">
+            <div class="inputform_paramblock" id="nsp_vendor_block2">
+                <div class="inputform_label" id="nsp_vendor_label2">Vendor</div>
+                <div class="inputform_selection">
+                    <select id="nsp_vendor_field2" name="VendorSel" onchange="proc_vendor()"></select>
+                </div>
+            </div>
+        </div>
+        <div id="nsp_vendorpn">
+            <div class="inputform_paramblock" id="nsp_vendorpn_block">
+                <div class="inputform_label" id="nsp_vendorpn_label">Vendor Part Number</div>
+                <div class="inputform_text_field">
+                    <input type="text"  id="nsp_vendorpn_field" name="VendorPN">
+                </div>
+            </div>
+        </div>
+        <div id="nsp_weblink">
+            <div class="inputform_paramblock" id="nsp_weblink_block">
+                <div class="inputform_label" id="nsp_weblink_label">Web Link</div>
+                <div class="inputform_text_field">
+                    <input type="text"  id="nsp_weblink_field" name="WebLink"> 
+                </div>
+            </div>
+        </div>
+        <div id="nsp_desc">
+            <div class="inputform_paramblock"  id="nsp_desc_block">
+                <div class="inputform_label" id="nsp_desc_label">Description</div>
+                <div class="inputform_textarea">
+                    <textarea  id="nsp_desc_field" name="Description" rows="2" cols="45" >
+                    </textarea>
+                </div>
+            </div>
+        </div>
+
+        <div style="clear: both;"></div>
+        <div class="inputform_paramblock">
+
+        <div class="btn_form_submit_div">
+            <input class="btn_form_submit" type="submit" value="Submit">
+        </div>
+    </form>
+</div>
+
+{{if .Instructions}} 
+    <div class="inputfrom_instructions">
+    {{.Instructions}}
+    </div> 
+{{end}}
+
+</div>

@@ -1,0 +1,80 @@
+{{/*
+// --------------------------------------------------------------------
+// find_post.tmpl -- template to display a find request
+//
+// Created 2018-09-30 DLB
+// --------------------------------------------------------------------
+*/}}
+
+
+<div class="content_area">
+<div class="page_title"> {{- .PageTitle -}}</div>
+
+<div class="inputform_area">
+
+    {{if .ErrorMsg}} 
+    <div id="fdp_errmsg" class="errmsg"> {{.ErrorMsg}} </div>
+    {{else}}
+      
+      <div id="fdp_maintype_block" class="param_block">
+      <div id="fdp_maintype_label" class="param_label">MainType:</div>
+      <div id="fdp_maintype_value" class="param_value">{{.MainType}}</div>
+      </div>
+
+      <div id="fdp_designer_block" class="param_block">
+      <div id="fdp_designer_label" class="param_label">Designer:</div>
+      <div id="fdp_designer_value" class="param_value">{{.Designer}}</div>
+      </div>
+
+      <div id="fdp_project_block" class="param_block">
+      <div id="fdp_project_label" class="param_label">Project:</div>
+      <div id="fdp_project_value" class="param_value">{{.Project}}</div>
+      </div>
+
+      <div id="fdp_subsystem_block" class="param_block">
+      <div id="fdp_subsystem_label" class="param_label">Subsystem:</div>
+      <div id="fdp_subsystem_value" class="param_value">{{.Subsystem}}</div>
+      </div>
+
+      <div id="fdp_parttype_block" class="param_block">
+      <div id="fdp_parttype_label" class="param_label">PartType:</div>
+      <div id="fdp_parttype_value" class="param_value">{{.PartType}}</div>
+      </div>
+
+      <div id="fdp_category_block" class="param_block">
+      <div id="fdp_category_label" class="param_label">Category:</div>
+      <div id="fdp_category_value" class="param_value">{{.Category}}</div>
+      </div>
+
+      <div id="fdp_vendor_block" class="param_block">
+      <div id="fdp_vendor_label" class="param_label">Vendor:</div>
+      <div id="fdp_vendor_value" class="param_value">{{.Vendor}}</div>
+      </div>
+
+      <div id="fdp_vendorpn_block" class="param_block">
+      <div id="fdp_vendorpn_label" class="param_label">VendorPN:</div>
+      <div id="fdp_vendorpn_value" class="param_value">{{.VendorPN}}</div>
+      </div>
+
+      <div id="fdp_weblink_block" class="param_block">
+      <div id="fdp_weblink_label" class="param_label">Web Link:</div>
+      <div id="fdp_weblink_value" class="param_value">{{.WebLink}}</div>
+      </div>
+
+      <div id="fdp_description_block" class="param_block">
+      <div id="fdp_description_label" class="param_label">Description:</div>
+      <div id="fdp_description_value" class="param_value">{{.Description}}</div>
+      </div>
+
+      <div id="fdp_datebefore_block" class="param_block">
+      <div id="fdp_datebefore_label" class="param_label">Date Before:</div>
+      <div id="fdp_datebefore_value" class="param_value">{{.DateBefore}}</div>
+      </div>
+
+      <div id="fdp_dateafter_block" class="param_block">
+      <div id="fdp_dateafter_label" class="param_label">Date After:</div>
+      <div id="fdp_dateafter_value" class="param_value">{{.DateAfter}}</div>
+      </div>
+    {{end}}
+</div>
+

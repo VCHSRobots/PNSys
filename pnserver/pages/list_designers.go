@@ -15,9 +15,15 @@ func init() {
 	RegisterPage("ListDesigners", Invoke_GET, authorizer, handle_list_designers)
 }
 
+type ListDesignersData struct {
+	*HeaderData
+	*TableData
+}
+
 func handle_list_designers(c *gin.Context) {
 	rows := pnsql.GetDesigners()
-	data := &TablePageData{}
+	data := &ListDesignersData{}
+	data.TableData = new(TableData)
 	data.HeaderData = GetHeaderData(c)
 	data.Head = []string{"Name", "Year0", "Active"}
 	data.Rows = make([]TColumn, 0, len(rows))
@@ -28,5 +34,5 @@ func handle_list_designers(c *gin.Context) {
 		}
 		data.Rows = append(data.Rows, TColumn{Cols: []string{r.Name, r.Year0, sactive}})
 	}
-	SendPage(c, data, "header", "nav", "tablepage", "footer")
+	SendPage(c, data, "header", "menubar", "tablepage", "footer")
 }

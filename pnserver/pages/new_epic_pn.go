@@ -10,6 +10,7 @@ import (
 	"encoding/json"
 	"epic/lib/log"
 	"epic/pnserver/pnsql"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"strings"
 	"time"
@@ -19,12 +20,12 @@ type EpicPNData struct {
 	*HeaderData
 	ProjectsJson  string
 	DesignersJson string
-	PartTypes     []string
+	PartTypesJson string
 }
 
 type EpicPNDataPost struct {
 	*HeaderData
-	NewPN          string
+	PartNumber     string
 	Project        string
 	Subsystem      string
 	Designer       string
@@ -33,14 +34,6 @@ type EpicPNDataPost struct {
 	Description    string
 	DateCreated    string
 	ErrorMsg       string
-}
-
-type TEpicSubmitData struct {
-	Project     string `form:"Project"`
-	Subsystem   string `form:"Subsystem"`
-	Designer    string `form:"Designer"`
-	PartType    string `form:"PartType"`
-	Description string `form:"Description"`
 }
 
 func init() {
@@ -52,10 +45,9 @@ func handle_new_epic_pn(c *gin.Context) {
 	data := &EpicPNData{}
 	data.HeaderData = GetHeaderData(c)
 	data.PageTitle = "Create New Epic Part Number"
-	data.Instructions = "Fill form out and click Submit."
+	data.Instructions = ""
 	data.StyleSheets = []string{"new_epic_pn"}
 	data.OnLoadFuncJS = "startUp"
-	data.PartTypes = pnsql.GetPartTypeSelStrings()
 
 	var err error
 	prjs := pnsql.GetProjects()
@@ -76,18 +68,36 @@ func handle_new_epic_pn(c *gin.Context) {
 	}
 	data.DesignersJson = string(des_bytes)
 
-	SendPage(c, data, "header", "nav", "newpn_menubar", "new_epic_pn", "footer")
+	ptlst := pnsql.GetPartTypes()
+	pt_bytes, err := json.MarshalIndent(ptlst, "", "  ")
+	if err != nil {
+		log.Errorf("Unable to convert to json. Err=%v", err)
+		c.AbortWithError(400, err)
+		return
+	}
+	data.PartTypesJson = string(pt_bytes)
+
+	SendPage(c, data, "header", "menubar", "new_epic_pn", "footer")
 }
 
 func handle_new_epic_pn_post(c *gin.Context) {
 	data := &EpicPNDataPost{}
 	data.HeaderData = GetHeaderData(c)
 
-	var sdata TEpicSubmitData
+	type submitdata struct {
+		Project     string `form:"Project"`
+		Subsystem   string `form:"Subsystem"`
+		Designer    string `form:"Designer"`
+		PartType    string `form:"PartType"`
+		Description string `form:"Description"`
+	}
+
+	var sdata submitdata
 	err := c.ShouldBind(&sdata)
 	if err != nil {
-		log.Errorf("Unable to bind data. Err=%v", err)
-		c.AbortWithError(400, err)
+		err = fmt.Errorf("Bind error for SubmitNewEpicPN. Err=%v", err)
+		log.Errorf("%v", err)
+		SendErrorPage(c, err)
 		return
 	}
 
@@ -100,10 +110,10 @@ func handle_new_epic_pn_post(c *gin.Context) {
 	data.SequenceNumber = "087"
 	data.Description = sdata.Description
 	data.DateCreated = time.Now().Format("2006-01-02")
-	data.NewPN = getword(sdata.Project) + "-" + getword(sdata.Subsystem) +
+	data.PartNumber = getword(sdata.Project) + "-" + getword(sdata.Subsystem) +
 		"-" + getword(sdata.PartType) + data.SequenceNumber
 
-	SendPage(c, data, "header", "nav", "newpn_menubar", "new_epic_pn_post", "footer")
+	SendPage(c, data, "header", "menubar", "new_epic_pn_post", "footer")
 }
 
 func getword(x string) string {

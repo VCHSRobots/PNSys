@@ -16,5 +16,5 @@ func init() {
 
 func handle_help(c *gin.Context) {
 	data := GetHeaderData(c)
-	SendPage(c, data, "header", "nav", "help", "footer")
+	SendPage(c, data, "header", "menubar", "help", "footer")
 }

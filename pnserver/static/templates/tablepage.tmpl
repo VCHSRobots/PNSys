@@ -10,6 +10,10 @@
 <div class="content_area">
 <div class="page_title"> {{- .PageTitle -}}</div>
 
+{{if .LimitMsg}}
+<div class="table_limit_msg" id="table_limit_msg"> {{.LimitMsg}} </div>
+{{end}}
+
 <div id="table_content" class="table_content">
 {{if .Rows}}
     <table>

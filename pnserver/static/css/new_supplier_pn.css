@@ -1,0 +1,46 @@
+/* --------------------------------------------------------------------
+** new_supplier_pn.css -- CSS to layout new supplier part number entry form.
+**
+** Created 2018-09-30 DLB
+** --------------------------------------------------------------------
+*/
+
+#nsp_category {float: left; width: 400px; height: 80px;}
+#nsp_category_block {}
+#nsp_category_label {}
+#nsp_category_field {}
+
+#nsp_designer {float: left; width: 250px; margin-left: 0px; top: 0px; height: 80px;}
+#nsp_designer_block {}
+#nsp_designer_label {}
+#nsp_designer_field {}
+
+
+
+#nsp_vendor_txtbox {float: left; width: 400px; margin-left: 0px; height: 100px; margin-top: -3px;}
+#nsp_vendor_selbox {float: left; width: 400px; margin-left: 0px; height: 100px; margin-top: -3px;}
+#nsp_vendor_block1 {}
+#nsp_vendor_label1 {}
+#nsp_vendor_field1 {float: left; width: 305px;}
+#nsp_vendor_block2 {}
+#nsp_vendor_label2 {}
+#nsp_vendor_field2 {}
+.restore_btn {float: left; height: 35px;}
+
+#nsp_vendorpn {float: left; width: 250px; margin-left: 0px; height: 80px;}
+#nsp_vendorpn_block {}
+#nsp_vendorpn_label {}
+#nsp_vendorpn_field {}
+
+#nsp_weblink {float: left; width: 695px; margin-left: 0px; height: 60px;}
+#nsp_weblink_block {}
+#nsp_weblink_label {margin-top: 0px;}
+#nsp_weblink_field {}
+
+#nsp_desc {clear: both; }
+#nsp_desc_block {}
+#nsp_desc_label {margin-top: 10px;}
+#nsp_desc_field { font-size: 16px;  font-family: monospace;}
+
+#nsp_designer_active_div{}
+#nsp_designer_active_btn {}

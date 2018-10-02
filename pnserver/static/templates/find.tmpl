@@ -1,0 +1,223 @@
+{{/*
+// --------------------------------------------------------------------
+// find.tmpl -- template to find a part.
+//
+// Created 2018-09-30 DLB
+// --------------------------------------------------------------------
+*/}}
+
+<script src="js/fill_selbox.js"></script>
+
+<script type="application/json" id="designers">
+{{.DesignersJson}}
+</script>
+
+<script type="application/json" id="projects">
+{{.ProjectsJson}}
+</script>
+
+<script type="application/json" id="categories">
+{{.CategoriesJson}}
+</script>
+
+<script type="application/json" id="parttypes">
+{{.PartTypesJson}}
+</script>
+
+<script type="application/json" id="vendors">
+{{.KnownVendorsJson}}
+</script>
+
+<script type="text/javascript">
+
+var gShowAllProjects = false
+var gShowAllDesigners = false
+
+
+function updateActiveUI() {
+    if (gShowAllProjects) {
+        document.getElementById("fnd_project_active_btn").innerHTML = "Show Some";
+    } else {
+        document.getElementById("fnd_project_active_btn").innerHTML = "Show All";
+    }
+    if (gShowAllDesigners) {
+        document.getElementById("fnd_designer_active_btn").innerHTML = "Show Some";
+    } else {
+        document.getElementById("fnd_designer_active_btn").innerHTML = "Show All";
+    }
+}
+
+function toggleActiveProjects() {
+    gShowAllProjects = !gShowAllProjects;
+    updateActiveUI();
+    fillProjects("fnd_project_field", gShowAllProjects, true);
+    fillSubsystem("fnd_subsystem_field", "fnd_project_field", true);
+}
+
+function toggleActiveDesigners() {
+    gShowAllDesigners = !gShowAllDesigners;
+    updateActiveUI();
+    fillDesigners("fnd_designer_field", gShowAllDesigners, true);
+}
+function doFillSubsystem() {
+    fillSubsystem("fnd_subsystem_field", "fnd_project_field", true)
+}
+
+function startUp() {
+    updateActiveUI();
+    fillDesigners("fnd_designer_field", gShowAllDesigners, true);
+    fillCategories("fnd_category_field", true);
+    fillPartTypes("fnd_parttype_field", true);
+    fillVendors("fnd_vendor_field", true);
+    fillProjects("fnd_project_field", gShowAllProjects, true);
+    fillSubsystem("fnd_subsystem_field", "fnd_project_field", true);
+}
+
+</script>
+
+
+<div class="content_area">
+<div class="page_title"> {{- .PageTitle -}}</div>
+
+<span id="dbmsg"></span>
+<div class="inputform_area">
+    <form action="SubmitFind" method="post">
+        <div id="fnd_maintype">
+            <div class="inputform_paramblock" id="fnd_maintype_block">
+                <div class="inputform_label" id="fnd_maintype_label">Type</div>
+                <div class="inputform_selection">
+                    <select id="fnd_maintype_field" name="MainType">
+                        <option name="" value=""></option>
+                        <option name="epic" value="epic">Epic PN</option>
+                        <option name="supplier" value="supplier">Supplier PN</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div id="fnd_designer">
+            <div class="inputform_paramblock" id="fnd_designer_block">
+                <div class="inputform_label" id="fnd_designer_label">Designer</div>
+                <div class="inputform_selection">
+                    <select id="fnd_designer_field" name="Designer">
+                    </select>
+                <div id="fnd_designer_active_div" class="active_btn_div">
+                    <button type="button" id="fnd_designer_active_btn" class="active_btn" onclick="toggleActiveDesigners()">Show All</button>
+                </div>
+
+                </div>
+            </div>
+        </div>
+        <div id="fnd_datebefore">
+            <div class="inputform_paramblock"  id="fnd_datebefore_block">
+                <div class="inputform_label" id="fnd_datebefore_label">Before</div>
+                <div class="inputform_text_field">
+                    <input type="text" id="fnd_datebefore_field" name="DateBefore">
+                </div>
+            </div>
+        </div>
+
+        <div id="fnd_project">
+            <div class="inputform_paramblock" id="fnd_project_block">
+                <div class="inputform_label" id="fnd_project_label">Project</div>
+                <div class="inputform_selection">
+                    <select id="fnd_project_field" name="Project" onchange="doFillSubsystem()">
+                    </select>
+                </div>
+                <div id="fnd_project_active_div" class="active_btn_div">
+                    <button type="button" id="fnd_project_active_btn" class="active_btn" onclick="toggleActiveProjects()">Show All</button>
+                </div>
+            </div>
+        </div>
+        <div id="fnd_subsystem">
+            <div class="inputform_paramblock" id="fnd_subsystem_block">
+                <div class="inputform_label" id="fnd_subsystem_label">Subsystem</div>
+                <div class="inputform_selection">
+                    <select id="fnd_subsystem_field" name="Subsystem"></select>
+                </div>
+            </div>
+        </div>
+        <div id="fnd_dateafter">
+            <div class="inputform_paramblock"  id="fnd_dateafter_block">
+                <div class="inputform_label" id="fnd_dateafter_label">After</div>
+                <div class="inputform_text_field">
+                    <input type="text" id="fnd_dateafter_field" name="DateAfter">
+                </div>
+            </div>
+        </div>
+
+        <div id="fnd_category">
+            <div class="inputform_paramblock" id="fnd_category_block">
+                <div class="inputform_label" id="fnd_category_label">Category</div>
+                <div class="inputform_selection">
+                    <select id="fnd_category_field" name="Category"></select>
+                </div>
+            </div>
+        </div>
+        <div id="fnd_parttype">
+            <div class="inputform_paramblock" id="fnd_parttype_block">
+                <div class="inputform_label" id="fnd_parttype_label">Part Type</div>
+                <div class="inputform_selection">
+                    <select id="fnd_parttype_field" name="PartType"></select>
+                </div>
+            </div>
+        </div>
+        <div id="fnd_vendor">
+            <div class="inputform_paramblock" id="fnd_vendor_block">
+                <div class="inputform_label" id="fnd_vendor_label">Vendor</div>
+                <div class="inputform_selection">
+                    <select id="fnd_vendor_field" name="Vendor"></select>
+                </div>
+            </div>
+        </div>
+        <div id="fnd_vendorpn">
+            <div class="inputform_paramblock" id="fnd_vendorpn_block">
+                <div class="inputform_label" id="fnd_vendorpn_label">Vendor Part Number</div>
+                <div class="inputform_text_field">
+                    <input type="text"  id="fnd_vendorpn_field" name="VendorPN">
+                </div>
+            </div>
+        </div>
+        <div id="fnd_weblink">
+            <div class="inputform_paramblock" id="fnd_weblink_block">
+                <div class="inputform_label" id="fnd_weblink_label">Web Link</div>
+                <div class="inputform_text_field">
+                    <input type="text"  id="fnd_weblink_field" name="WebLink">
+                </div>
+            </div>
+        </div>
+        <div id="fnd_desc">
+            <div class="inputform_paramblock"  id="fnd_desc_block">
+                <div class="inputform_label" id="fnd_desc_label">Description</div>
+                <div class="inputform_text_field">
+                    <input type="text" id="fnd_desc_field" name="Description">
+                </div>
+            </div>
+        </div>
+        <div style="clear: both;"></div>
+        <div class="inputform_paramblock">
+        <div class="btn_form_submit_div">
+            <input class="btn_form_submit" type="submit" value="Submit">
+        </div>
+    </div>
+    </form>
+</div>
+
+{{if .ErrorMessage}} 
+    <div class="inputform_msg" id="">{{.ErrorMessage}}</div>
+{{else}}
+    {{if .Instructions}} 
+        <div class="inputform_instructions" id="fnd_instructions">
+        {{.Instructions}}
+        </div> 
+    {{else}}
+        <div class="inputfrom_instructions" id="fnd_instructions">
+            <p>Tips:  Boxes that are empty match all parts. Boxes that are pull downs match parts exactly.
+                Boxes that accept typted text (VendorPN, WebLink, Description), match on any case-insensitive substring.
+                For example "bra" would match "bracket" and "Brake".  </p>
+            <p> The date boxes can be used to narrow the search to parts that either were created before a 
+                date, or after a date, or both before and after dates.  The date format is very loose.  For example
+            "2018", "Jan 1, 2018", "2018-03-25", "3/18/17" are all valid date inputs.</p>
+        </div>
+    {{end}}
+{{end}}
+</div>

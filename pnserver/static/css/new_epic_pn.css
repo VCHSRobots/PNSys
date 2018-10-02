@@ -5,22 +5,22 @@
 ** --------------------------------------------------------------------
 */
 
-#nep_project {float: left; width: 400px; height: 100px;}
+#nep_project {float: left; width: 400px; height: 90px;}
 #nep_project_block {}
 #nep_project_label {}
 #nep_project_field {}
 
-#nep_designer {float: left; width: 250px; margin-left: 0px; top: 0px; height: 100px;}
+#nep_designer {float: left; width: 250px; margin-left: 0px; top: 0px; height: 90px;}
 #nep_designer_block {}
 #nep_designer_label {}
 #nep_designer_field {}
 
-#nep_subsystem {float: left; width: 400px; margin-left: 0px; height: 100px;}
+#nep_subsystem {float: left; width: 400px; margin-left: 0px; height: 90px;}
 #nep_subsystem_block {}
 #nep_subsystem_label {}
 #nep_subsystem_field {}
 
-#nep_parttype {float: left; width: 250px; margin-left: 0px; height: 100px;}
+#nep_parttype {float: left; width: 250px; margin-left: 0px; height: 90px;}
 #nep_parttype_block {}
 #nep_parttype_label {}
 #nep_parttype_field {}
@@ -29,3 +29,8 @@
 #nep_desc_block {}
 #nep_desc_label {}
 #nep_desc_field { font-size: 16px;  font-family: monospace;}
+
+#nep_project_active_div{}
+#nep_designer_active_div{}
+#nep_project_active_btn {}
+#nep_designer_active_btn {}

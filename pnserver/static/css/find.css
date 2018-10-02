@@ -1,0 +1,74 @@
+/* --------------------------------------------------------------------
+** find.css -- CSS to layout find entry form.
+**
+** Created 2018-09-24 DLB
+** --------------------------------------------------------------------
+*/
+
+#fnd_maintype {float: left; width: 250px; margin-left: 0px; height: 65px;}
+#fnd_maintype_block {}
+#fnd_maintype_label {font-size: 12pt;}
+#fnd_maintype_field {font-size: 12pt;}
+
+#fnd_designer {float: left; width: 250px; margin-left: 0px; height: 65px;}
+#fnd_designer_block {}
+#fnd_designer_label {font-size: 12pt;}
+#fnd_designer_field {font-size: 12pt;}
+
+#fnd_project {float: left; width: 250px; margin-left: 0px; height: 65px;}
+#fnd_project_block {}
+#fnd_project_label {font-size: 12pt;}
+#fnd_project_field {font-size: 12pt;}
+
+#fnd_subsystem {float: left; width: 250px; margin-left: 0px; height: 65px;}
+#fnd_subsystem_block {}
+#fnd_subsystem_label {font-size: 12pt;}
+#fnd_subsystem_field {font-size: 12pt;}
+
+#fnd_category {float: left; width: 250px; margin-left: 0px; height: 65px;}
+#fnd_category_block {}
+#fnd_category_label {font-size: 12pt;}
+#fnd_category_field {font-size: 12pt;}
+
+#fnd_parttype {float: left; width: 250px; margin-left: 0px; height: 65px;}
+#fnd_parttype_block {}
+#fnd_parttype_label {font-size: 12pt;}
+#fnd_parttype_field {font-size: 12pt;}
+
+#fnd_vendor {float: left; width: 250px; margin-left: 0px; height: 65px;}
+#fnd_vendor_block {}
+#fnd_vendor_label {font-size: 12pt;}
+#fnd_vendor_field {font-size: 12pt;}
+
+#fnd_vendorpn {float: left; width: 250px; margin-left: 0px; height: 65px;}
+#fnd_vendorpn_block {}
+#fnd_vendorpn_label {font-size: 12pt;}
+#fnd_vendorpn_field {font-size: 12pt;}
+
+#fnd_datebefore {float: left; width: 100px; margin-left: 0px; height: 65px;}
+#fnd_datebefore_block {}
+#fnd_datebefore_label {font-size: 12pt;}
+#fnd_datebefore_field {font-size: 12pt;}
+
+#fnd_dateafter {float: left; width: 100px; margin-left: 0px; height: 65px;}
+#fnd_dateafter_block {}
+#fnd_dateafter_label {font-size: 12pt;}
+#fnd_dateafter_field {font-size: 12pt;}
+
+#fnd_weblink {float: left; width: 250px; margin-left: 0px; height: 65px;}
+#fnd_weblink_block {}
+#fnd_weblink_label {font-size: 12pt;}
+#fnd_weblink_field {font-size: 12pt;}
+
+#fnd_desc {float: left; width: 250px; margin-left: 0px; height: 65px;}
+#fnd_desc_block {}
+#fnd_desc_label {font-size: 12pt;}
+#fnd_desc_field {font-size: 12pt;}
+
+#fnd_instructions {font-size: 10pt; margin-left: 20px; margin-right: 40px;}
+#fnd_instructions p {font-size: 10pt;}
+
+#fnd_project_active_div{float: right;  position: relative; top: -55px;}
+#fnd_designer_active_div{float: right;  position: relative; top: -55px;}
+#fnd_project_active_btn {font-size: 8pt; width: 90px;  line-height: 1px; height: 17px; }
+#fnd_designer_active_btn {font-size: 8pt; width: 90px;  line-height: 1px; height: 17px; }

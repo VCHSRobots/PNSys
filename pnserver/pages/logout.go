@@ -19,6 +19,6 @@ func handle_logout(c *gin.Context) {
 	data := &HeaderData{}
 	data.PageTabTitle = "Epic PN"
 	data.HideLoginLink = false
-	data.HideAboutLink = true
+	data.HideAboutLink = false
 	SendPage(c, data, "header", "logout", "footer")
 }

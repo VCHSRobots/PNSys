@@ -1,0 +1,64 @@
+/* --------------------------------------------------------------------
+** show_part.css -- CSS to layout show_part page.
+**
+** Created 2018-09-30 DLB
+** --------------------------------------------------------------------
+*/
+
+
+.param_block {float:left; width 400px; height: 30px;}
+.param_label {width: 120px;}
+
+#spn_partnumber_btn_area {width: 200px; height: 2px; position: relative; left: 525px; top: 25px;}
+#spn_partnumber_copybtn {float: left;}
+#spn_partnumber_editbtn {float: left;}
+
+#spn_partnumber {clear: both; margin-top: 0px;}
+
+#spn_designer_block {float: left; margin-left: 0px; top: 0px;}
+#spn_designer_label {}
+#spn_designer_field {}
+
+#spn_dateissued_block {float: left; width: 300px; margin-left: 0px; top: 0px;}
+#spn_dateissued_label {}
+#spn_dateissued_field {}
+
+#spn_seqnum_block {float: left; margin-left: 0px; top: 0px; }
+#spn_seqnum_label {}
+#spn_seqnum_field {}
+
+#spn_pid_block {float: left; width: 350px; margin-left: 0px; top: 0px;}
+#spn_pid_label {font-size: 10pt; width: 40px;}
+#spn_pid_value {font-size: 10pt;}
+
+#spn_project_block {float: left; width: 400px; }
+#spn_project_label {}
+#spn_project_value {}
+
+#spn_subsystem_block {float: left; width: 400px; margin-left: 0px;}
+#spn_subsystem_label {}
+#spn_subsystem_value {}
+
+#spn_parttype_block {float: left; width: 350px; margin-left: 0px;}
+#spn_parttype_label {}
+#spn_parttype_value {}
+
+#spn_category_block {float: left; width: 400px;}
+#spn_category_label {}
+#spn_category_value {}
+
+#spn_vendor_block {float: left; width: 400px; }
+#spn_vendor_label {}
+#spn_vendor_value {}
+
+#spn_vendorpn_block {float: left; width: 400px; }
+#spn_vendorpn_label {}
+#spn_vendorpn_value {}
+
+#spn_weblink_block {float: left; width: 650px; }
+#spn_weblink_label {}
+#spn_weblink_value {}
+
+#spn_description_block {float: left; width: 600px;}
+#spn_description_label {}
+#spn_description_value { font-size: 12pt;  font-family: monospace;}

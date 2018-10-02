@@ -1,0 +1,109 @@
+{{/*
+// --------------------------------------------------------------------
+// show_part.tmpl -- template to display a part number
+//
+// Created 2018-09-30 DLB
+// --------------------------------------------------------------------
+*/}}
+
+<script src="js/copy_to_clipboard.js"/>
+<script>
+function copyPNtoclipboard() {
+    copyToClipboard("{{.PartNumber}}")
+}
+</script>
+
+<div class="content_area">
+<div class="page_title"> {{- .PageTitle -}}</div>
+
+    {{if .ErrorMessage}} 
+    <div id="spn_errmsg" class="errmsg"> {{.ErrorMessage}} </div>
+    {{else}}
+      {{if .HavePart}}
+      <div id="spn_partnumber_btn_area">
+      <a id="spn_partnumber_copybtn" class="partnum_btn" onclick="copyPNtoclipboard()">Copy</a>
+      <a id="spn_partnumber_editbtn" class="partnum_btn" href="/EditPart?pn={{.PartNumber}}">Edit</a>
+      </div>
+      <div id="spn_partnumber" class="partnumber">{{.PartNumber}}</div>
+
+
+      <div id="spn_designer_block" class="param_block">
+      <div id="spn_designer_label" class="param_label">Designer:</div>
+      <div id="spn_designer_value" class="param_value">{{.Designer}}</div>
+      </div>
+
+      <div id="spn_dateissued_block" class="param_block">
+      <div id="spn_dateissued_label" class="param_label">Date Issued:</div>
+      <div id="spn_dateissued_value" class="param_value">{{.DateIssued}}</div>
+      </div>
+
+      <div id="spn_seqnum_block" class="param_block">
+      <div id="spn_seqnum_label" class="param_label">Seq Num:</div>
+      <div id="spn_seqnum_value" class="param_value">{{.SequenceNumber}}</div>
+      </div>
+
+      <div id="spn_pid_block" class="param_block">
+      <div id="spn_pid_label" class="param_label">PID:</div>
+      <div id="spn_pid_value" class="param_value">{{.PID}}</div>
+      </div>
+
+      {{if .IsEpic}}
+
+      <div id="spn_project_block" class="param_block">
+      <div id="spn_project_label" class="param_label">Project:</div>
+      <div id="spn_proejct_value" class="param_value">{{.Project}}</div>
+      </div>
+
+      <div id="spn_parttype_block" class="param_block">
+      <div id="spn_parttype_label" class="param_label">Part Type:</div>
+      <div id="spn_parttype_value" class="param_value">{{.PartType}}</div>
+      </div>
+
+      <div id="spn_subsystem_block" class="param_block">
+      <div id="spn_subsystem_label" class="param_label">Subsystem:</div>
+      <div id="spn_subsystem_value" class="param_value">{{.Subsystem}}</div>
+      </div>
+
+
+
+      {{end}}  <!-- End of Epic Section -->
+
+      {{if .IsSupplier}}
+
+      <div id="spn_category_block" class="param_block">
+      <div id="spn_category_label" class="param_label">Category:</div>
+      <div id="spn_category_value" class="param_value">{{.Category}}</div>
+      </div>
+
+      <div id="spn_vendor_block" class="param_block">
+      <div id="spn_vendor_label" class="param_label">Vendor:</div>
+      <div id="spn_vendor_value" class="param_value">{{.Vendor}}</div>
+      </div>
+
+      <div id="spn_vendorpn_block" class="param_block">
+      <div id="spn_vendorpn_label" class="param_label">Vendor PN:</div>
+      <div id="spn_vendorpn_value" class="param_value">{{.VendorPN}}</div>
+      </div>
+
+      <div id="spn_weblink_block" class="param_block">
+      <div id="spn_weblink_label" class="param_label">Web Link:</div>
+      <div id="spn_weblink_value" class="param_value">
+        {{if .WebLinkAddr}} <a href="{{.WebLinkAddr}}" target="_blank">{{.WebLink}}</a>{{else}}
+        {{.WebLink}}{{end}}
+      </div>
+      </div>          
+
+      {{end}}  <!-- End of Supplier Section -->
+
+      <div id="spn_description_block" class="param_block">
+      <div id="spn_description_label" class="param_label">Description:</div>
+      <div id="spn_description_value" class="param_value">{{.Description}}</div>
+      </div>
+    
+
+
+      {{else}} <!-- Middle of Have Part Section -->
+          <div id="spn_partnotfound" class="message">Part {{.PartNumber}} is not in the database.</div>
+      {{end}} <!-- End of Have Part Section -->
+    {{end}} <!-- End of Error Message Check -->
+</div>  <!-- End of content_area -->

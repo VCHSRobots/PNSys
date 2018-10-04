@@ -1,0 +1,62 @@
+{{/*
+// --------------------------------------------------------------------
+// admin.tmpl -- template to run admin page.
+//
+// Created 2018-10-04 DLB
+// --------------------------------------------------------------------
+*/}}
+
+<script type="text/javascript">
+
+var xhttp = new XMLHttpRequest();
+
+function addTextToTerminal(str) {
+    //console.log("In add text to terminal.");
+    var txt = document.getElementById("terminal_output").value;
+    txt += "\n";
+    txt += str;
+    document.getElementById("terminal_output").value = txt;
+    document.getElementById("terminal_output").scrollTop = 99999;
+}
+
+function execCommand(cmd) {
+    xhttp.onreadystatechange = function() {
+        //console.log("on ready state change.");
+        if (this.readyState == 4 && this.status == 200) {
+            var stuff = JSON.parse(this.responseText);
+            var sout = atob(stuff.CommandOutput);
+            addTextToTerminal(sout);
+        }
+    };
+    xhttp.open("POST", "AdminCommand", true);
+    xhttp.setRequestHeader("Content-type", "text/plain");
+    xhttp.send(cmd);
+}
+
+function checkEnter(e) {
+    var cCode = e.which;
+    if (cCode == 13) {
+        var txt = document.getElementById("terminal_input").value;
+        //console.log("calling btoa on ", txt);
+        var btxt = btoa(txt);
+        //console.log("sending ", btxt);
+        execCommand(btxt);
+    }
+}
+
+
+</script>
+
+<div class="content_area">
+<div class="page_title">Administration of the Part Numbering System</div>
+
+<div class="terminal_output_area">
+    <textarea  id="terminal_output" name="Description"  rows="20" cols="80" > </textarea>
+</div>
+
+<div class="terminal_input_area">
+    <div class="terminal_label">Command:</div>
+    <input id="terminal_input" type="text" name="Command"  onKeyPress="checkEnter(event)">
+</div>
+
+</div>

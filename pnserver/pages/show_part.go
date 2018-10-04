@@ -43,30 +43,30 @@ func init() {
 }
 
 func handle_show_part(c *gin.Context) {
+
+	pn := c.Query("pn")
+	if util.Blank(pn) {
+		SendErrorPagef(c, "ShowPart page called without a part number!")
+		return
+	}
+	show_part_page(c, pn)
+}
+
+func show_part_page(c *gin.Context, pn string) {
 	data := &ShowPNData{}
 	data.HeaderData = GetHeaderData(c)
 	data.PageTitle = "Part Number"
 	data.StyleSheets = []string{"show_part"}
-	pn := c.Query("pn")
-	if util.Blank(pn) {
-		log.Warnf("ShowPart page called without a part number!")
-		c.Redirect(300, "/NewEpicPN")
-		return
-	}
 	ty, _ := pnsql.ClassifyPN(pn)
 	if ty == pnsql.PNType_Epic {
 		data.IsEpic = true
 		part, err := pnsql.GetEpicPart(pn)
 		if err != nil {
-			err = fmt.Errorf("Database error while searching for part %s. Err=%v", pn, err)
-			log.Warnf("%v", err)
-			data.ErrorMessage = fmt.Sprintf("%v", err)
-			SendPage(c, data, "header", "menubar", "error", "footer")
+			SendErrorPagef(c, "Database error while searching for part %s. <br>Err=<br>%v", pn, err)
 			return
 		}
 		if part == nil {
-			data.ErrorMessage = fmt.Sprintf("Part %s not in database.", pn)
-			SendPage(c, data, "header", "menubar", "error", "footer")
+			SendErrorPagef(c, "Part %s not in database.", pn)
 			return
 		}
 		data.HavePart = true
@@ -86,15 +86,11 @@ func handle_show_part(c *gin.Context) {
 		data.IsSupplier = true
 		part, err := pnsql.GetSupplierPart(pn)
 		if err != nil {
-			err = fmt.Errorf("Database error while searching for part %s. Err=%v", pn, err)
-			log.Warnf("%v", err)
-			data.ErrorMessage = fmt.Sprintf("%v", err)
-			SendPage(c, data, "header", "menubar", "error", "footer")
+			SendErrorPagef(c, "Database error while searching for part %s. <br>Err=<br>%v", pn, err)
 			return
 		}
 		if part == nil {
-			data.ErrorMessage = fmt.Sprintf("Part %s not in database.", pn)
-			SendPage(c, data, "header", "menubar", "error", "footer")
+			SendErrorPagef(c, "Part %s not in database.", pn)
 			return
 		}
 		data.HavePart = true
@@ -113,9 +109,8 @@ func handle_show_part(c *gin.Context) {
 		return
 
 	} else {
-		data.HavePart = false
-		data.ErrorMessage = fmt.Sprintf("The part %q is not a known part.", pn)
-		SendPage(c, data, "header", "menubar", "error", "footer")
+		log.Warnf("ShowPart page called with an unknown part type. (%q).", pn)
+		SendMessagePagef(c, "The part %q is not a known part.", pn)
 		return
 	}
 }

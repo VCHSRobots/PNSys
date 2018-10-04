@@ -34,7 +34,8 @@ type EpicPart struct {
 }
 
 var gEpicParts []*EpicPart
-var gEpicPartsLock sync.Mutex
+var gEpicPartsLock sync.Mutex   // For General access to the cache
+var gEpicNewPartLock sync.Mutex // When generating a new part with a new sequence number
 
 func InvalidateEpicPartsCache() {
 	gEpicPartsLock.Lock()
@@ -311,6 +312,80 @@ func SetEpicPartDateIssued(p *EpicPart, dateissued time.Time) error {
 	return nil
 }
 
+func NewEpicPartInSequence(Designer, ProjectId, SubsystemId, PartType, Description string) (*EpicPart, error) {
+	if !IsDesigner(Designer) {
+		return nil, fmt.Errorf("Designer %s unknown.", Designer)
+	}
+
+	if !IsProject(ProjectId) {
+		return nil, fmt.Errorf("Project Id %s unknown.", ProjectId)
+	}
+
+	if !IsSubsystem(ProjectId, SubsystemId) {
+		return nil, fmt.Errorf("Subsystem %s-%s unknown.", ProjectId, SubsystemId)
+	}
+	if !IsPartType(PartType) {
+		return nil, fmt.Errorf("Parttype %s unknown.", PartType)
+	}
+	if util.Blank(Description) {
+		return nil, fmt.Errorf("Description cannot be blank.")
+	}
+	gEpicNewPartLock.Lock()
+	defer gEpicNewPartLock.Unlock()
+	InvalidateEpicPartsCache()
+	lastseq := 0
+	for _, part := range GetEpicParts() {
+		if part.ProjectId != ProjectId {
+			continue
+		}
+		if part.SubsystemId != SubsystemId {
+			continue
+		}
+		if part.SequenceNum > lastseq {
+			lastseq = part.SequenceNum
+		}
+	}
+
+	p := &EpicPart{}
+	p.EpicPN = &EpicPN{}
+	p.PID = uuid.New()
+	p.ProjectId = ProjectId
+	p.SubsystemId = SubsystemId
+	p.PartType = PartType
+	p.SequenceNum = lastseq + 1
+	p.Designer = Designer
+	p.Description = Description
+	p.DateIssued = time.Now()
+	err := write_epic_part(p)
+	InvalidateEpicPartsCache()
+	return p, err
+}
+
+func write_epic_part(p *EpicPart) error {
+	stmt, err := m_db.Prepare("insert EpicParts set" +
+		" PID=?," +
+		" ProjectId=?," +
+		" SubsystemId=?," +
+		" PartType=?," +
+		" SequenceNum=?," +
+		" Designer=?," +
+		" DateIssued=?," +
+		" Description=?")
+	if err != nil {
+		err := fmt.Errorf("Err inserting into EpicPart. Err=%v", err)
+		log.Errorf("%v", err)
+		return err
+	}
+	_, err = stmt.Exec(p.PID.String(), p.ProjectId, p.SubsystemId, p.PartType, p.SequenceNum,
+		p.Designer, p.DateIssued.Format("2006-01-02"), p.Description)
+	if err != nil {
+		err := fmt.Errorf("Err inserting into EpicPart. Err=%v", err)
+		log.Errorf("%v", err)
+		return err
+	}
+	return nil
+}
+
 func AddEpicPart(p *EpicPart) error {
 	if err := p.CheckPNFormat(); err != nil {
 		return err
@@ -321,6 +396,10 @@ func AddEpicPart(p *EpicPart) error {
 	if p.DateIssued.IsZero() {
 		p.DateIssued = time.Now()
 	}
+
+	gEpicNewPartLock.Lock()
+	defer gEpicNewPartLock.Unlock()
+
 	ep, _ := GetEpicPart(p.PNString())
 	if ep != nil {
 		return fmt.Errorf("Part already exists.")
@@ -344,34 +423,19 @@ func AddEpicPart(p *EpicPart) error {
 		return fmt.Errorf("Subsystem %s-%s unknown.", p.ProjectId, p.SubsystemId)
 	}
 
-	stmt, err := m_db.Prepare("insert EpicParts set" +
-		" PID=?," +
-		" ProjectId=?," +
-		" SubsystemId=?," +
-		" PartType=?," +
-		" SequenceNum=?," +
-		" Designer=?," +
-		" DateIssued=?," +
-		" Description=?")
-	if err != nil {
-		err := fmt.Errorf("Err inserting into EpicPart. Err=%v", err)
-		log.Errorf("%v", err)
-		return err
+	if !IsPartType(p.PartType) {
+		return fmt.Errorf("PartType %s unknown.", p.PartType)
 	}
-	_, err = stmt.Exec(p.PID.String(), p.ProjectId, p.SubsystemId, p.PartType, p.SequenceNum,
-		p.Designer, p.DateIssued.Format("2006-01-02"), p.Description)
-	if err != nil {
-		err := fmt.Errorf("Err inserting into EpicPart. Err=%v", err)
-		log.Errorf("%v", err)
-		return err
-	}
+	err := write_epic_part(p)
 	// Now put the part into the cache.  No need to refresh directly from disk?
 	gEpicPartsLock.Lock()
 	defer gEpicPartsLock.Unlock()
-	gEpicParts = append(gEpicParts, p)
-	// Think about refreshing directly from disk?
-
-	return nil
+	if err != nil {
+		InvalidateEpicPartsCache()
+	} else {
+		gEpicParts = append(gEpicParts, p)
+	}
+	return err
 }
 
 // FilterEpicParts returns a list of parts that have been filtered by the

@@ -60,7 +60,7 @@ function toggleActiveDesigners() {
     fillDesigners("fnd_designer_field", gShowAllDesigners, true);
 }
 function doFillSubsystem() {
-    fillSubsystem("fnd_subsystem_field", "fnd_project_field", true)
+    fillSubsystem("fnd_subsystem_field", "fnd_project_field", true);
 }
 
 function startUp() {
@@ -71,6 +71,27 @@ function startUp() {
     fillVendors("fnd_vendor_field", true);
     fillProjects("fnd_project_field", gShowAllProjects, true);
     fillSubsystem("fnd_subsystem_field", "fnd_project_field", true);
+    setSelectionBox("fnd_maintype_field", "{{.Defaults.MainType}}");
+    var ok = setSelectionBox("fnd_designer_field", "{{.Defaults.Designer}}");
+    if (!ok) {
+        toggleActiveDesigners();
+        setSelectionBoxBestMatch("fnd_designer_field", "{{.Defaults.Designer}}");
+    }
+    setSelectionBoxBestMatch("fnd_category_field", "{{.Defaults.Category}}");
+    setSelectionBoxBestMatch("fnd_vendor_field", "{{.Defaults.Vendor}}");
+    setTextBox("fnd_vendorpn_field", "{{.Defaults.VendorPN}}");
+    setTextBox("fnd_weblink_field", "{{.Defaults.WebLink}}");
+    ok = setSelectionBox("fnd_project_field", "{{.Defaults.Project}}");
+    if (!ok) {
+        toggleActiveProjects();
+        setSelectionBoxBestMatch("fnd_project_field", "{{.Defaults.Project}}");
+    }
+    doFillSubsystem();
+    setSelectionBoxBestMatch("fnd_subsystem_field", "{{.Defaults.Subsystem}}");
+    setSelectionBoxBestMatch("fnd_parttype_field", "{{.Defaults.PartType}}");
+    setTextBox("fnd_desc_field", "{{.Defaults.Description}}");
+    setTextBox("fnd_datebefore_field", "{{.Defaults.DateBefore}}");
+    setTextBox("fnd_dateafter_field", "{{.Defaults.DateAfter}}");
 }
 
 </script>
@@ -203,7 +224,7 @@ function startUp() {
 </div>
 
 {{if .ErrorMessage}} 
-    <div class="inputform_msg" id="">{{.ErrorMessage}}</div>
+    <div class="inputform_msg_err">{{.ErrorMessage}}</div>
 {{else}}
     {{if .Instructions}} 
         <div class="inputform_instructions" id="fnd_instructions">

@@ -127,6 +127,13 @@ func GetSelectionBoxData() (*SelectionBoxData, error) {
 	return data, nil
 }
 
+func SendMessagePagef(c *gin.Context, f string, args ...interface{}) {
+	data := &FindPartPost{}
+	data.HeaderData = GetHeaderData(c)
+	data.Message = fmt.Sprintf(f, args...)
+	SendPage(c, data, "header", "menubar", "message", "footer")
+}
+
 func SendErrorPage(c *gin.Context, err error) {
 	SendErrorPagef(c, "%v", err)
 }

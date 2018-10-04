@@ -59,18 +59,13 @@ function restore_vendor_selbox() {
     fillVendors("ept_vendor_field2", false, true);
 }
 
-function setTextBox(fieldid, txt) {
-    var d = document.getElementById(fieldid);
-    d.text = txt;
-    d.value = txt ;
-}
 
 function startUp() {
     updateActiveUI();
     fillDesigners("ept_designer_field", gShowAllDesigners);
     fillVendors("ept_vendor_field2", false, true);
-    //setDesinger("{{.Designer}}")
     restore_vendor_selbox();
+
     var ok = setSelectionBox("ept_designer_field", "{{.Designer}}");
     if (!ok) {
         toggleActiveDesigners()
@@ -78,10 +73,10 @@ function startUp() {
     }
 
     setSelectionBox("ept_vendor_field2", "{{.Vendor}}");
+    setTextBox("ept_vendor_field1", "{{.Vendor}}");
     setTextBox("ept_vendorpn_field", "{{.VendorPN}}");
     setTextBox("ept_weblink_field", "{{.WebLink}}");
     setTextBox("ept_desc_field", "{{.Description}}");
-    setTextBox("ept_partnumber_field", "{{.PartNumber}}");
 }
 
 </script>
@@ -133,7 +128,7 @@ function startUp() {
         <div class="inputform_paramblock" id="ept_vendor_block1">
             <div class="inputform_label" id="ept_vendor_label1">Vendor</div>
             <div class="inputform_text_field">
-                <input type="text"  id="ept_vendor_field1" name="Vendor"> </textarea>
+                <input type="text"  id="ept_vendor_field1" name="Vendor"> 
             </div>
             <div class="restore_sel_btn">
                 <button type="button" id="ept_restore_sel_btn" class="restore_btn"
@@ -150,7 +145,7 @@ function startUp() {
             </div>
         </div>
     </div>
-  </div>
+    </div>
 
     <div id="ept_vendorpn">
         <div class="inputform_paramblock" id="ept_vendorpn_block">
@@ -185,11 +180,21 @@ function startUp() {
     </div>
 
     <div style="clear: both;"></div>
-    <div class="inputform_paramblock">
     <div class="btn_form_submit_div">
         <input class="btn_form_submit" type="submit" value="Submit">
     </div>
     </form>
 </div>
+
+{{if .Instructions}} 
+    <div class="inputfrom_instructions">
+    {{.Instructions}}
+    </div> 
+{{end}}
+
+{{if .ErrorMessage}}
+    <div class="inputform_msg_err"> {{.ErrorMessage}} </div>
+{{end}}
+
 
 </div>

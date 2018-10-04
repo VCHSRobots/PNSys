@@ -7,37 +7,26 @@
 package pages
 
 import (
-	"encoding/json"
 	"epic/lib/log"
+	"epic/lib/util"
 	"epic/pnserver/pnsql"
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"time"
 )
+
+type SupplierPageDefaults struct {
+	Designer    string
+	Category    string
+	Vendor      string
+	VendorPN    string
+	WebLink     string
+	Description string
+}
 
 type SupplierPNData struct {
 	*HeaderData
-	DesignersJson    string
-	CategoriesJson   string
-	KnownVendorsJson string
-	DesignerHint     string
-	VendorHint       string
-	CategoryHint     string
-}
-
-type SupplierPNDataPost struct {
-	*HeaderData
-	NewPN          string
-	Category       string
-	Vendor         string
-	VendorPN       string
-	WebLink        string
-	WebLinkAddr    string
-	Designer       string
-	SequenceNumber string
-	Description    string
-	DateCreated    string
-	ErrorMsg       string
+	*SelectionBoxData
+	Defaults *SupplierPageDefaults
 }
 
 func init() {
@@ -46,49 +35,44 @@ func init() {
 }
 
 func handle_new_supplier_pn(c *gin.Context) {
+	handle_new_supplier_pn_with_error(c, "")
+}
+
+func handle_new_supplier_pn_with_error(c *gin.Context, errmsg string) {
+
 	data := &SupplierPNData{}
 	data.HeaderData = GetHeaderData(c)
 	data.PageTitle = "Create New Supplier Part Number"
 	data.Instructions = ""
 	data.StyleSheets = []string{"new_supplier_pn"}
 	data.OnLoadFuncJS = "startUp"
+	data.ErrorMessage = errmsg
 
-	des := pnsql.GetDesigners()
-	des_bytes, err := json.MarshalIndent(des, "", "  ")
+	var err error
+	data.SelectionBoxData, err = GetSelectionBoxData()
 	if err != nil {
-		log.Errorf("Unable to convert to json. Err=%v", err)
-		c.AbortWithError(400, err)
+		SendErrorPage(c, err)
 		return
 	}
-	data.DesignersJson = string(des_bytes)
 
-	catlst := pnsql.GetSupplierCategories()
-	cat_bytes, err := json.MarshalIndent(catlst, "", "  ")
-	if err != nil {
-		log.Errorf("Unable to convert to json. Err=%v", err)
-		c.AbortWithError(400, err)
-		return
-	}
-	data.CategoriesJson = string(cat_bytes)
-
-	vendorlst := pnsql.GetVendors()
-	vbytes, err := json.MarshalIndent(vendorlst, "", "  ")
-	if err != nil {
-		log.Errorf("Unable to convert to json. Err=%v", err)
-		c.AbortWithError(400, err)
-		return
-	}
-	data.KnownVendorsJson = string(vbytes)
-
+	var sd *SupplierPageDefaults
 	ses := GetSession(c)
-	data.DesignerHint = ses.Name
-
+	t, ok := ses.Data["NewSupplierDefaults"]
+	if !ok {
+		sd = &SupplierPageDefaults{}
+	} else {
+		sd, ok = t.(*SupplierPageDefaults)
+		if !ok {
+			log.Errorf("Unable to type convert SupplierPageDefaults in handle_new_supplier_pn.")
+			sd = &SupplierPageDefaults{}
+		}
+	}
+	sd.Designer = data.Designer // Override designer default
+	data.Defaults = sd
 	SendPage(c, data, "header", "menubar", "new_supplier_pn", "footer")
 }
 
 func handle_new_supplier_pn_post(c *gin.Context) {
-	data := &SupplierPNDataPost{}
-	data.HeaderData = GetHeaderData(c)
 
 	type submitdata struct {
 		Category    string `form:"Category"`
@@ -99,26 +83,50 @@ func handle_new_supplier_pn_post(c *gin.Context) {
 		Description string `form:"Description"`
 	}
 
-	var sdata submitdata
-	err := c.ShouldBind(&sdata)
+	var data submitdata
+	err := c.ShouldBind(&data)
 	if err != nil {
 		err = fmt.Errorf("Bind error for SubmitNewSupplierPN. Err=%v", err)
-		log.Errorf("%v", err)
 		SendErrorPage(c, err)
 		return
 	}
 
-	data.PageTitle = "New Supplier Part Number"
-	data.StyleSheets = []string{}
-	data.Category = sdata.Category
-	data.Vendor = sdata.Vendor
-	data.VendorPN = sdata.VendorPN
-	data.WebLink = sdata.WebLink
-	data.WebLinkAddr = FixWebLinkAddr(sdata.WebLink)
-	data.Designer = sdata.Designer
-	data.SequenceNumber = "087"
-	data.Description = sdata.Description
-	data.DateCreated = time.Now().Format("2006-01-02")
-	data.NewPN = "SP-" + data.Category + "-" + data.SequenceNumber
-	SendPage(c, data, "header", "menubar", "new_supplier_pn_post", "footer")
+	// Remember the defaults...
+	sd := &SupplierPageDefaults{}
+	sd.Designer = data.Designer
+	sd.Category = data.Category
+	sd.Vendor = data.Vendor
+	sd.VendorPN = data.VendorPN
+	sd.WebLink = data.WebLink
+	sd.Description = data.Description
+	ses := GetSession(c)
+	ses.Data["NewSupplierDefaults"] = sd
+
+	if util.Blank(data.Description) {
+		handle_new_supplier_pn_with_error(c, "Please provide at least a few words that describes the part.")
+		return
+	}
+
+	pn, err := pnsql.NewSupplierPartInSequence(data.Designer, data.Category, data.Vendor,
+		data.VendorPN, data.WebLink, data.Description)
+	if err != nil {
+		SendErrorPage(c, err)
+		return
+	}
+
+	// Defaults for next time...
+	sd.Description = ""
+	sd.Designer = ses.Name
+	ses.Data["EpicPageDefaults"] = sd
+
+	show_part_page(c, pn.PNString())
+
+	// msg := fmt.Sprintf("Submitted Data: <br>")
+	// msg += fmt.Sprintf("Category     = %s<br>", data.Category)
+	// msg += fmt.Sprintf("Vendor       = %s<br>", data.Vendor)
+	// msg += fmt.Sprintf("VendorPN     = %s<br>", data.VendorPN)
+	// msg += fmt.Sprintf("WebLink      = %s<br>", data.WebLink)
+	// msg += fmt.Sprintf("Designer     = %s<br>", data.Designer)
+	// msg += fmt.Sprintf("Description  = %s<br>", data.Description)
+	// SendMessagePagef(c, msg)
 }

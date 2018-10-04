@@ -9,7 +9,6 @@ package console
 import (
 	"epic/lib/util"
 	"epic/pnserver/pnsql"
-	"fmt"
 )
 
 var gTopic_update_project string = `
@@ -33,20 +32,20 @@ func init() {
 	RegistorTopic("update-project", gTopic_update_project)
 }
 
-func handle_update_project(cmdline string) {
+func handle_update_project(c *Context, cmdline string) {
 	params := make(map[string]string, 10)
 	args, err := ParseCmdLine(cmdline, params)
 	if err != nil {
-		fmt.Printf("%v\n", err)
+		c.Printf("%v\n", err)
 		return
 	}
 	if len(args) < 2 {
-		fmt.Printf("Not enough args.\n")
+		c.Printf("Not enough args.\n")
 		return
 	}
 	projectid, subsystemid, err := pnsql.SplitProjectId(args[1])
 	if err != nil {
-		fmt.Printf("%v\n", err)
+		c.Printf("%v\n", err)
 		return
 	}
 	desc, _ := util.MapAlias(params, "Description", "description", "Desc", "desc")
@@ -55,50 +54,50 @@ func handle_update_project(cmdline string) {
 	if subsystemid == "" {
 		// Updateing a project.
 		if !pnsql.IsProject(projectid) {
-			fmt.Printf("Project %s does not exist.\n", projectid)
+			c.Printf("Project %s does not exist.\n", projectid)
 			return
 		}
 		nupdates := 0
 		if desc != "" {
 			err = pnsql.SetProjectDescription(projectid, desc)
 			if err != nil {
-				fmt.Printf("%v\n", err)
+				c.Printf("%v\n", err)
 				return
 			}
 			nupdates++
-			fmt.Printf("Description for project %s updated successfully.\n", projectid)
+			c.Printf("Description for project %s updated successfully.\n", projectid)
 		}
 		if year0 != "" {
 			err = pnsql.SetProjectYear0(projectid, year0)
 			if err != nil {
-				fmt.Printf("%v\n", err)
+				c.Printf("%v\n", err)
 				return
 			}
 			nupdates++
-			fmt.Printf("Year0 for project %s updated successfully.\n", projectid)
+			c.Printf("Year0 for project %s updated successfully.\n", projectid)
 		}
 		if nupdates == 0 {
-			fmt.Printf("Nothing updated for project %s.\n", projectid)
+			c.Printf("Nothing updated for project %s.\n", projectid)
 		}
 		return
 	} else {
 		// Updateing a subsystem.
 		if !pnsql.IsSubsystem(projectid, subsystemid) {
-			fmt.Printf("Subsystem %s-%s does not exist.\n", projectid, subsystemid)
+			c.Printf("Subsystem %s-%s does not exist.\n", projectid, subsystemid)
 			return
 		}
 		nupdates := 0
 		if desc != "" {
 			err = pnsql.SetSubsystemDescription(projectid, subsystemid, desc)
 			if err != nil {
-				fmt.Printf("%v\n", err)
+				c.Printf("%v\n", err)
 				return
 			}
 			nupdates++
-			fmt.Printf("Description for subsystem %s-%s updated successfully.\n", projectid, subsystemid)
+			c.Printf("Description for subsystem %s-%s updated successfully.\n", projectid, subsystemid)
 		}
 		if nupdates == 0 {
-			fmt.Printf("Nothing updated for subsystem %s-%s.\n", projectid, subsystemid)
+			c.Printf("Nothing updated for subsystem %s-%s.\n", projectid, subsystemid)
 		}
 		return
 	}

@@ -9,7 +9,6 @@ package console
 import (
 	"epic/lib/util"
 	"epic/pnserver/pnsql"
-	"fmt"
 )
 
 var gTopic_update_part string = `
@@ -28,21 +27,21 @@ func init() {
 	RegistorArg("pn", "A partnumber in the ppp-ss-0000 or SP-cc-000 format.")
 }
 
-func handle_update_part(cmdline string) {
+func handle_update_part(c *Context, cmdline string) {
 	params := make(map[string]string, 10)
 	args, err := ParseCmdLine(cmdline, params)
 	if err != nil {
-		fmt.Printf("%v\n", err)
+		c.Printf("%v\n", err)
 		return
 	}
 	if len(args) < 2 {
-		fmt.Printf("Not enough args.\n")
+		c.Printf("Not enough args.\n")
 		return
 	}
 	spn := args[1]
 	part, err := pnsql.GetEpicPart(spn)
 	if err != nil || part == nil {
-		fmt.Printf("Part %q not found.\n", spn)
+		c.Printf("Part %q not found.\n", spn)
 		return
 	}
 
@@ -54,13 +53,13 @@ func handle_update_part(cmdline string) {
 	}
 	if ok {
 		if !pnsql.IsDesigner(designer) {
-			fmt.Printf("%s is not a current designer.\n", designer)
+			c.Printf("%s is not a current designer.\n", designer)
 			return
 		}
 		err := pnsql.SetEpicPartDesigner(part, designer)
 		pnsql.InvalidateEpicPartsCache()
 		if err != nil {
-			fmt.Printf("Error on update of designer. Err=%v\n", err)
+			c.Printf("Error on update of designer. Err=%v\n", err)
 			return
 		}
 		nupdate++
@@ -80,7 +79,7 @@ func handle_update_part(cmdline string) {
 		err := pnsql.SetEpicPartDescription(part, desc)
 		pnsql.InvalidateEpicPartsCache()
 		if err != nil {
-			fmt.Printf("Error on update of description. Err=%v\n", err)
+			c.Printf("Error on update of description. Err=%v\n", err)
 			return
 		}
 		nupdate++
@@ -99,21 +98,21 @@ func handle_update_part(cmdline string) {
 	if sdate != "" {
 		date, err := util.ParseGenericTime(sdate)
 		if err != nil {
-			fmt.Printf("Syntax error in date (%q).\n", sdate)
+			c.Printf("Syntax error in date (%q).\n", sdate)
 			return
 		}
 		err = pnsql.SetEpicPartDateIssued(part, date)
 		pnsql.InvalidateEpicPartsCache()
 		if err != nil {
-			fmt.Printf("Error on update of date issued. Err=%v\n", err)
+			c.Printf("Error on update of date issued. Err=%v\n", err)
 			return
 		}
 		nupdate++
 	}
 
 	if nupdate <= 0 {
-		fmt.Printf("Nothing updated (see topic). \n")
+		c.Printf("Nothing updated (see topic). \n")
 		return
 	}
-	fmt.Printf("Success.\n")
+	c.Printf("Success.\n")
 }

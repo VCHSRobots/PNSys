@@ -75,20 +75,14 @@ func handle_login_post(c *gin.Context) {
 
 	IsAdmin := pwhash.CheckPasswordHash(ld.Password, gPwAdmin)
 	if IsAdmin {
-		ses := sessions.NewSession(ld.Designer, c.ClientIP(), sessions.Privilege_Admin)
-		ses.SetStringValue("DesignerHint", ld.Designer)
-		c.SetCookie("Cred", ses.AuthCookie, 0, "/", "", false, true)
-		log.Infof("New Login: %s (%s) with privilege: Admin.", ld.Designer, c.ClientIP())
+		setup_login(c, ld.Designer, sessions.Privilege_Admin)
 		c.Redirect(302, "/NewEpicPN")
 		return
 	}
 
 	IsUser := pwhash.CheckPasswordHash(ld.Password, gPwUser)
 	if IsUser {
-		ses := sessions.NewSession(ld.Designer, c.ClientIP(), sessions.Privilege_User)
-		ses.SetStringValue("DesignerHint", ld.Designer)
-		c.SetCookie("Cred", ses.AuthCookie, 0, "/", "", false, true)
-		log.Infof("New Login: %s (%s) with privilege: User.", ld.Designer, c.ClientIP())
+		setup_login(c, ld.Designer, sessions.Privilege_User)
 		c.Redirect(302, "/NewEpicPN")
 		return
 	}
@@ -96,6 +90,14 @@ func handle_login_post(c *gin.Context) {
 	log.Infof("Login failed: bad password.")
 	data.ErrorMessage = "Login Failed."
 	show_login_page(c, data)
+}
+
+func setup_login(c *gin.Context, user string, mode sessions.SessionPrivilege) *sessions.TSession {
+	ses := sessions.NewSession(user, c.ClientIP(), mode)
+	ses.SetStringValue("DesignerHint", user)
+	c.SetCookie("Cred", ses.AuthCookie, 0, "/", "", false, true)
+	log.Infof("New Login: %s (%s) with privilege: %s.", user, c.ClientIP(), mode)
+	return ses
 }
 
 func kill_session(c *gin.Context) {
@@ -123,8 +125,7 @@ func show_login_page(c *gin.Context, data *LoginData) {
 	}
 	des_bytes, err := json.MarshalIndent(des, "", "  ")
 	if err != nil {
-		log.Errorf("Unable to convert to json. Err=%v", err)
-		c.AbortWithError(400, err)
+		SendErrorPagef(c, "Unabel to convert designer list to json. <br>Err=%v", err)
 		return
 	}
 	data.DesignersJson = string(des_bytes)

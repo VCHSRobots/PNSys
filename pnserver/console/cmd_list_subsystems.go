@@ -9,7 +9,6 @@ package console
 import (
 	"epic/lib/util"
 	"epic/pnserver/pnsql"
-	"fmt"
 )
 
 var gTopic_list_subsystems string = `
@@ -28,17 +27,17 @@ func init() {
 	RegistorTopic("list-subsystems", gTopic_list_subsystems)
 }
 
-func handle_list_subsystems(cmdline string) {
+func handle_list_subsystems(c *Context, cmdline string) {
 	params := make(map[string]string, 10)
 	args, err := ParseCmdLine(cmdline, params)
 	if err != nil {
-		fmt.Printf("%v\n", err)
+		c.Printf("%v\n", err)
 		return
 	}
 
 	act, doactive, err := ParseActive(params)
 	if err != nil {
-		fmt.Printf("%v\n", err)
+		c.Printf("%v\n", err)
 		return
 	}
 	year0, doyear := util.MapAlias(params, "Year0", "year0", "Year", "year")
@@ -49,7 +48,7 @@ func handle_list_subsystems(cmdline string) {
 	}
 	if prj != "" {
 		if !pnsql.IsProject(prj) {
-			fmt.Printf("%q is not a project.  (Use project Id three letter Id.)\n", prj)
+			c.Printf("%q is not a project.  (Use project Id three letter Id.)\n", prj)
 			return
 		}
 	}
@@ -73,5 +72,5 @@ func handle_list_subsystems(cmdline string) {
 			}
 		}
 	}
-	fmt.Printf("\n%s\n%d subsystems found.\n", tbl.Text(), icount)
+	c.Printf("\n%s\n%d subsystems found.\n", tbl.Text(), icount)
 }

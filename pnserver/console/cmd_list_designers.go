@@ -29,11 +29,11 @@ func init() {
 	RegistorTopic("list-designers", gTopic_list_designers)
 }
 
-func handle_list_designers(cmdline string) {
+func handle_list_designers(c *Context, cmdline string) {
 	params := make(map[string]string, 10)
 	_, err := ParseCmdLine(cmdline, params)
 	if err != nil {
-		fmt.Printf("%v\n", err)
+		c.Printf("%v\n", err)
 		return
 	}
 
@@ -47,7 +47,7 @@ func handle_list_designers(cmdline string) {
 		} else if sact == "false" || sact == "no" || sact == "f" || sact == "n" {
 			act = false
 		} else {
-			fmt.Printf("Invalid value for active (%q)\n", sactive)
+			c.Printf("Invalid value for active (%q)\n", sactive)
 			return
 		}
 	}
@@ -69,5 +69,5 @@ func handle_list_designers(cmdline string) {
 		tbl.AddRow(fmt.Sprintf("%d", i), c.Name, c.Year0, sactive)
 		icount++
 	}
-	fmt.Printf("\n%s%d desingers found.\n", tbl.Text(), icount)
+	c.Printf("\n%s%d desingers found.\n", tbl.Text(), icount)
 }

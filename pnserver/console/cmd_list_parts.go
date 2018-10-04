@@ -48,11 +48,11 @@ func init() {
 	RegistorTopic("list-parts", g_topic_list_parts)
 }
 
-func handle_list_parts(cmdline string) {
+func handle_list_parts(c *Context, cmdline string) {
 	params := make(map[string]string, 10)
 	_, err := ParseCmdLine(cmdline, params)
 	if err != nil {
-		fmt.Printf("%v\n", err)
+		c.Printf("%v\n", err)
 		return
 	}
 
@@ -63,7 +63,7 @@ func handle_list_parts(cmdline string) {
 	if havetype {
 		stype = strings.ToLower(stype)
 		if stype != "epic" && stype != "supplier" && stype != "sup" {
-			fmt.Printf("Illegal parts type specified (%q). Must be either 'epic' or 'supplier'.\n", stype)
+			c.Printf("Illegal parts type specified (%q). Must be either 'epic' or 'supplier'.\n", stype)
 			return
 		}
 		if stype == "sup" {
@@ -93,7 +93,7 @@ func handle_list_parts(cmdline string) {
 	}
 
 	if bMustBeEpic && bMustBeSupplier {
-		fmt.Printf("Incompatible parameters -- no parts can be found.\n")
+		c.Printf("Incompatible parameters -- no parts can be found.\n")
 		return
 	}
 
@@ -135,7 +135,7 @@ func handle_list_parts(cmdline string) {
 		for _, r := range blst {
 			tbl.AddRow(r.pn, r.desc, r.designer, r.sdate, r.other)
 		}
-		fmt.Printf("\n%s%d parts found.\n", tbl.Text(), len(blst))
+		c.Printf("\n%s%d parts found.\n", tbl.Text(), len(blst))
 		return
 	} else if len(epiclst) > 0 {
 		tbl := util.NewTable("Part Number", "Description", "Designer", "Date", "Project", "Subsystem", "PartType", "PID")
@@ -156,7 +156,7 @@ func handle_list_parts(cmdline string) {
 		for _, r := range blst {
 			tbl.AddRow(r.pn, r.desc, r.designer, r.sdate, r.prj, r.subsys, r.parttype, r.pid)
 		}
-		fmt.Printf("\n%s%d parts found.\n", tbl.Text(), len(blst))
+		c.Printf("\n%s%d parts found.\n", tbl.Text(), len(blst))
 		return
 	} else if len(suplst) > 0 {
 		tbl := util.NewTable("Part Number", "Description", "Designer", "Date", "Category", "Vendor", "VendorPN", "WebLink", "PID")
@@ -178,10 +178,10 @@ func handle_list_parts(cmdline string) {
 		for _, r := range blst {
 			tbl.AddRow(r.pn, r.desc, r.designer, r.sdate, r.cat, r.ven, r.venpn, r.weblink, r.pid)
 		}
-		fmt.Printf("\n%s%d parts found.\n", tbl.Text(), len(blst))
+		c.Printf("\n%s%d parts found.\n", tbl.Text(), len(blst))
 		return
 	} else {
-		fmt.Printf("No parts found.\n")
+		c.Printf("No parts found.\n")
 		return
 	}
 }

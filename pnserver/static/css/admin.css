@@ -1,0 +1,17 @@
+/* --------------------------------------------------------------------
+** admin.css -- CSS for the admin page.
+**
+** Created 2018-10-04 DLB
+** --------------------------------------------------------------------
+*/
+
+.terminal_output_area {border-width: 2px; border-style: solid; border-color: gray; width: 95%;}
+#terminal_output {font-size: 10pt; font-family: monospace; width: 99%; color: black; overflow-y: scroll;}
+
+.terminal_input_area {margin-top: 10px; border-width: 2px; border-style: solid; border-color: gray; 
+                      height: 35px; clear: both; width: 95%;}
+.terminal_label {float: left; margin-right: 8px; height: 25px; position: relative; top: 6px; left: 5px;}
+#terminal_input {float: left; font-size: 12pt; font-family: monospace; width: 83%; height: 18px;
+                margin-right: 0px; margin-top: 2px; padding-right: 0px; color: black;}
+
+

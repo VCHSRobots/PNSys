@@ -9,7 +9,6 @@ package console
 import (
 	"epic/lib/util"
 	"epic/pnserver/pnsql"
-	"fmt"
 	"time"
 )
 
@@ -31,15 +30,15 @@ func init() {
 	RegistorTopic("add-designer", gTopic_add_designer)
 }
 
-func handle_add_designer(cmdline string) {
+func handle_add_designer(c *Context, cmdline string) {
 	params := make(map[string]string, 10)
 	args, err := ParseCmdLine(cmdline, params)
 	if err != nil {
-		fmt.Printf("%v\n", err)
+		c.Printf("%v\n", err)
 		return
 	}
 	if len(args) < 2 {
-		fmt.Printf("Not enough args.\n")
+		c.Printf("Not enough args.\n")
 		return
 	}
 	name := args[1]
@@ -49,19 +48,19 @@ func handle_add_designer(cmdline string) {
 	}
 	err = pnsql.CheckYear0Text(year0)
 	if err != nil {
-		fmt.Printf("%v\n", err)
+		c.Printf("%v\n", err)
 		return
 	}
 
 	if pnsql.IsDesigner(name) {
-		fmt.Printf("Designer %s already exists.\n")
+		c.Printf("Designer %s already exists.\n")
 		return
 	}
 
 	err = pnsql.AddDesigner(name, year0)
 	if err != nil {
-		fmt.Printf("Error: %v\n", err)
+		c.Printf("Error: %v\n", err)
 		return
 	}
-	fmt.Printf("Success.\n")
+	c.Printf("Success.\n")
 }

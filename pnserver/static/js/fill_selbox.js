@@ -34,6 +34,7 @@ function countMatchLen(s1, s2) {
 }
 
 function setSelectionBox(selid, txt) {
+    //console.log("in setSelectioBox. Txt=", txt)
     var selbox = document.getElementById(selid);
     var i;
     // Look for an exact match, in either text or values.
@@ -41,13 +42,23 @@ function setSelectionBox(selid, txt) {
       var opt = selbox.options[i];
       if (opt.value == txt) {
           selbox.value = opt.value;
+          //console.log("setting to (1):", selbox.value)
           return true;
       }
       if (opt.text == txt) {
-          console.log("found text value for ", txt)
           selbox.value = opt.value;
+          //console.log("setting to (2):", selbox.value)
           return true;
       }
+    }
+    return false;
+}
+
+function setSelectionBoxBestMatch(selid, txt) {
+    //console.log("setting ", selid, "  with ", txt)
+    if (setSelectionBox(selid, txt)) {
+        //console.log("set with exact match.");
+        return true;
     }
     // Try again but by finding the closest match.
     var bestopt = false;
@@ -60,11 +71,19 @@ function setSelectionBox(selid, txt) {
         bestopt = opt;
       }
     }
-    if (bestopt) {
+    if (bestopt && nchars > 0) {
       selbox.value = bestopt.value;
+      //console.log("setting to (3):", selbox.value, "  Matched chars", nchars);
       return true;
     }
+    //console.log("unable to set selection box?");
     return false;
+}
+
+function setTextBox(fieldid, txt) {
+    var d = document.getElementById(fieldid);
+    d.text = txt;
+    d.value = txt ;
 }
 
 // fillDesigers uses the JSON from "designers" to fill a selection box 

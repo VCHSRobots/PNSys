@@ -36,39 +36,39 @@ func init() {
 	RegistorTopic("check-import", gTopic_check_import)
 }
 
-func handle_check_import(cmdline string) {
+func handle_check_import(c *Context, cmdline string) {
 	params := make(map[string]string, 10)
 	args, err := ParseCmdLine(cmdline, params)
 	if err != nil {
-		fmt.Printf("%v\n", err)
+		c.Printf("%v\n", err)
 		return
 	}
 	if len(args) < 2 {
-		fmt.Printf("Not enough args.\n")
+		c.Printf("Not enough args.\n")
 		return
 	}
 	fn := args[1]
 	filetype, ok := util.MapAlias(params, "Type", "type")
 	if !ok {
-		fmt.Printf("The type parameters must be specified. See 'help import'.\n")
+		c.Printf("The type parameters must be specified. See 'help import'.\n")
 		return
 	}
 	filetype = strings.ToLower(filetype)
 	if filetype == "epic" {
-		check_epic_import(fn)
+		check_epic_import(c, fn)
 		return
 	}
 	if filetype == "supplier" {
-		check_supplier_csv(fn)
+		check_supplier_csv(c, fn)
 		return
 	}
-	fmt.Printf("Unknown type (%q). Use either 'epic' or 'supplier'.\n", filetype)
+	c.Printf("Unknown type (%q). Use either 'epic' or 'supplier'.\n", filetype)
 }
 
-func check_supplier_csv(fn string) {
+func check_supplier_csv(c *Context, fn string) {
 	fi, err := os.Open(fn)
 	if err != nil {
-		fmt.Printf("Unable to open file %q. Err=%v\n", fn, err)
+		c.Printf("Unable to open file %q. Err=%v\n", fn, err)
 		return
 	}
 	defer fi.Close()
@@ -88,11 +88,11 @@ func check_supplier_csv(fn string) {
 			break
 		}
 		if err != nil {
-			fmt.Printf("Read error on line %d. Aborting. Err=%v\n", ilinenum, err)
+			c.Printf("Read error on line %d. Aborting. Err=%v\n", ilinenum, err)
 			return
 		}
 		if len(record) < 8 {
-			fmt.Printf("Line %d has too few fields, skipping.\n", ilinenum)
+			c.Printf("Line %d has too few fields, skipping.\n", ilinenum)
 			continue
 		}
 
@@ -107,57 +107,57 @@ func check_supplier_csv(fn string) {
 
 		pn, err := pnsql.GetSupplierPart(spn)
 		if err != nil {
-			fmt.Printf("Database error while searching for %s. Err=%v\n", spn, err)
+			c.Printf("Database error while searching for %s. Err=%v\n", spn, err)
 			continue
 		}
 		if pn != nil {
-			fmt.Printf("Part %s already exsits, on line %d\n", pn.PNString(), ilinenum)
+			c.Printf("Part %s already exsits, on line %d\n", pn.PNString(), ilinenum)
 			continue
 		}
 
 		if !pnsql.IsDesigner(sdesigner) {
-			fmt.Printf("Designer %q does not exist, on line %d\n", sdesigner, ilinenum)
+			c.Printf("Designer %q does not exist, on line %d\n", sdesigner, ilinenum)
 		}
 
 		_, err = strconv.Atoi(sseq)
 		if err != nil {
-			fmt.Printf("Bad sequence number on line %d\n", ilinenum)
+			c.Printf("Bad sequence number on line %d\n", ilinenum)
 			continue
 		}
 		_, err = util.ParseGenericTime(sdate)
 		if err != nil {
-			fmt.Printf("Bad date format on line %d. Err=%v\n", ilinenum, err)
+			c.Printf("Bad date format on line %d. Err=%v\n", ilinenum, err)
 			continue
 		}
 		_, err = pnsql.StrToSupplierPartPN(spn)
 		if err != nil {
-			fmt.Printf("%v. On line %d.\n", err, ilinenum)
+			c.Printf("%v. On line %d.\n", err, ilinenum)
 			continue
 		}
 		if util.Blank(sdesc) {
-			fmt.Printf("Blank description on line %d\n", ilinenum)
+			c.Printf("Blank description on line %d\n", ilinenum)
 			continue
 		}
 		if sdesc != util.CleanStr(sdesc, "|") {
-			fmt.Printf("Illegal chars in Description on line %d\n", ilinenum)
+			c.Printf("Illegal chars in Description on line %d\n", ilinenum)
 		}
 		if svendor != util.CleanStr(svendor, "|") {
-			fmt.Printf("Illegal chars in Vendor on line %d\n", ilinenum)
+			c.Printf("Illegal chars in Vendor on line %d\n", ilinenum)
 		}
 		if svendorpn != util.CleanStr(svendorpn, "|") {
-			fmt.Printf("Illegal chars in VendorPN on line %d\n", ilinenum)
+			c.Printf("Illegal chars in VendorPN on line %d\n", ilinenum)
 		}
 		if slink != util.CleanStr(slink, "|") {
-			fmt.Printf("Illegal chars in WebLink on line %d\n", ilinenum)
+			c.Printf("Illegal chars in WebLink on line %d\n", ilinenum)
 		}
 	}
-	fmt.Printf("Finished. Lines Processed = %d.\n", ilinenum)
+	c.Printf("Finished. Lines Processed = %d.\n", ilinenum)
 }
 
-func check_epic_import(fn string) {
+func check_epic_import(c *Context, fn string) {
 	fi, err := os.Open(fn)
 	if err != nil {
-		fmt.Printf("Unable to open file %q. Err=%v\n", fn, err)
+		c.Printf("Unable to open file %q. Err=%v\n", fn, err)
 		return
 	}
 	defer fi.Close()
@@ -176,11 +176,11 @@ func check_epic_import(fn string) {
 			break
 		}
 		if err != nil {
-			fmt.Printf("Read error on line %d. Aborting. Err=%v\n", ilinenum, err)
+			c.Printf("Read error on line %d. Aborting. Err=%v\n", ilinenum, err)
 			return
 		}
 		if len(record) < 5 {
-			fmt.Printf("Line %d has too few fields, skipping.\n", ilinenum)
+			c.Printf("Line %d has too few fields, skipping.\n", ilinenum)
 			continue
 		}
 		sseq := record[0]      // Sequence number
@@ -191,47 +191,47 @@ func check_epic_import(fn string) {
 
 		_, err = strconv.Atoi(sseq)
 		if err != nil {
-			fmt.Printf("Bad sequence number on line %d\n", ilinenum)
+			c.Printf("Bad sequence number on line %d\n", ilinenum)
 			continue
 		}
 
 		pn, err := pnsql.GetEpicPart(spn)
 		if err != nil {
-			fmt.Printf("Database error on search for part. Err=%v\n", err)
+			c.Printf("Database error on search for part. Err=%v\n", err)
 			continue
 		}
 		if pn != nil {
-			fmt.Printf("Part %s already exsits, on line %d\n", pn.PNString(), ilinenum)
+			c.Printf("Part %s already exsits, on line %d\n", pn.PNString(), ilinenum)
 			continue
 		}
 
 		err = checkepicpn(spn)
 		if err != nil {
-			fmt.Printf("%v. On line %d.\n", err, ilinenum)
+			c.Printf("%v. On line %d.\n", err, ilinenum)
 			continue
 		}
 		if util.Blank(sdesc) {
-			fmt.Printf("Blank description on line %d\n", ilinenum)
+			c.Printf("Blank description on line %d\n", ilinenum)
 			continue
 		}
 		if !pnsql.IsDesigner(sdesigner) {
-			fmt.Printf("Designer %q is unknown. On line %d\n", sdesigner, ilinenum)
+			c.Printf("Designer %q is unknown. On line %d\n", sdesigner, ilinenum)
 		}
 		// Check valid date
 		date, err := time.Parse("01/02/06", sdate)
 		if err != nil {
-			fmt.Printf("Bad date format on line %d. Err=%v\n", ilinenum, err)
+			c.Printf("Bad date format on line %d. Err=%v\n", ilinenum, err)
 			continue
 		}
 		t0 := time.Date(2010, time.January, 1, 0, 0, 0, 0, time.UTC)
 		t1 := time.Date(2025, time.January, 1, 0, 0, 0, 0, time.UTC)
 		if date.Before(t0) || date.After(t1) {
-			fmt.Printf("Date is out of range on line %d.", ilinenum)
+			c.Printf("Date is out of range on line %d.", ilinenum)
 			continue
 		}
 
 	}
-	fmt.Printf("%d lines read and examined.\n", ilinenum)
+	c.Printf("%d lines read and examined.\n", ilinenum)
 }
 
 func checkepicpn(s string) error {

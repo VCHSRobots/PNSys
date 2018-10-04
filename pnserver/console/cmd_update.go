@@ -43,21 +43,21 @@ func init() {
 	RegistorTopic("update", gTopic_update_thing)
 }
 
-func handle_update_thing(cmdline string) {
+func handle_update_thing(c *Context, cmdline string) {
 	params := make(map[string]string, 10)
 	args, err := ParseCmdLine(cmdline, params)
 	if err != nil {
-		fmt.Printf("%v\n", err)
+		c.Printf("%v\n", err)
 		return
 	}
 	if len(args) < 2 {
-		fmt.Printf("Not enough args.\n")
+		c.Printf("Not enough args.\n")
 		return
 	}
 	thing := args[1]
 	err = pnsql.CheckDesignerNameText(thing)
 	if err == nil {
-		update_designer(thing, params)
+		update_designer(c, thing, params)
 		return
 	}
 
@@ -65,7 +65,7 @@ func handle_update_thing(cmdline string) {
 	if pt == pnsql.PNType_Epic {
 		pn, err := pnsql.StrToEpicPN(thing)
 		if err == nil {
-			update_epic_part(pn, params)
+			update_epic_part(c, pn, params)
 		} else {
 			fmt.Printf("%v\n", err)
 		}
@@ -73,30 +73,30 @@ func handle_update_thing(cmdline string) {
 	}
 
 	if pt == pnsql.PNType_Supplier {
-		update_supplier_part(thing, params)
+		update_supplier_part(c, thing, params)
 		return
 	}
 
 	projectid, subsystemid, err := pnsql.SplitProjectId(thing)
 	if err == nil {
 		if subsystemid == "" {
-			update_project(projectid, params)
+			update_project(c, projectid, params)
 		} else {
-			update_subsystem(projectid, subsystemid, params)
+			update_subsystem(c, projectid, subsystemid, params)
 		}
 		return
 	}
-	fmt.Printf("%q cannot be indentified.\n", thing)
+	c.Printf("%q cannot be indentified.\n", thing)
 }
 
-func update_epic_part(pn *pnsql.EpicPN, params map[string]string) {
+func update_epic_part(c *Context, pn *pnsql.EpicPN, params map[string]string) {
 	part, err := pnsql.GetEpicPart(pn.PNString())
 	if err != nil {
-		fmt.Printf("Database error while searching for part %s. Err=%v\n", pn.PNString(), err)
+		c.Printf("Database error while searching for part %s. Err=%v\n", pn.PNString(), err)
 		return
 	}
 	if part == nil {
-		fmt.Printf("Part %s not found.\n", pn.PNString())
+		c.Printf("Part %s not found.\n", pn.PNString())
 		return
 	}
 	nupdates := 0
@@ -107,31 +107,31 @@ func update_epic_part(pn *pnsql.EpicPN, params map[string]string) {
 		if desc != part.Description {
 			err := pnsql.SetEpicPartDescription(part, desc)
 			if err != nil {
-				fmt.Printf("%v\n", err)
+				c.Printf("%v\n", err)
 				return
 			}
-			fmt.Printf("Successful update of Description on part %s.\n", part.PNString())
+			c.Printf("Successful update of Description on part %s.\n", part.PNString())
 			nupdates++
 		} else {
-			fmt.Printf("Description specified, but equal to current value.\n")
+			c.Printf("Description specified, but equal to current value.\n")
 		}
 	}
 	if havedate {
 		date, err := util.ParseGenericTime(sdate)
 		if err != nil {
-			fmt.Printf("%v\n", err)
+			c.Printf("%v\n", err)
 			return
 		}
 		if date.Format("2006-01-02") != part.DateIssued.Format("2006-01-02") {
 			err = pnsql.SetEpicPartDateIssued(part, date)
 			if err != nil {
-				fmt.Printf("%v\n", err)
+				c.Printf("%v\n", err)
 				return
 			}
-			fmt.Printf("Successful update of Date Issued on part %s.\n", part.PNString())
+			c.Printf("Successful update of Date Issued on part %s.\n", part.PNString())
 			nupdates++
 		} else {
-			fmt.Printf("Date specified, but equal to current value.\n")
+			c.Printf("Date specified, but equal to current value.\n")
 		}
 
 	}
@@ -139,24 +139,24 @@ func update_epic_part(pn *pnsql.EpicPN, params map[string]string) {
 		if part.Designer != dname {
 			err = pnsql.SetEpicPartDesigner(part, dname)
 			if err != nil {
-				fmt.Printf("%v\n", err)
+				c.Printf("%v\n", err)
 				return
 			}
-			fmt.Printf("Successful update of Designer on part %s.\n", part.PNString())
+			c.Printf("Successful update of Designer on part %s.\n", part.PNString())
 			nupdates++
 		} else {
-			fmt.Printf("Designer specified, but equal to current value.\n")
+			c.Printf("Designer specified, but equal to current value.\n")
 		}
 	}
 	if nupdates == 0 {
-		fmt.Printf("Nothing updated on part %s.\n", part.PNString())
+		c.Printf("Nothing updated on part %s.\n", part.PNString())
 	}
 }
 
-func update_designer(name string, params map[string]string) {
+func update_designer(c *Context, name string, params map[string]string) {
 	designer, err := pnsql.GetDesigner(name)
 	if err != nil {
-		fmt.Printf("%v\n", err)
+		c.Printf("%v\n", err)
 		return
 	}
 	nupdates := 0
@@ -166,13 +166,13 @@ func update_designer(name string, params map[string]string) {
 		if designer.Year0 != year0 {
 			err = pnsql.SetDesignerYear0(designer.Name, year0)
 			if err != nil {
-				fmt.Printf("%v\n", err)
+				c.Printf("%v\n", err)
 				return
 			}
-			fmt.Printf("Successful update of Year0 for Designer %s.\n", designer.Name)
+			c.Printf("Successful update of Year0 for Designer %s.\n", designer.Name)
 			nupdates++
 		} else {
-			fmt.Printf("Year0 specified, but equal to current value.\n")
+			c.Printf("Year0 specified, but equal to current value.\n")
 		}
 	}
 	if haveactive {
@@ -183,35 +183,35 @@ func update_designer(name string, params map[string]string) {
 		} else if ssact == "false" || ssact == "f" || ssact == "no" || ssact == "n" {
 			act = false
 		} else {
-			fmt.Printf("Illegal value (%q) for active.", sact)
+			c.Printf("Illegal value (%q) for active.", sact)
 			return
 		}
 		if designer.Active != act {
 			err = pnsql.SetDesignerActive(designer.Name, act)
 			if err != nil {
-				fmt.Printf("%v\n", err)
+				c.Printf("%v\n", err)
 				return
 			}
-			fmt.Printf("Successful update of Active for Designer %s.\n", designer.Name)
+			c.Printf("Successful update of Active for Designer %s.\n", designer.Name)
 			nupdates++
 		} else {
-			fmt.Printf("Active specified, but equal to current value.\n")
+			c.Printf("Active specified, but equal to current value.\n")
 		}
 	}
 	if nupdates == 0 {
-		fmt.Printf("Nothing updated for designer %s.\n", designer.Name)
+		c.Printf("Nothing updated for designer %s.\n", designer.Name)
 	}
 }
 
-func update_supplier_part(pns string, params map[string]string) {
+func update_supplier_part(c *Context, pns string, params map[string]string) {
 
 	part, err := pnsql.GetSupplierPart(pns)
 	if err != nil {
-		fmt.Printf("Database error while searching for part %s. Err=%v\n", pns, err)
+		c.Printf("Database error while searching for part %s. Err=%v\n", pns, err)
 		return
 	}
 	if part == nil {
-		fmt.Printf("Part %s not found.\n", pns)
+		c.Printf("Part %s not found.\n", pns)
 		return
 	}
 
@@ -227,44 +227,44 @@ func update_supplier_part(pns string, params map[string]string) {
 		if part.Description != desc {
 			err := pnsql.SetSupplierPartDescription(part, desc)
 			if err != nil {
-				fmt.Printf("%v\n", err)
+				c.Printf("%v\n", err)
 				return
 			}
-			fmt.Printf("Successful update of Description on part %s.\n", part.PNString())
+			c.Printf("Successful update of Description on part %s.\n", part.PNString())
 			nupdates++
 		} else {
-			fmt.Printf("Description specified, but equal to current value.\n")
+			c.Printf("Description specified, but equal to current value.\n")
 		}
 	}
 	if havedate {
 		date, err := util.ParseGenericTime(sdate)
 		if err != nil {
-			fmt.Printf("%v\n", err)
+			c.Printf("%v\n", err)
 			return
 		}
 		if date.Format("2006-01-02") != part.DateIssued.Format("2006-01-02") {
 			err = pnsql.SetSupplierPartDateIssued(part, date)
 			if err != nil {
-				fmt.Printf("%v\n", err)
+				c.Printf("%v\n", err)
 				return
 			}
-			fmt.Printf("Successful update of Date Issued on part %s.\n", part.PNString())
+			c.Printf("Successful update of Date Issued on part %s.\n", part.PNString())
 			nupdates++
 		} else {
-			fmt.Printf("Date specified, but equal to current value.\n")
+			c.Printf("Date specified, but equal to current value.\n")
 		}
 	}
 	if havedesigner {
 		if part.Designer != dname {
 			err = pnsql.SetSupplierPartDesigner(part, dname)
 			if err != nil {
-				fmt.Printf("%v\n", err)
+				c.Printf("%v\n", err)
 				return
 			}
-			fmt.Printf("Successful update of Designer on part %s.\n", part.PNString())
+			c.Printf("Successful update of Designer on part %s.\n", part.PNString())
 			nupdates++
 		} else {
-			fmt.Printf("Designer specified, but equal to current value.\n")
+			c.Printf("Designer specified, but equal to current value.\n")
 		}
 	}
 
@@ -272,13 +272,13 @@ func update_supplier_part(pns string, params map[string]string) {
 		if part.Vendor != sven {
 			err = pnsql.SetSupplierPartVendor(part, sven)
 			if err != nil {
-				fmt.Printf("%v\n", err)
+				c.Printf("%v\n", err)
 				return
 			}
-			fmt.Printf("Successful update of Vendor on part %s.\n", part.PNString())
+			c.Printf("Successful update of Vendor on part %s.\n", part.PNString())
 			nupdates++
 		} else {
-			fmt.Printf("Vendor specified, but equal to current value.\n")
+			c.Printf("Vendor specified, but equal to current value.\n")
 		}
 	}
 
@@ -286,13 +286,13 @@ func update_supplier_part(pns string, params map[string]string) {
 		if part.VendorPN != svpn {
 			err = pnsql.SetSupplierPartVendorPN(part, svpn)
 			if err != nil {
-				fmt.Printf("%v\n", err)
+				c.Printf("%v\n", err)
 				return
 			}
-			fmt.Printf("Successful update of VendorPN on part %s.\n", part.PNString())
+			c.Printf("Successful update of VendorPN on part %s.\n", part.PNString())
 			nupdates++
 		} else {
-			fmt.Printf("VendorPN specified, but equal to current value.\n")
+			c.Printf("VendorPN specified, but equal to current value.\n")
 		}
 	}
 
@@ -300,25 +300,25 @@ func update_supplier_part(pns string, params map[string]string) {
 		if part.WebLink != slink {
 			err = pnsql.SetSupplierPartWebLink(part, slink)
 			if err != nil {
-				fmt.Printf("%v\n", err)
+				c.Printf("%v\n", err)
 				return
 			}
-			fmt.Printf("Successful update of WebLink on part %s.\n", part.PNString())
+			c.Printf("Successful update of WebLink on part %s.\n", part.PNString())
 			nupdates++
 		} else {
-			fmt.Printf("WebLink specified, but equal to current value.\n")
+			c.Printf("WebLink specified, but equal to current value.\n")
 		}
 	}
 
 	if nupdates == 0 {
-		fmt.Printf("Nothing updated on part %s.\n", part.PNString())
+		c.Printf("Nothing updated on part %s.\n", part.PNString())
 	}
 }
 
-func update_project(projectid string, params map[string]string) {
+func update_project(c *Context, projectid string, params map[string]string) {
 	prj, err := pnsql.GetProject(projectid)
 	if err != nil {
-		fmt.Printf("%v\n", err)
+		c.Printf("%v\n", err)
 		return
 	}
 	nupdates := 0
@@ -329,26 +329,26 @@ func update_project(projectid string, params map[string]string) {
 		if prj.Description != desc {
 			err = pnsql.SetProjectDescription(prj.ProjectId, desc)
 			if err != nil {
-				fmt.Printf("%v\n", err)
+				c.Printf("%v\n", err)
 				return
 			}
-			fmt.Printf("Successful update of Description on project %s.\n", prj.ProjectId)
+			c.Printf("Successful update of Description on project %s.\n", prj.ProjectId)
 			nupdates++
 		} else {
-			fmt.Printf("Description specified, but equal to current value.\n")
+			c.Printf("Description specified, but equal to current value.\n")
 		}
 	}
 	if haveyear {
 		if prj.Year0 != year0 {
 			err = pnsql.SetProjectYear0(prj.ProjectId, year0)
 			if err != nil {
-				fmt.Printf("%v\n", err)
+				c.Printf("%v\n", err)
 				return
 			}
-			fmt.Printf("Successful update of Year0 on project %s.\n", prj.ProjectId)
+			c.Printf("Successful update of Year0 on project %s.\n", prj.ProjectId)
 			nupdates++
 		} else {
-			fmt.Printf("Year0 specified, but equal to current value.\n")
+			c.Printf("Year0 specified, but equal to current value.\n")
 		}
 	}
 	if haveactive {
@@ -359,30 +359,30 @@ func update_project(projectid string, params map[string]string) {
 		} else if ssact == "false" || ssact == "f" || ssact == "no" || ssact == "n" {
 			act = false
 		} else {
-			fmt.Printf("Illegal value (%q) for active.", sact)
+			c.Printf("Illegal value (%q) for active.", sact)
 			return
 		}
 		if prj.Active != act {
 			err = pnsql.SetProjectActive(prj.ProjectId, act)
 			if err != nil {
-				fmt.Printf("%v\n", err)
+				c.Printf("%v\n", err)
 				return
 			}
-			fmt.Printf("Successful update of Active on project %s.\n", prj.ProjectId)
+			c.Printf("Successful update of Active on project %s.\n", prj.ProjectId)
 			nupdates++
 		} else {
-			fmt.Printf("Active specified, but equal to current value.\n")
+			c.Printf("Active specified, but equal to current value.\n")
 		}
 	}
 	if nupdates == 0 {
-		fmt.Printf("Nothing updated for project %s.\n", prj.ProjectId)
+		c.Printf("Nothing updated for project %s.\n", prj.ProjectId)
 	}
 }
 
-func update_subsystem(projectid, subsystemid string, params map[string]string) {
+func update_subsystem(c *Context, projectid, subsystemid string, params map[string]string) {
 	ss, err := pnsql.GetSubsystem(projectid, subsystemid)
 	if err != nil {
-		fmt.Printf("%v\n", err)
+		c.Printf("%v\n", err)
 		return
 	}
 	nupdates := 0
@@ -391,16 +391,16 @@ func update_subsystem(projectid, subsystemid string, params map[string]string) {
 		if ss.Description != desc {
 			err = pnsql.SetSubsystemDescription(ss.ProjectId, ss.SubsystemId, desc)
 			if err != nil {
-				fmt.Printf("%v\n", err)
+				c.Printf("%v\n", err)
 				return
 			}
-			fmt.Printf("Successful update of Description on subsystem %s-%s.\n", ss.ProjectId, ss.SubsystemId)
+			c.Printf("Successful update of Description on subsystem %s-%s.\n", ss.ProjectId, ss.SubsystemId)
 			nupdates++
 		} else {
-			fmt.Printf("Description specified, but equal to current value.\n")
+			c.Printf("Description specified, but equal to current value.\n")
 		}
 	}
 	if nupdates == 0 {
-		fmt.Printf("Nothing updated for subsystem %s-%s.\n", ss.ProjectId, ss.SubsystemId)
+		c.Printf("Nothing updated for subsystem %s-%s.\n", ss.ProjectId, ss.SubsystemId)
 	}
 }

@@ -71,13 +71,42 @@ func main() {
 		}
 	}
 
-	fmt.Printf("Showing Log to console. Use 'hide-log' to turn this off.\n")
-	log.UseConsole(true)
+	dev, ok := cparams["dev"]
+	dev = strings.TrimSpace(dev)
+	if ok && !util.Blank(dev) {
+		fmt.Printf("Developer bypass mode is ON.  For %s as admin.\n", dev)
+		pages.UseBypass(dev)
+	}
+	consolelog := getboolparam(cparams, "consolelog", true)
+	if consolelog {
+		fmt.Printf("Showing Log to console. Use 'hide-log' to turn this off.\n")
+		log.UseConsole(true)
+	}
+	ginconsole := getboolparam(cparams, "ginconsole", true)
+	log.AllowPassOnConsole(ginconsole)
+	if !ginconsole {
+		fmt.Printf("GIN messages will NOT be sent to the console termainal.\n")
+	}
 
 	go RunServer() // Start up and run server in different thread
 	fmt.Printf("Server running.  Should be able to access at %s\n", gHostAddr)
 	go console.ConsoleLoop() // Process console commands
 	<-make(chan int)         // Wait forever here
+}
+
+func getboolparam(cparams map[string]string, name string, defaultvalue bool) bool {
+	str, ok := cparams[name]
+	if !ok {
+		return defaultvalue
+	}
+	str = strings.ToLower(str)
+	if str == "true" || str == "t" || str == "yes" || str == "y" {
+		return true
+	}
+	if str == "false" || str == "f" || str == "no" || str == "n" {
+		return false
+	}
+	return defaultvalue
 }
 
 func RunServer() {
@@ -96,8 +125,8 @@ func CheckDirs() {
 	}
 }
 
-func handle_version(cmdline string) {
-	fmt.Printf("Version: %s\n", gVersion)
+func handle_version(c *console.Context, cmdline string) {
+	c.Printf("Version: %s\n", gVersion)
 }
 
 func GetConfig(filename string) (map[string]string, error) {

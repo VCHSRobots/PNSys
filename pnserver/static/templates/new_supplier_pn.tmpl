@@ -54,6 +54,12 @@ function proc_vendor() {
     txt.value = sel.value;
 }
 
+function copy_vendor_from_sel_to_text() {
+    txtbox = document.getElementById("nsp_vendor_field1");
+    selbox = document.getElementById("nsp_vendor_field2");
+    txtbox.value = selbox.value;
+}
+
 function restore_vendor_selbox() {
     d = document.getElementById("nsp_vendor_selbox");
     d.style.display = "block";
@@ -67,6 +73,22 @@ function startUp() {
     fillDesigners("nsp_designer_field", gShowAllDesigners);
     fillCategories("nsp_category_field");
     fillVendors("nsp_vendor_field2", false, true);
+    {{if .Defaults.Designer}}
+        var ok = setSelectionBox("nsp_designer_field", "{{.Defaults.Designer}}");
+        if (!ok) {
+            toggleActiveDesigners();
+            setSelectionBox("nsp_designer_field", "{{.Defaults.Designer}}");
+        }
+    {{end}}
+    setSelectionBox("nsp_category_field", "{{.Defaults.Category}}");
+    setSelectionBox("nsp_vendor_field2", "{{.Defaults.Vendor}}");
+    //setTextBox("nsp_vendor_field1", "{{.Defaults.Vendor}}");
+    copy_vendor_from_sel_to_text();
+    //restore_vendor_selbox();
+    setTextBox("nsp_vendorpn_field", "{{.Defaults.VendorPN}}");
+    setTextBox("nsp_weblink_field", "{{.Defaults.WebLink}}");
+    setTextBox("nsp_desc_field", "{{.Defaults.Description}}");
+
     txt = document.getElementById("nsp_vendor_txtbox");
     txt.style.display = "none";
 }
@@ -105,7 +127,7 @@ function startUp() {
             <div class="inputform_paramblock" id="nsp_vendor_block1">
                 <div class="inputform_label" id="nsp_vendor_label1">Vendor</div>
                 <div class="inputform_text_field">
-                    <input type="text"  id="nsp_vendor_field1" name="Vendor"> </textarea>
+                    <input type="text"  id="nsp_vendor_field1" name="Vendor"> 
                 </div>
                 <div class="restore_sel_btn">
                     <button type="button" id="nsp_restore_sel_btn" class="restore_btn"
@@ -149,7 +171,6 @@ function startUp() {
         </div>
 
         <div style="clear: both;"></div>
-        <div class="inputform_paramblock">
 
         <div class="btn_form_submit_div">
             <input class="btn_form_submit" type="submit" value="Submit">
@@ -161,6 +182,10 @@ function startUp() {
     <div class="inputfrom_instructions">
     {{.Instructions}}
     </div> 
+{{end}}
+
+{{if .ErrorMessage}}
+    <div class="inputform_msg_err"> {{.ErrorMessage}} </div>
 {{end}}
 
 </div>

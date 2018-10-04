@@ -8,7 +8,6 @@ package console
 
 import (
 	"epic/pnserver/pnsql"
-	"fmt"
 )
 
 var gTopic_delete_part string = `
@@ -28,33 +27,33 @@ func init() {
 	RegistorTopic("delete-part", gTopic_delete_part)
 }
 
-func handle_delete_part(cmdline string) {
+func handle_delete_part(c *Context, cmdline string) {
 	params := make(map[string]string, 10)
 	args, err := ParseCmdLine(cmdline, params)
 	if err != nil {
-		fmt.Printf("%v\n", err)
+		c.Printf("%v\n", err)
 		return
 	}
 	if len(args) < 2 {
-		fmt.Printf("Not enough args.\n")
+		c.Printf("Not enough args.\n")
 		return
 	}
 	spn := args[1]
 	part, err := pnsql.GetEpicPart(spn)
 	if err != nil {
-		fmt.Printf("Database error while searching for part %s. Err=%v.\n", spn, err)
+		c.Printf("Database error while searching for part %s. Err=%v.\n", spn, err)
 		return
 	}
 	if part == nil {
-		fmt.Printf("Part %q does not exist.\n", spn)
+		c.Printf("Part %q does not exist.\n", spn)
 		return
 	}
 
 	err = pnsql.DeleteEpicPart(part)
 	if err != nil {
-		fmt.Printf("Error removing part %s. Err=%v", part.PNString(), err)
+		c.Printf("Error removing part %s. Err=%v", part.PNString(), err)
 		return
 	}
-	fmt.Printf("Success. Part %s removed.\n", part.PNString())
+	c.Printf("Success. Part %s removed.\n", part.PNString())
 	return
 }

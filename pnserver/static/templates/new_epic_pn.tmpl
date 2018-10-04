@@ -52,7 +52,7 @@ function toggleActiveDesigners() {
     fillDesigners("nep_designer_field", gShowAllDesigners);
 }
 
-function dofillSubsystem() {
+function doFillSubsystem() {
     fillSubsystem("nep_subsystem_field", "nep_project_field");
 }
 
@@ -62,6 +62,20 @@ function startUp() {
     fillSubsystem("nep_subsystem_field", "nep_project_field");
     fillDesigners("nep_designer_field", gShowAllDesigners);
     fillPartTypes("nep_parttype_field");
+    var ok = setSelectionBox("nep_designer_field", "{{.Defaults.Designer}}");
+    if (!ok) {
+        toggleActiveDesigners();
+        setSelectionBox("nep_designer_field", "{{.Defaults.Designer}}");
+    }
+    ok = setSelectionBox("nep_project_field", "{{.Defaults.Project}}");
+    if (!ok) {
+        toggleActiveProjects();
+        setSelectionBox("nep_project_field", "{{.Defaults.Project}}");
+    }
+    doFillSubsystem();
+    setSelectionBox("nep_subsystem_field", "{{.Defaults.Subsystem}}");
+    setSelectionBox("nep_parttype_field", "{{.Defaults.PartType}}");
+    setTextBox("nep_desc_field", "{{.Defaults.Description}}");
 }
 
 </script>
@@ -77,7 +91,7 @@ function startUp() {
             <div class="inputform_paramblock" id="nep_project_block">
                 <div class="inputform_label" id="nep_project_label">Project</div>
                 <div class="inputform_selection">
-                    <select id="nep_project_field" name="Project" onchange="dofillSubsystem()">
+                    <select id="nep_project_field" name="Project" onchange="doFillSubsystem()">
                     </select>
                 </div>
                 <div id="nep_project_active_div" class="active_btn_div">
@@ -126,7 +140,6 @@ function startUp() {
         </div>
 
         <div style="clear: both;"></div>
-        <div class="inputform_paramblock">
 
         <div class="btn_form_submit_div">
             <input class="btn_form_submit" type="submit" value="Submit">
@@ -138,6 +151,10 @@ function startUp() {
     <div class="inputfrom_instructions">
     {{.Instructions}}
     </div> 
+{{end}}
+
+{{if .ErrorMessage}}
+    <div class="inputform_msg_err"> {{.ErrorMessage}} </div>
 {{end}}
 
 </div>

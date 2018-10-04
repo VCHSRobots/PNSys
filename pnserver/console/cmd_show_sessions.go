@@ -17,7 +17,7 @@ func init() {
 	RegistorCmd("show-sessions", "", "Shows current sessions.", handle_showsessions)
 }
 
-func handle_showsessions(cmdline string) {
+func handle_showsessions(c *Context, cmdline string) {
 	lst := sessions.GetAllSessions()
 	tbl := util.NewTable("Ref#", "Name", "ClientIP", "Login Time", "Last Access", "Elp (mins)", "Auth Cookie")
 	for i, c := range lst {
@@ -28,5 +28,5 @@ func handle_showsessions(cmdline string) {
 			fmt.Sprintf("%6.1f", elp.Minutes()),
 			c.AuthCookie)
 	}
-	fmt.Printf("\n%s\n", tbl.Text())
+	c.Printf("\n%s\n", tbl.Text())
 }

@@ -19,7 +19,7 @@ type Command struct {
 	CmdName  string
 	ArgLine  string
 	HelpLine string
-	Handler  func(cmd string)
+	Handler  func(c *Context, cmd string)
 }
 
 var gCmds []*Command
@@ -39,7 +39,7 @@ func cmdsorter(i, j int) bool {
 }
 
 // Registor a command that will be avaliable at the console.
-func RegistorCmd(name, argline, helpline string, handler func(string)) {
+func RegistorCmd(name, argline, helpline string, handler func(*Context, string)) {
 	if gCmds == nil {
 		gCmds = make([]*Command, 0, 10)
 	}
@@ -57,7 +57,15 @@ func SetHistoryFile(filename string) {
 	gHistoryFile = filename
 }
 
-// Start a console loop.  Runs forever.  Should be called as a go command.
+// ExecuteCommand will execute a command outside a command loop.  Suitable for
+// a web interface.  No history is maintained.
+func ExecuteCommand(cmdline string) string {
+	c := NewContext(Context_External)
+	execute_cmd(c, cmdline)
+	return c.Output()
+}
+
+// Start a console loop.  Runs forever.  Should be called as a go func.
 func ConsoleLoop() {
 	gConsole = liner.NewLiner()
 
@@ -96,7 +104,9 @@ func ConsoleLoop() {
 		}
 		if !util.Blank(cmdline) {
 			gConsole.AppendHistory(cmdline)
-			execute_cmd(cmdline)
+			c := NewContext(Context_Internal)
+			execute_cmd(c, cmdline)
+			fmt.Printf("%s", c.Output())
 		}
 	}
 }
@@ -111,7 +121,7 @@ func write_history() {
 	f.Close()
 }
 
-func execute_cmd(cmdline string) {
+func execute_cmd(c *Context, cmdline string) {
 
 	cmdline = strings.TrimSpace(cmdline)
 	if cmdline == "" {
@@ -123,17 +133,21 @@ func execute_cmd(cmdline string) {
 	}
 	cmd := strings.TrimSpace(cmdwords[0])
 	if cmd == "exit" || cmd == "quit" {
+		if c.IsExternal() {
+			c.Printf("Cannot use this command from an external connection.\n")
+			return
+		}
 		write_history()
 		gConsole.Close()
 		os.Exit(0)
 		return
 	}
-	for _, c := range gCmds {
-		if cmd == c.CmdName {
-			c.Handler(cmdline)
+	for _, x := range gCmds {
+		if cmd == x.CmdName {
+			x.Handler(c, cmdline)
 			return
 		}
 	}
-	fmt.Printf("Unknown Command. Use ? or help.\n")
+	c.Printf("Unknown Command. Use ? or help.\n")
 	return
 }

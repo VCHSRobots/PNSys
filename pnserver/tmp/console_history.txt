@@ -568,3 +568,13 @@ exexit
 exit
 exot
 exit
+show-gin
+exit
+show-gin
+exit
+show-gin
+exit
+show-gin
+exit
+show-gin
+exit

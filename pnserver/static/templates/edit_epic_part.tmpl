@@ -115,11 +115,21 @@ function startUp() {
     </div>
 
     <div style="clear: both;"></div>
-    <div class="inputform_paramblock">
     <div class="btn_form_submit_div">
         <input class="btn_form_submit" type="submit" value="Submit">
     </div>
     </form>
 </div>
+
+{{if .Instructions}} 
+    <div class="inputfrom_instructions">
+    {{.Instructions}}
+    </div> 
+{{end}}
+
+{{if .ErrorMessage}}
+    <div class="inputform_msg_err"> {{.ErrorMessage}} </div>
+{{end}}
+
 
 </div>

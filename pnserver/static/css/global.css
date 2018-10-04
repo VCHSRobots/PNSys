@@ -119,9 +119,13 @@ p {font-size: 14pt; font: Arial, Univers, sans-serif; padding: 5px; margin-right
                  border-color: blue; width: 95%;  max-width: 700px; padding: 10px; }
 
 .inputform_msg_area {width: 70%; float: left; font-size: 16pt; margin-left: 30px;}
-.inputform_msg      {border: 2px; border-style: solid; border-color: green; width: 90%; max-width: 500px; 
+.inputform_msg      {border: 2px; border-style: solid; border-color: green; width: 90%; 
                      padding-left: 10px; padding-right: 10px; padding-top: 4px; padding-bottom: 4px;
                      margin-bottom: 15px; margin-top: 10px; font-size: 16pt; font-style: bold;}
+.inputform_msg_err  {border: 2px; border-style: solid; border-color: red; width: 90%;  
+                     padding-left: 10px; padding-right: 10px; padding-top: 4px; padding-bottom: 4px;
+                     margin-bottom: 15px; margin-top: 10px; font-size: 16pt; font-style: bold; }
+
 #inputform_error_msg   {color: red; }
 #inputform_success_msg {color: black; }
 

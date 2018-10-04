@@ -9,7 +9,6 @@ package console
 import (
 	"epic/lib/util"
 	"epic/pnserver/pnsql"
-	"fmt"
 )
 
 var gTopic_add_subsystem string = `
@@ -29,36 +28,36 @@ func init() {
 	RegistorArg("ppp-ss", "A subsystem Id, consisting of both the project and subsystem Ids.")
 }
 
-func handle_add_subsystem(cmdline string) {
+func handle_add_subsystem(c *Context, cmdline string) {
 	params := make(map[string]string, 10)
 	args, err := ParseCmdLine(cmdline, params)
 	if err != nil {
-		fmt.Printf("%v\n", err)
+		c.Printf("%v\n", err)
 		return
 	}
 	if len(args) < 2 {
-		fmt.Printf("Not enough args.\n")
+		c.Printf("Not enough args.\n")
 		return
 	}
 	projectid, subsystemid, err := pnsql.SplitProjectId(args[1])
 	if err != nil {
-		fmt.Printf("%v\n", err)
+		c.Printf("%v\n", err)
 		return
 	}
 	if subsystemid == "" {
-		fmt.Printf("Subsystem not specified.\n")
+		c.Printf("Subsystem not specified.\n")
 		return
 	}
 	desc, ok := util.MapAlias(params, "description", "Description", "Desc", "desc")
 	if !ok || util.Blank(desc) {
-		fmt.Printf("A description must be provided.\n")
+		c.Printf("A description must be provided.\n")
 		return
 	}
 
 	err = pnsql.AddSubsystem(projectid, subsystemid, desc)
 	if err != nil {
-		fmt.Printf("%v\n", err)
+		c.Printf("%v\n", err)
 		return
 	}
-	fmt.Printf("Success.\n")
+	c.Printf("Success.\n")
 }

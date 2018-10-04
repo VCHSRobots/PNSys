@@ -37,6 +37,7 @@ type SupplierPart struct {
 
 var gSupplierParts []*SupplierPart
 var gSupplierPartsLock sync.Mutex
+var gSupplierNewPartLock sync.Mutex // When generating a new part with a new sequence number
 
 func InvalidateSupplierPartsCache() {
 	gSupplierPartsLock.Lock()
@@ -371,6 +372,46 @@ func SetSupplierPartDateIssued(p *SupplierPart, dateissued time.Time) error {
 	return nil
 }
 
+func NewSupplierPartInSequence(Designer, Category, Vendor, VendorPN, WebLink, Description string) (*SupplierPart, error) {
+	if !IsDesigner(Designer) {
+		return nil, fmt.Errorf("Designer %s unknown.", Designer)
+	}
+	if !IsSupplierCategory(Category) {
+		return nil, fmt.Errorf("Category %s unknown.", Category)
+	}
+	if util.Blank(Description) {
+		return nil, fmt.Errorf("Description cannot be blank.")
+	}
+
+	gSupplierNewPartLock.Lock()
+	defer gSupplierNewPartLock.Unlock()
+	InvalidateSupplierPartsCache()
+	lastseq := 0
+	for _, part := range GetSupplierParts() {
+		if part.Category != Category {
+			continue
+		}
+		if part.SequenceNum > lastseq {
+			lastseq = part.SequenceNum
+		}
+	}
+	p := &SupplierPart{}
+	p.SupplierPartPN = &SupplierPartPN{}
+
+	p.PID = uuid.New()
+	p.Category = Category
+	p.SequenceNum = lastseq + 1
+	p.Description = Description
+	p.Vendor = Vendor
+	p.VendorPN = VendorPN
+	p.WebLink = WebLink
+	p.Designer = Designer
+	p.DateIssued = time.Now()
+	err := write_supplier_part(p)
+	InvalidateSupplierPartsCache()
+	return p, err
+}
+
 func AddSupplierPart(p *SupplierPart) error {
 	if err := p.CheckPNFormat(); err != nil {
 		return err
@@ -403,7 +444,19 @@ func AddSupplierPart(p *SupplierPart) error {
 	if util.Blank(p.Description) {
 		return fmt.Errorf("Description cannot be blank.")
 	}
+	err := write_supplier_part(p)
+	// Now put the part into the cache.  No need to refresh directly from disk?
+	gSupplierPartsLock.Lock()
+	defer gSupplierPartsLock.Unlock()
+	if err != nil {
+		InvalidateSupplierPartsCache()
+	} else {
+		gSupplierParts = append(gSupplierParts, p)
+	}
+	return nil
+}
 
+func write_supplier_part(p *SupplierPart) error {
 	stmt, err := m_db.Prepare("insert SupplierParts set" +
 		" PID=?," +
 		" Category=?," +
@@ -427,18 +480,8 @@ func AddSupplierPart(p *SupplierPart) error {
 		log.Errorf("%v", err)
 		return err
 	}
-	bForceRefresh := false
 	if n, _ := r.RowsAffected(); n != 1 {
 		log.Errorf("Wrong number of affected rows (%d) on insert of supplier part.", n)
-		bForceRefresh = true
-	}
-	// Now put the part into the cache.  No need to refresh directly from disk?
-	gSupplierPartsLock.Lock()
-	defer gSupplierPartsLock.Unlock()
-	gSupplierParts = append(gSupplierParts, p)
-	// Think about refreshing directly from disk?
-	if bForceRefresh {
-		InvalidateSupplierPartsCache()
 	}
 	return nil
 }

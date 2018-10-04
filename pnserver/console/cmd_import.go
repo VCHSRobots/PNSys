@@ -10,7 +10,6 @@ import (
 	"encoding/csv"
 	"epic/lib/util"
 	"epic/pnserver/pnsql"
-	"fmt"
 	"io"
 	"os"
 	"strconv"
@@ -45,39 +44,39 @@ func init() {
 	RegistorTopic("import", gTopic_import)
 }
 
-func handle_import(cmdline string) {
+func handle_import(c *Context, cmdline string) {
 	params := make(map[string]string, 10)
 	args, err := ParseCmdLine(cmdline, params)
 	if err != nil {
-		fmt.Printf("%v\n", err)
+		c.Printf("%v\n", err)
 		return
 	}
 	if len(args) < 2 {
-		fmt.Printf("Not enough args.\n")
+		c.Printf("Not enough args.\n")
 		return
 	}
 	fn := args[1]
 	filetype, ok := util.MapAlias(params, "Type", "type")
 	if !ok {
-		fmt.Printf("The type parameters must be specified. See 'help import'.\n")
+		c.Printf("The type parameters must be specified. See 'help import'.\n")
 		return
 	}
 	filetype = strings.ToLower(filetype)
 	if filetype == "epic" {
-		import_epic_csv(fn)
+		import_epic_csv(c, fn)
 		return
 	}
 	if filetype == "supplier" {
-		import_supplier_csv(fn)
+		import_supplier_csv(c, fn)
 		return
 	}
-	fmt.Printf("Unknown type (%q). Use either 'epic' or 'supplier'.\n", filetype)
+	c.Printf("Unknown type (%q). Use either 'epic' or 'supplier'.\n", filetype)
 }
 
-func import_supplier_csv(fn string) {
+func import_supplier_csv(c *Context, fn string) {
 	fi, err := os.Open(fn)
 	if err != nil {
-		fmt.Printf("Unable to open file %q. Err=%v\n", fn, err)
+		c.Printf("Unable to open file %q. Err=%v\n", fn, err)
 		return
 	}
 	defer fi.Close()
@@ -94,7 +93,7 @@ func import_supplier_csv(fn string) {
 		elp := time.Now().Sub(t0)
 		if elp > 20*time.Second {
 			t0 = time.Now()
-			fmt.Printf("Still working. Lines Processed=%d, Parts Added=%d\n", ilinenum, nadd)
+			c.Printf("Still working. Lines Processed=%d, Parts Added=%d\n", ilinenum, nadd)
 		}
 		ilinenum++
 		record, err := rdr.Read()
@@ -104,11 +103,11 @@ func import_supplier_csv(fn string) {
 			break
 		}
 		if err != nil {
-			fmt.Printf("Read error on line %d. Aborting. Err=%v\n", ilinenum, err)
+			c.Printf("Read error on line %d. Aborting. Err=%v\n", ilinenum, err)
 			return
 		}
 		if len(record) < 8 {
-			fmt.Printf("Line %d has too few fields, skipping.\n", ilinenum)
+			c.Printf("Line %d has too few fields, skipping.\n", ilinenum)
 			continue
 		}
 
@@ -123,21 +122,21 @@ func import_supplier_csv(fn string) {
 
 		_, err = strconv.Atoi(sseq)
 		if err != nil {
-			fmt.Printf("Bad sequence number on line %d\n", ilinenum)
+			c.Printf("Bad sequence number on line %d\n", ilinenum)
 			continue
 		}
 		date, err := util.ParseGenericTime(sdate)
 		if err != nil {
-			fmt.Printf("Bad date format on line %d. Err=%v\n", ilinenum, err)
+			c.Printf("Bad date format on line %d. Err=%v\n", ilinenum, err)
 			continue
 		}
 		pn, err := pnsql.StrToSupplierPartPN(spn)
 		if err != nil {
-			fmt.Printf("%v. On line %d.\n", err, ilinenum)
+			c.Printf("%v. On line %d.\n", err, ilinenum)
 			continue
 		}
 		if util.Blank(sdesc) {
-			fmt.Printf("Blank description on line %d\n", ilinenum)
+			c.Printf("Blank description on line %d\n", ilinenum)
 			continue
 		}
 
@@ -152,21 +151,21 @@ func import_supplier_csv(fn string) {
 
 		err = pnsql.AddSupplierPart(p)
 		if err != nil {
-			fmt.Printf("Unable to add supplier part (line %d, pn %s). Err=%v\n", ilinenum,
+			c.Printf("Unable to add supplier part (line %d, pn %s). Err=%v\n", ilinenum,
 				p.PNString(), err)
 			continue
 		} else {
 			nadd++
 		}
 	}
-	fmt.Printf("Finished!\n")
-	fmt.Printf("%d lines read.  %d parts added to database.\n", ilinenum, nadd)
+	c.Printf("Finished!\n")
+	c.Printf("%d lines read.  %d parts added to database.\n", ilinenum, nadd)
 }
 
-func import_epic_csv(fn string) {
+func import_epic_csv(c *Context, fn string) {
 	fi, err := os.Open(fn)
 	if err != nil {
-		fmt.Printf("Unable to open file %q. Err=%v\n", fn, err)
+		c.Printf("Unable to open file %q. Err=%v\n", fn, err)
 		return
 	}
 	defer fi.Close()
@@ -183,7 +182,7 @@ func import_epic_csv(fn string) {
 		elp := time.Now().Sub(t0)
 		if elp > 20*time.Second {
 			t0 = time.Now()
-			fmt.Printf("Still working. Lines Processed=%d, Parts Added=%d\n", ilinenum, nadd)
+			c.Printf("Still working. Lines Processed=%d, Parts Added=%d\n", ilinenum, nadd)
 		}
 		ilinenum++
 		record, err := rdr.Read()
@@ -193,11 +192,11 @@ func import_epic_csv(fn string) {
 			break
 		}
 		if err != nil {
-			fmt.Printf("Read error on line %d. Aborting. Err=%v\n", ilinenum, err)
+			c.Printf("Read error on line %d. Aborting. Err=%v\n", ilinenum, err)
 			return
 		}
 		if len(record) < 5 {
-			fmt.Printf("Line %d has too few fields, skipping.\n", ilinenum)
+			c.Printf("Line %d has too few fields, skipping.\n", ilinenum)
 			continue
 		}
 		sseq := record[0]      // Sequence number
@@ -208,21 +207,21 @@ func import_epic_csv(fn string) {
 
 		_, err = strconv.Atoi(sseq)
 		if err != nil {
-			fmt.Printf("Bad sequence number on line %d\n", ilinenum)
+			c.Printf("Bad sequence number on line %d\n", ilinenum)
 			continue
 		}
 		date, err := time.Parse("01/02/06", sdate)
 		if err != nil {
-			fmt.Printf("Bad date format on line %d. Err=%v\n", ilinenum, err)
+			c.Printf("Bad date format on line %d. Err=%v\n", ilinenum, err)
 			continue
 		}
 		err = checkepicpn(spn)
 		if err != nil {
-			fmt.Printf("%v. On line %d.\n", err, ilinenum)
+			c.Printf("%v. On line %d.\n", err, ilinenum)
 			continue
 		}
 		if util.Blank(sdesc) {
-			fmt.Printf("Blank description on line %d\n", ilinenum)
+			c.Printf("Blank description on line %d\n", ilinenum)
 			continue
 		}
 		p := &pnsql.EpicPart{}
@@ -231,18 +230,18 @@ func import_epic_csv(fn string) {
 		p.DateIssued = date
 		p.EpicPN, err = pnsql.StrToEpicPN(spn)
 		if err != nil {
-			fmt.Printf("%v. On line %d\n", err, ilinenum)
+			c.Printf("%v. On line %d\n", err, ilinenum)
 			continue
 		}
 		err = pnsql.AddEpicPart(p)
 		if err != nil {
-			fmt.Printf("Unable to add epic part (line %d, pn %s). Err=%v\n", ilinenum,
+			c.Printf("Unable to add epic part (line %d, pn %s). Err=%v\n", ilinenum,
 				p.PNString(), err)
 			continue
 		} else {
 			nadd++
 		}
 	}
-	fmt.Printf("Finished!\n")
-	fmt.Printf("%d lines read.  %d parts added to database.\n", ilinenum, nadd)
+	c.Printf("Finished!\n")
+	c.Printf("%d lines read.  %d parts added to database.\n", ilinenum, nadd)
 }

@@ -151,6 +151,15 @@ func IsSubsystem(ProjectId, SubsystemId string) bool {
 	return false
 }
 
+func IsPartType(PartType string) bool {
+	for _, t := range GetPartTypes() {
+		if t.Digit == PartType {
+			return true
+		}
+	}
+	return false
+}
+
 func GetProject(ProjectId string) (*Project, error) {
 	for _, p := range GetProjects() {
 		if p.ProjectId == ProjectId {

@@ -1,0 +1,69 @@
+// --------------------------------------------------------------------
+// admin.go -- Runs the admin page
+//
+// Created 2018-10-03 DLB
+// --------------------------------------------------------------------
+
+package pages
+
+import (
+	"encoding/base64"
+	"epic/lib/log"
+	"github.com/gin-gonic/gin"
+)
+
+func init() {
+	RegisterPage("Admin", Invoke_GET, authorizer, handle_admin)
+	RegisterPage("AdminCommand", Invoke_POST, authorizer, handle_command)
+}
+
+func handle_admin(c *gin.Context) {
+	data := GetHeaderData(c)
+	data.StyleSheets = []string{"admin"}
+	if !data.IsAdmin {
+		SendMessagePagef(c, "How did you get here?<br><br>This page is only for Admin Users!<br>")
+		return
+	}
+	SendPage(c, data, "header", "menubar", "admin", "footer")
+}
+
+type CmdResponse struct {
+	ErrorMessage  string
+	CommandOutput string
+}
+
+func handle_command(c *gin.Context) {
+	data := GetHeaderData(c)
+	if !data.IsAdmin {
+		log.Infof("Non Admin user attemting to use admin command!  Returning nothing.")
+		sendCmdResponse(c, "")
+		return
+	}
+	if c.ContentType() != "text/plain" {
+		log.Infof("Wrong request time (%s) for admin command. Returning nothing.", c.ContentType())
+		sendCmdResponse(c, "")
+		return
+	}
+
+	raw, err := c.GetRawData()
+	if err != nil {
+		log.Infof("Unable to get raw data for admin command. Err=%v", err)
+		sendCmdResponse(c, "")
+		return
+	}
+	cmd_bytes, err := base64.StdEncoding.DecodeString(string(raw))
+	if err != nil {
+		log.Infof("Unable to decode base64 for admin command.  Recieved=%q. Err=%v", string(raw), err)
+		sendCmdResponse(c, "")
+	}
+	log.Infof("Admin command received: %s", string(cmd_bytes))
+	sendCmdResponse(c, "Received: \n \""+string(cmd_bytes)+"\"")
+}
+
+func sendCmdResponse(c *gin.Context, txt string) {
+	txt64 := base64.StdEncoding.EncodeToString([]byte(txt))
+	response := &CmdResponse{}
+	response.ErrorMessage = ""
+	response.CommandOutput = txt64
+	c.JSON(200, response)
+}

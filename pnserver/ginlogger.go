@@ -12,8 +12,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-var mGinLogging bool = false
-
 type GinLoggerType string
 
 const (

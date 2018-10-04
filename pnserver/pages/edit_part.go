@@ -46,54 +46,6 @@ func init() {
 	RegisterPage("/EditSupplierPNPost", Invoke_POST, authorizer, handle_edit_supplier_post)
 }
 
-func handle_edit_epic_post(c *gin.Context) {
-	type submitdata struct {
-		PartNumber  string `form:"PartNumber"`
-		Designer    string `form:"Designer"`
-		Description string `form:"Description"`
-	}
-	var data submitdata
-	err := c.ShouldBind(&data)
-	if err != nil {
-		err = fmt.Errorf("Bind error for EditEpicPNPost. Err=%v", err)
-		log.Errorf("%v", err)
-		SendErrorPage(c, err)
-		return
-	}
-	msg := fmt.Sprintf("Data:<br>")
-	msg += fmt.Sprintf("PartNumber  = %s<br>", data.PartNumber)
-	msg += fmt.Sprintf("Designer    = %s<br>", data.Designer)
-	msg += fmt.Sprintf("Description = %s<br>", data.Description)
-	SendErrorPagef(c, msg)
-}
-
-func handle_edit_supplier_post(c *gin.Context) {
-	type submitdata struct {
-		PartNumber  string `form:"PartNumber"`
-		Vendor      string `form:"Vendor"`
-		VendorPN    string `form:"VendorPN"`
-		WebLink     string `form:"WebLink"`
-		Designer    string `form:"Designer"`
-		Description string `form:"Description"`
-	}
-	var data submitdata
-	err := c.ShouldBind(&data)
-	if err != nil {
-		err = fmt.Errorf("Bind error for EditSupplierPNPost. Err=%v", err)
-		log.Errorf("%v", err)
-		SendErrorPage(c, err)
-		return
-	}
-	msg := fmt.Sprintf("Data:<br>")
-	msg += fmt.Sprintf("PartNumber  = %s<br>", data.PartNumber)
-	msg += fmt.Sprintf("Vendor      = %s<br>", data.Vendor)
-	msg += fmt.Sprintf("VendorPN    = %s<br>", data.VendorPN)
-	msg += fmt.Sprintf("WebLink     = %s<br>", data.WebLink)
-	msg += fmt.Sprintf("Designer    = %s<br>", data.Designer)
-	msg += fmt.Sprintf("Description = %s<br>", data.Description)
-	SendErrorPagef(c, msg)
-}
-
 func handle_edit_part(c *gin.Context) {
 	data := &EditPartData{}
 	data.HeaderData = GetHeaderData(c)
@@ -174,4 +126,51 @@ func handle_edit_part(c *gin.Context) {
 		SendErrorPagef(c, "EditPart called with a bogus part number! (%s)", pn)
 		return
 	}
+}
+
+func handle_edit_epic_post(c *gin.Context) {
+	type submitdata struct {
+		PartNumber  string `form:"PartNumber"`
+		Designer    string `form:"Designer"`
+		Description string `form:"Description"`
+	}
+	var data submitdata
+	err := c.ShouldBind(&data)
+	if err != nil {
+		err = fmt.Errorf("Bind error for EditEpicPNPost. Err=%v", err)
+		log.Errorf("%v", err)
+		SendErrorPage(c, err)
+		return
+	}
+	msg := fmt.Sprintf("Submitted Data:<br>")
+	msg += fmt.Sprintf("PartNumber  = %s<br>", data.PartNumber)
+	msg += fmt.Sprintf("Designer    = %s<br>", data.Designer)
+	msg += fmt.Sprintf("Description = %s<br>", data.Description)
+	SendMessagePagef(c, msg)
+}
+
+func handle_edit_supplier_post(c *gin.Context) {
+	type submitdata struct {
+		PartNumber  string `form:"PartNumber"`
+		Vendor      string `form:"Vendor"`
+		VendorPN    string `form:"VendorPN"`
+		WebLink     string `form:"WebLink"`
+		Designer    string `form:"Designer"`
+		Description string `form:"Description"`
+	}
+	var data submitdata
+	err := c.ShouldBind(&data)
+	if err != nil {
+		err = fmt.Errorf("Bind error for EditSupplierPNPost. Err=%v", err)
+		SendErrorPage(c, err)
+		return
+	}
+	msg := fmt.Sprintf("Data:<br>")
+	msg += fmt.Sprintf("PartNumber  = %s<br>", data.PartNumber)
+	msg += fmt.Sprintf("Vendor      = %s<br>", data.Vendor)
+	msg += fmt.Sprintf("VendorPN    = %s<br>", data.VendorPN)
+	msg += fmt.Sprintf("WebLink     = %s<br>", data.WebLink)
+	msg += fmt.Sprintf("Designer    = %s<br>", data.Designer)
+	msg += fmt.Sprintf("Description = %s<br>", data.Description)
+	SendMessagePagef(c, msg)
 }

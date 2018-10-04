@@ -8,3 +8,15 @@ hostaddr=:80
 // Provide the password that will be used with mysql
 pw=?????
 
+// You can bypass logins for development by providing the name of the
+// designer you wish to be automatically logged in as a user.  
+// dev=name
+
+// With 'consolelog' you can control weither or not log messages are sent
+// to the console at startup.
+consolelog=true
+
+// GIN messages always go to the log file.  However, if you are directing
+// log messages to the terminal (usually for development or debugging)
+// you can hide GIN messages and keep everything else with the following.
+ginconsole=false

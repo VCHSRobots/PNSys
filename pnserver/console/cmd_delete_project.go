@@ -8,7 +8,6 @@ package console
 
 import (
 	"epic/pnserver/pnsql"
-	"fmt"
 )
 
 var gTopic_delete_project string = `
@@ -25,22 +24,22 @@ func init() {
 	RegistorTopic("delete-project", gTopic_delete_project)
 }
 
-func handle_delete_project(cmdline string) {
+func handle_delete_project(c *Context, cmdline string) {
 	params := make(map[string]string, 10)
 	args, err := ParseCmdLine(cmdline, params)
 	if err != nil {
-		fmt.Printf("%v\n", err)
+		c.Printf("%v\n", err)
 		return
 	}
 	if len(args) < 2 {
-		fmt.Printf("Not enought args.\n")
+		c.Printf("Not enought args.\n")
 		return
 	}
 	projectid := args[1]
 	err = pnsql.DeleteProject(projectid)
 	if err != nil {
-		fmt.Printf("%v\n", err)
+		c.Printf("%v\n", err)
 		return
 	}
-	fmt.Printf("Success.\n")
+	c.Printf("Success.\n")
 }

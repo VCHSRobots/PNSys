@@ -8,7 +8,6 @@ package console
 
 import (
 	"epic/pnserver/pnsql"
-	"fmt"
 )
 
 var gTopic_delete_thing string = `
@@ -32,23 +31,23 @@ func init() {
 	RegistorTopic("delete", gTopic_delete_thing)
 }
 
-func handle_delete_thing(cmdline string) {
+func handle_delete_thing(c *Context, cmdline string) {
 	params := make(map[string]string, 10)
 	args, err := ParseCmdLine(cmdline, params)
 	if err != nil {
-		fmt.Printf("%v\n", err)
+		c.Printf("%v\n", err)
 		return
 	}
 	if len(args) < 2 {
-		fmt.Printf("Not enough args.\n")
+		c.Printf("Not enough args.\n")
 		return
 	}
 	thing := args[1]
 	prtresult := func(err error) {
 		if err != nil {
-			fmt.Printf("%v\n", err)
+			c.Printf("%v\n", err)
 		} else {
-			fmt.Printf("Success.\n")
+			c.Printf("Success.\n")
 		}
 	}
 
@@ -63,11 +62,11 @@ func handle_delete_thing(cmdline string) {
 	if pt == pnsql.PNType_Supplier {
 		part, err := pnsql.GetSupplierPart(thing)
 		if err != nil {
-			fmt.Printf("Database error while searching for %s. Err=%v\n", thing, err)
+			c.Printf("Database error while searching for %s. Err=%v\n", thing, err)
 			return
 		}
 		if part == nil {
-			fmt.Printf("Part %s not found.\n", thing)
+			c.Printf("Part %s not found.\n", thing)
 			return
 		}
 		prtresult(pnsql.DeleteSupplierPart(part))
@@ -79,11 +78,11 @@ func handle_delete_thing(cmdline string) {
 		if err == nil {
 			part, err := pnsql.GetEpicPart(pn.PNString())
 			if err != nil {
-				fmt.Printf("Database error on search for part. Err=%v\n", err)
+				c.Printf("Database error on search for part. Err=%v\n", err)
 				return
 			}
 			if part == nil {
-				fmt.Printf("Part %s not found.\n", pn.PNString())
+				c.Printf("Part %s not found.\n", pn.PNString())
 				return
 			}
 			prtresult(pnsql.DeleteEpicPart(part))
@@ -100,5 +99,5 @@ func handle_delete_thing(cmdline string) {
 		}
 		return
 	}
-	fmt.Printf("%q cannot be indentified.\n", thing)
+	c.Printf("%q cannot be indentified.\n", thing)
 }

@@ -9,18 +9,17 @@ package console
 import (
 	"epic/lib/util"
 	"epic/pnserver/pnsql"
-	"fmt"
 )
 
 func init() {
 	RegistorCmd("list-parttypes", "", "Lists all the part types for epic part numbers.", handle_list_parttypes)
 }
 
-func handle_list_parttypes(cmdline string) {
+func handle_list_parttypes(c *Context, cmdline string) {
 	lst := pnsql.GetPartTypes()
 	tbl := util.NewTable("Digit", "Part Type")
 	for _, c := range lst {
 		tbl.AddRow(c.Digit, c.Description)
 	}
-	fmt.Printf("\n%s\n", tbl.Text())
+	c.Printf("\n%s\n", tbl.Text())
 }

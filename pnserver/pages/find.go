@@ -7,6 +7,7 @@
 package pages
 
 import (
+	"epic/lib/log"
 	"epic/lib/util"
 	"epic/pnserver/pnsql"
 	"fmt"
@@ -16,14 +17,7 @@ import (
 	"time"
 )
 
-type FindPartData struct {
-	*HeaderData
-	*SelectionBoxData
-}
-
-type FindPartPost struct {
-	*HeaderData
-	*TableData
+type FindPartFields struct {
 	MainType    string
 	Designer    string
 	Project     string
@@ -36,22 +30,19 @@ type FindPartPost struct {
 	Description string
 	DateBefore  string
 	DateAfter   string
-	ErrorMsg    string
 }
 
-type TFindSubmitData struct {
-	MainType    string `form:MainType`
-	Designer    string `form:Designer`
-	Project     string `form:Project`
-	Subsystem   string `form:Subsystem`
-	PartType    string `form:PartType`
-	Category    string `form:Category`
-	Vendor      string `form:Vendor`
-	VendorPN    string `form:VendorPN`
-	WebLink     string `form:WebLink`
-	Description string `form:Description`
-	DateBefore  string `form:DateBefore`
-	DateAfter   string `form:DateAfter`
+type FindPartData struct {
+	*HeaderData
+	*SelectionBoxData
+	Defaults *FindPartFields
+}
+
+type FindPartPost struct {
+	*HeaderData
+	*TableData
+	FindPartFields
+	ErrorMsg string
 }
 
 func init() {
@@ -80,23 +71,68 @@ func handle_find_with_error(c *gin.Context, errmsg string) {
 		return
 	}
 
+	var sd *FindPartFields
+	ses := GetSession(c)
+	t, ok := ses.Data["FindPageDefaults"]
+	if !ok {
+		sd = &FindPartFields{}
+	} else {
+		sd, ok = t.(*FindPartFields)
+		if !ok {
+			log.Errorf("Unable to type convert EpicPageDefaults in handle_find.")
+			sd = &FindPartFields{}
+		}
+	}
+	data.Defaults = sd
+
 	SendPage(c, data, "header", "menubar", "find", "footer")
 }
 
+type TFindSubmitData struct {
+	MainType    string `form:MainType`
+	Designer    string `form:Designer`
+	Project     string `form:Project`
+	Subsystem   string `form:Subsystem`
+	PartType    string `form:PartType`
+	Category    string `form:Category`
+	Vendor      string `form:Vendor`
+	VendorPN    string `form:VendorPN`
+	WebLink     string `form:WebLink`
+	Description string `form:Description`
+	DateBefore  string `form:DateBefore`
+	DateAfter   string `form:DateAfter`
+}
+
 func handle_find_post(c *gin.Context) {
+
 	var sdata TFindSubmitData
 	err := c.ShouldBind(&sdata)
 	if err != nil {
 		SendErrorPagef(c, "Unable to bind data in Find Post. Err=%v", err)
 		return
 	}
+	sd := &FindPartFields{}
+	sd.MainType = sdata.MainType
+	sd.Designer = sdata.Designer
+	sd.Project = sdata.Project
+	sd.Subsystem = sdata.Subsystem
+	sd.PartType = sdata.PartType
+	sd.Category = sdata.Category
+	sd.Vendor = sdata.Vendor
+	sd.VendorPN = sdata.VendorPN
+	sd.WebLink = sdata.WebLink
+	sd.Description = sdata.Description
+	sd.DateBefore = sdata.DateBefore
+	sd.DateAfter = sdata.DateAfter
+	ses := GetSession(c)
+	ses.Data["FindPageDefaults"] = sd
 
 	data := &FindPartPost{}
 	data.HeaderData = GetHeaderData(c)
 
 	data.PageTitle = "Find Results"
 	data.MainType = sdata.MainType
-	data.Designer = sdata.Designer
+	data.FindPartFields.Designer = sdata.Designer
 	data.Project = sdata.Project
 	data.Subsystem = sdata.Subsystem
 	data.PartType = sdata.PartType

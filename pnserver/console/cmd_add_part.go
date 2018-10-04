@@ -9,7 +9,6 @@ package console
 import (
 	"epic/lib/util"
 	"epic/pnserver/pnsql"
-	"fmt"
 	"time"
 )
 
@@ -34,67 +33,67 @@ func init() {
 	RegistorTopic("add-part", gTopic_add_part)
 }
 
-func handle_add_part(cmdline string) {
+func handle_add_part(c *Context, cmdline string) {
 	params := make(map[string]string, 10)
 	args, err := ParseCmdLine(cmdline, params)
 	if err != nil {
-		fmt.Printf("%v\n", err)
+		c.Printf("%v\n", err)
 		return
 	}
 	if len(args) < 2 {
-		fmt.Printf("Not enough args.\n")
+		c.Printf("Not enough args.\n")
 		return
 	}
 	spn := args[1]
 	tp, _ := pnsql.ClassifyPN(spn)
 	if tp == pnsql.PNType_Epic {
-		add_epic_part(spn, params)
+		add_epic_part(c, spn, params)
 		return
 	}
 	if tp == pnsql.PNType_Supplier {
-		add_supplier_part(spn, params)
+		add_supplier_part(c, spn, params)
 		return
 	}
-	fmt.Printf("Unrecognizable part number (%q)?\n", spn)
+	c.Printf("Unrecognizable part number (%q)?\n", spn)
 	return
 }
 
-func add_epic_part(spn string, params map[string]string) {
+func add_epic_part(c *Context, spn string, params map[string]string) {
 	part, err := pnsql.GetEpicPart(spn)
 	if err != nil {
-		fmt.Printf("Database error while searching for part. Err=%v", err)
+		c.Printf("Database error while searching for part. Err=%v", err)
 		return
 	}
 	if part != nil {
-		fmt.Printf("Part %q current exists.  Cannot overwrite.\n", part.PNString())
+		c.Printf("Part %q current exists.  Cannot overwrite.\n", part.PNString())
 		return
 	}
 	pns, err := pnsql.StrToEpicPN(spn)
 	if err != nil {
-		fmt.Printf("Invalid part number %q. Err=%v\n", spn, err)
+		c.Printf("Invalid part number %q. Err=%v\n", spn, err)
 		return
 	}
 	if !pnsql.IsProject(pns.ProjectId) {
-		fmt.Printf("%s is not a current project.\n", pns.ProjectId)
+		c.Printf("%s is not a current project.\n", pns.ProjectId)
 	}
 	if !pnsql.IsSubsystem(pns.ProjectId, pns.SubsystemId) {
-		fmt.Printf("%s is not a current subsystem in the project %s.\n", pns.SubsystemId, pns.ProjectId)
+		c.Printf("%s is not a current subsystem in the project %s.\n", pns.SubsystemId, pns.ProjectId)
 	}
 	designer, ok := params["Designer"]
 	if !ok {
 		designer, ok = params["designer"]
 	}
 	if !ok {
-		fmt.Printf("A designer must be specified.\n")
+		c.Printf("A designer must be specified.\n")
 		return
 	}
 	if !pnsql.IsDesigner(designer) {
-		fmt.Printf("%s is not a current designer.\n", designer)
+		c.Printf("%s is not a current designer.\n", designer)
 		return
 	}
 	desc, ok := util.MapAlias(params, "Description", "description", "desc")
 	if !ok || util.Blank(desc) {
-		fmt.Printf("A description must be provided.\n")
+		c.Printf("A description must be provided.\n")
 		return
 	}
 	sdate, ok := util.MapAlias(params, "Date", "date", "DateIssued", "dateissued")
@@ -103,7 +102,7 @@ func add_epic_part(spn string, params map[string]string) {
 	}
 	date, err := util.ParseGenericTime(sdate)
 	if err != nil {
-		fmt.Printf("Syntax error in date (%q).\n", sdate)
+		c.Printf("Syntax error in date (%q).\n", sdate)
 		return
 	}
 
@@ -114,26 +113,26 @@ func add_epic_part(spn string, params map[string]string) {
 	pt.DateIssued = date
 	err = pnsql.AddEpicPart(pt)
 	if err != nil {
-		fmt.Printf("Error adding epic part. Err=%v\n", err)
+		c.Printf("Error adding epic part. Err=%v\n", err)
 		return
 	}
 	pnsql.InvalidateEpicPartsCache()
-	fmt.Printf("Success.\n")
+	c.Printf("Success.\n")
 }
 
-func add_supplier_part(spn string, params map[string]string) {
+func add_supplier_part(c *Context, spn string, params map[string]string) {
 	part, err := pnsql.GetSupplierPart(spn)
 	if err != nil {
-		fmt.Printf("Database error while searching for %s. Err=%v\n", part.PNString(), err)
+		c.Printf("Database error while searching for %s. Err=%v\n", part.PNString(), err)
 		return
 	}
 	if part != nil {
-		fmt.Printf("Part %q current exists.  Cannot overwrite.\n", part.PNString())
+		c.Printf("Part %q current exists.  Cannot overwrite.\n", part.PNString())
 		return
 	}
 	pn, err := pnsql.StrToSupplierPartPN(spn)
 	if err != nil {
-		fmt.Printf("%v\n", err)
+		c.Printf("%v\n", err)
 		return
 	}
 
@@ -142,16 +141,16 @@ func add_supplier_part(spn string, params map[string]string) {
 		designer, ok = params["designer"]
 	}
 	if !ok {
-		fmt.Printf("A designer must be specified.\n")
+		c.Printf("A designer must be specified.\n")
 		return
 	}
 	if !pnsql.IsDesigner(designer) {
-		fmt.Printf("%s is not a current designer.\n", designer)
+		c.Printf("%s is not a current designer.\n", designer)
 		return
 	}
 	desc, ok := util.MapAlias(params, "Description", "description", "desc")
 	if !ok || util.Blank(desc) {
-		fmt.Printf("A description must be provided.\n")
+		c.Printf("A description must be provided.\n")
 		return
 	}
 	sdate, ok := util.MapAlias(params, "Date", "date", "DateIssued", "dateissued")
@@ -160,7 +159,7 @@ func add_supplier_part(spn string, params map[string]string) {
 	}
 	date, err := util.ParseGenericTime(sdate)
 	if err != nil {
-		fmt.Printf("Syntax error in date (%q).\n", sdate)
+		c.Printf("Syntax error in date (%q).\n", sdate)
 		return
 	}
 	vendor, _ := util.MapAlias(params, "Vendor", "vendor", "ven")
@@ -178,9 +177,9 @@ func add_supplier_part(spn string, params map[string]string) {
 
 	err = pnsql.AddSupplierPart(pt)
 	if err != nil {
-		fmt.Printf("Error adding epic part. Err=%v\n", err)
+		c.Printf("Error adding epic part. Err=%v\n", err)
 		return
 	}
 	pnsql.InvalidateSupplierPartsCache()
-	fmt.Printf("Success.\n")
+	c.Printf("Success.\n")
 }

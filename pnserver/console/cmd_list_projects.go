@@ -9,7 +9,6 @@ package console
 import (
 	"epic/lib/util"
 	"epic/pnserver/pnsql"
-	"fmt"
 )
 
 var gTopic_list_projects string = `
@@ -28,16 +27,16 @@ func init() {
 	RegistorTopic("list-projects", gTopic_list_projects)
 }
 
-func handle_list_projects(cmdline string) {
+func handle_list_projects(c *Context, cmdline string) {
 	params := make(map[string]string, 10)
 	_, err := ParseCmdLine(cmdline, params)
 	if err != nil {
-		fmt.Printf("%v\n", err)
+		c.Printf("%v\n", err)
 		return
 	}
 	act, doactive, err := ParseActive(params)
 	if err != nil {
-		fmt.Printf("%v\n", err)
+		c.Printf("%v\n", err)
 		return
 	}
 	year0, doyear := util.MapAlias(params, "Year0", "year0", "Year", "year")
@@ -58,5 +57,5 @@ func handle_list_projects(cmdline string) {
 		tbl.AddRow(p.ProjectId, p.Description, p.Year0, sactive)
 		icount++
 	}
-	fmt.Printf("\n%s%d projects found.\n", tbl.Text(), icount)
+	c.Printf("\n%s%d projects found.\n", tbl.Text(), icount)
 }

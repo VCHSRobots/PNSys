@@ -9,7 +9,6 @@ package console
 import (
 	"epic/lib/util"
 	"epic/pnserver/pnsql"
-	"fmt"
 	"time"
 )
 
@@ -30,26 +29,26 @@ func init() {
 	RegistorArg("ppp", "A project Id.")
 }
 
-func handle_add_project(cmdline string) {
+func handle_add_project(c *Context, cmdline string) {
 	params := make(map[string]string, 10)
 	args, err := ParseCmdLine(cmdline, params)
 	if err != nil {
-		fmt.Printf("%v\n", err)
+		c.Printf("%v\n", err)
 		return
 	}
 	if len(args) < 2 {
-		fmt.Printf("Not enough args.\n")
+		c.Printf("Not enough args.\n")
 		return
 	}
 	projectid := args[1]
 	err = pnsql.CheckProjectIdText(projectid)
 	if err != nil {
-		fmt.Printf("%v\n", err)
+		c.Printf("%v\n", err)
 		return
 	}
 	desc, ok := util.MapAlias(params, "description", "Description", "Desc", "desc")
 	if !ok || util.Blank(desc) {
-		fmt.Printf("A description must be provided.\n")
+		c.Printf("A description must be provided.\n")
 		return
 	}
 	year0, _ := util.MapAlias(params, "year0", "Year0", "year", "Year")
@@ -58,8 +57,8 @@ func handle_add_project(cmdline string) {
 	}
 	err = pnsql.AddProject(projectid, desc, year0)
 	if err != nil {
-		fmt.Printf("Err adding project. Err=%v\n", err)
+		c.Printf("Err adding project. Err=%v\n", err)
 		return
 	}
-	fmt.Printf("Success.\n")
+	c.Printf("Success.\n")
 }

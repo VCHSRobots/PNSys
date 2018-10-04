@@ -16,16 +16,31 @@ import (
 	//"time"
 )
 
+var gBypassDev string = ""
+
+// UseByPass sets a mode whereby a given name is used as a Designer at login time
+// and therefore bypasses the normal login procedure.  Use an empty string to
+// disable this feature.
+func UseBypass(developer string) {
+	gBypassDev = developer
+}
+
 func authorizer(c *gin.Context) {
 	// If not logged in, redirect to login page.
 	cookie, err := c.Cookie("Cred")
 	ses, err := sessions.GetSessionByAuth(cookie)
 	if err != nil {
 		// We are not logged in!
-		log.Infof("Invalid auth cookie.. redirecting to Login.")
-		c.Redirect(302, "/Login")
-		c.Abort()
-		return
+		if gBypassDev != "" {
+			// Use developer bypass...
+			log.Infof("Developer ByPass Login Mode Triggered...")
+			ses = setup_login(c, gBypassDev, sessions.Privilege_Admin)
+		} else {
+			log.Infof("Invalid auth cookie.. redirecting to Login.")
+			c.Redirect(302, "/Login")
+			c.Abort()
+			return
+		}
 	}
 
 	// Session found. Fill up data.
@@ -33,7 +48,8 @@ func authorizer(c *gin.Context) {
 	hdrdata := &HeaderData{}
 	hdrdata.PageTabTitle = "Epic PN"
 	hdrdata.IsLoggedIn = true
-	hdrdata.UserFormattedName = ses.Name
+	hdrdata.UserName = ses.Name
+	hdrdata.Designer = ses.Name
 	hdrdata.IsAdmin = ses.IsAdmin()
 	c.Set("HeaderData", hdrdata)
 }
@@ -48,7 +64,8 @@ func guest_auth(c *gin.Context) {
 		hdrdata := &HeaderData{}
 		hdrdata.PageTabTitle = "Epic PN"
 		hdrdata.IsLoggedIn = false
-		hdrdata.UserFormattedName = ""
+		hdrdata.Designer = ""
+		hdrdata.UserName = ""
 		hdrdata.IsAdmin = false
 		c.Set("HeaderData", hdrdata)
 		return
@@ -59,7 +76,8 @@ func guest_auth(c *gin.Context) {
 	hdrdata := &HeaderData{}
 	hdrdata.PageTabTitle = "Epic PN"
 	hdrdata.IsLoggedIn = true
-	hdrdata.UserFormattedName = ses.Name
+	hdrdata.Designer = ses.Name
+	hdrdata.UserName = ses.Name
 	hdrdata.IsAdmin = ses.IsAdmin()
 	c.Set("HeaderData", hdrdata)
 }
@@ -92,7 +110,7 @@ func GetHeaderData(c *gin.Context) *HeaderData {
 func GetSession(c *gin.Context) *sessions.TSession {
 	x, ok := c.Get("Session")
 	if !ok {
-		err := fmt.Errorf("Session data not avaliable after authincation!?")
+		err := fmt.Errorf("Session data not avaliable after authentication!?")
 		log.Errorf("%v\n", err)
 		c.AbortWithError(400, err)
 		return nil

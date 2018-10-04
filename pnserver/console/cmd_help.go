@@ -40,7 +40,7 @@ func SayHelp() {
 	fmt.Printf("%s/n", gHelpText)
 }
 
-func show_topic_list() {
+func show_topic_list(c *Context) {
 	tlst := make([]string, 0, len(gTopics))
 	for k, _ := range gTopics {
 		tlst = append(tlst, k)
@@ -52,45 +52,50 @@ func show_topic_list() {
 			sout += ", "
 		}
 		if len(sout)+len(t) > 80 {
-			fmt.Printf("%s\n", sout)
+			c.Printf("%s\n", sout)
 			sout = ""
 		}
 		sout += t
 	}
 	if len(sout) > 0 {
-		fmt.Printf("%s\n", sout)
+		c.Printf("%s\n", sout)
 	}
 }
 
-func handle_help(cmdline string) {
+func handle_help(c *Context, cmdline string) {
 	cwrds := strings.Split(cmdline, " ")
 	if len(cwrds) > 1 {
 		top := strings.TrimSpace(cwrds[1])
 		if top == "topics" {
-			show_topic_list()
+			show_topic_list(c)
 			return
 		}
 		desc, ok := gTopics[top]
 		if !ok {
-			fmt.Printf("Unknown topic. ")
-			show_topic_list()
+			c.Printf("Unknown topic. ")
+			show_topic_list(c)
 			return
 		}
-		fmt.Printf("%s\n%s\n", top, desc)
+		c.Printf("%s\n%s\n", top, desc)
 		return
 	}
-	fmt.Printf("You are now in an interactive command loop. The commnds are:\n\n")
+	if c.IsInternal() {
+		c.Printf("You are now in an interactive command loop. The commnds are:\n\n")
+	}
+	if c.IsExternal() {
+		c.Printf("Help Info.\n")
+	}
 	w1 := 10
 	for _, c := range gCmds {
 		w1 = max(w1, len(c.CmdName+" "+c.ArgLine+" "))
 	}
 	w1 = max(w1, len("exit | quit  "))
-	for _, c := range gCmds {
-		s1 := util.FixStrLen(c.CmdName+" "+c.ArgLine+" ", w1, "")
-		fmt.Printf("    %s -- %s\n", s1, c.HelpLine)
+	for _, x := range gCmds {
+		s1 := util.FixStrLen(x.CmdName+" "+x.ArgLine+" ", w1, "")
+		c.Printf("    %s -- %s\n", s1, x.HelpLine)
 	}
-	fmt.Printf("    %s -- Exits this program.\n", util.FixStrLen("exit | quit  ", w1, ""))
-	fmt.Printf("\n")
+	c.Printf("    %s -- Exits this program.\n", util.FixStrLen("exit | quit  ", w1, ""))
+	c.Printf("\n")
 
 	w2 := 10
 	argnames := make([]string, 0, len(gArgs))
@@ -99,16 +104,16 @@ func handle_help(cmdline string) {
 		argnames = append(argnames, aname)
 	}
 	sort.Strings(argnames)
-	fmt.Printf("Where the argments are:\n")
+	c.Printf("Where the argments are:\n")
 	for _, aname := range argnames {
 		desc := gArgs[aname]
 		sn := util.FixStrLen(aname, w2, "")
-		fmt.Printf("    %s -- %s\n", sn, desc)
+		c.Printf("    %s -- %s\n", sn, desc)
 	}
-	fmt.Printf("\n")
+	c.Printf("\n")
 }
 
-func handle_help_condensed(cmdline string) {
+func handle_help_condensed(c *Context, cmdline string) {
 	sout := ""
 	w := 0
 	i := 0
@@ -129,7 +134,7 @@ func handle_help_condensed(cmdline string) {
 		i += 1
 	}
 	sout += ", exit"
-	fmt.Printf("%s\n", sout)
+	c.Printf("%s\n", sout)
 }
 
 var gHelpText string = `

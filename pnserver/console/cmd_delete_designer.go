@@ -8,7 +8,6 @@ package console
 
 import (
 	"epic/pnserver/pnsql"
-	"fmt"
 	"strconv"
 	"strings"
 )
@@ -37,11 +36,11 @@ func init() {
 	RegistorTopic("delete-designer", gTopic_delete_designer)
 }
 
-func handle_delete_designer(cmdline string) {
+func handle_delete_designer(c *Context, cmdline string) {
 	params := make(map[string]string, 10)
 	args, err := ParseCmdLine(cmdline, params)
 	if err != nil {
-		fmt.Printf("%v\n", err)
+		c.Printf("%v\n", err)
 		return
 	}
 	alldesigners := pnsql.GetDesigners()
@@ -49,19 +48,19 @@ func handle_delete_designer(cmdline string) {
 	refs, ok := params["ref"]
 	if !ok {
 		if len(args) < 2 {
-			fmt.Printf("Not enough args.\n")
+			c.Printf("Not enough args.\n")
 			return
 		}
 		name = args[1]
 	} else {
 		indx, err := strconv.Atoi(strings.TrimSpace(refs))
 		if err != nil {
-			fmt.Printf("Bad ref # (%s). Err=%v\n", refs, err)
+			c.Printf("Bad ref # (%s). Err=%v\n", refs, err)
 			return
 		}
 
 		if indx < 0 || indx >= len(alldesigners) {
-			fmt.Printf("Ref number (%d) out of range. Total number of desginers is %d\n",
+			c.Printf("Ref number (%d) out of range. Total number of desginers is %d\n",
 				indx, len(alldesigners))
 			return
 		}
@@ -74,19 +73,19 @@ func handle_delete_designer(cmdline string) {
 		}
 	}
 	if iCount <= 0 {
-		fmt.Printf("Designer %q not found.\n", name)
+		c.Printf("Designer %q not found.\n", name)
 		return
 	} else if iCount > 1 {
-		fmt.Printf("%d duplicate records found for %q.\n", iCount, name)
+		c.Printf("%d duplicate records found for %q.\n", iCount, name)
 	}
-	fmt.Printf("You are about to delete %s from the list of designers.\n", name)
+	c.Printf("You are about to delete %s from the list of designers.\n", name)
 	if !AreYouSure() {
 		return
 	}
 	err = pnsql.DeleteDesigner(name)
 	if err != nil {
-		fmt.Printf("Error %v\n", err)
+		c.Printf("Error %v\n", err)
 		return
 	}
-	fmt.Printf("Success. Designer %q removed.\n", name)
+	c.Printf("Success. Designer %q removed.\n", name)
 }

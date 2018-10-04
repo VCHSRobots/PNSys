@@ -15,14 +15,13 @@ import (
 	"time"
 )
 
-var m_console bool
-var m_file bool
+var m_console bool = true
+var m_allowPass bool = true
+var m_file bool = true
 var m_errcnt int
 var m_filelock sync.Mutex
 
 func init() {
-	m_console = false
-	m_file = true
 	fi, err := os.Stat("./logs")
 	if err != nil {
 		err := os.Mkdir("./logs", 0777)
@@ -43,8 +42,18 @@ func init() {
 	}
 }
 
+// UseConsole sets or unsets a mode whereby messages are not sent to the
+// terminal as well as the log file.
 func UseConsole(mode bool) {
 	m_console = mode
+}
+
+// AllowPassOnConsole sets a mode whereby messages that don't use the normal
+// Debugf, Infof, Warnf, and Errorf are filtered out from going to the
+// terminal.  In practice this means that the raw GIN messages may be
+// prevented from going to the terminal.
+func AllowPassOnConsole(mode bool) {
+	m_allowPass = mode
 }
 
 func Passf(ft string, args ...interface{}) {
@@ -92,7 +101,9 @@ func Logit(level, msg string) {
 			t.Format("06-01-02 15:04:05"), msec, util.FixStrLen(level, 5, " "), msg)
 	}
 	if m_console {
-		fmt.Fprintf(os.Stderr, msgout)
+		if level != "" || m_allowPass {
+			fmt.Fprintf(os.Stderr, msgout)
+		}
 	}
 	if !m_file {
 		return

@@ -74,7 +74,7 @@ func main() {
 	}
 
 	// Configure startup page.
-	gServer.GET("/", func(c *gin.Context) { c.Redirect(300, "/NewEpicPN") })
+	gServer.GET("/", func(c *gin.Context) { c.Redirect(303, "/NewEpicPN") })
 
 	dev_bypass, ok := config.GetParam("dev_bypass")
 	dev_bypass = strings.TrimSpace(dev_bypass)

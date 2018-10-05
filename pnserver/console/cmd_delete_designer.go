@@ -78,10 +78,10 @@ func handle_delete_designer(c *Context, cmdline string) {
 	} else if iCount > 1 {
 		c.Printf("%d duplicate records found for %q.\n", iCount, name)
 	}
-	c.Printf("You are about to delete %s from the list of designers.\n", name)
-	if !AreYouSure() {
-		return
-	}
+	// c.Printf("You are about to delete %s from the list of designers.\n", name)
+	// if !AreYouSure() {
+	// 	return
+	// }
 	err = pnsql.DeleteDesigner(name)
 	if err != nil {
 		c.Printf("Error %v\n", err)

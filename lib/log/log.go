@@ -9,6 +9,7 @@ package log
 import (
 	"epic/lib/util"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"strings"
 	"sync"
@@ -137,4 +138,13 @@ func Logit(level, msg string) {
 			fmt.Fprintf(os.Stderr, "Unable to close log file.\n")
 		}
 	}
+}
+
+func ReadLogFile(date time.Time) (string, error) {
+	fn := fmt.Sprintf("./logs/Log_%s.txt", date.Format("06-01-02"))
+	data, err := ioutil.ReadFile(fn)
+	if err != nil {
+		return "", err
+	}
+	return string(data), nil
 }

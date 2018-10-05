@@ -6,17 +6,20 @@
 hostaddr=:80
 
 // Provide the password that will be used with mysql
-pw=?????
+sql_pw=?????
 
 // You can bypass logins for development by providing the name of the
 // designer you wish to be automatically logged in as a user.  
-// dev=name
+// dev_bypass=name
 
-// With 'consolelog' you can control weither or not log messages are sent
+// With 'log_on_console' you can control weither or not log messages are sent
 // to the console at startup.
-consolelog=true
+log_on_console=true
 
 // GIN messages always go to the log file.  However, if you are directing
 // log messages to the terminal (usually for development or debugging)
 // you can hide GIN messages and keep everything else with the following.
-ginconsole=false
+gin_on_console=false
+
+// With 'allow_universal_pw' you can allow everbody to use the same password.
+//allow_universal_pw=true

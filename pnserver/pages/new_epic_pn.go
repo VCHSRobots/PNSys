@@ -10,6 +10,7 @@ import (
 	"epic/lib/log"
 	"epic/lib/util"
 	"epic/pnserver/pnsql"
+	"fmt"
 	"github.com/gin-gonic/gin"
 )
 
@@ -112,12 +113,19 @@ func handle_new_epic_pn_post(c *gin.Context) {
 		return
 	}
 
+	user := GetDesigner(c)
+	if user == pn.Designer {
+		log.Infof("New part %s designed and and added to database by %s.", pn.PNString(), pn.Designer)
+	} else {
+		log.Infof("New part %s designed by %s and added to database by %s.", pn.PNString(), pn.Designer, user)
+	}
 	// Defaults for next time...
 	sd.Description = ""
 	sd.Designer = ses.Name
 	ses.Data["EpicPageDefaults"] = sd
 
-	show_part_page(c, pn.PNString())
+	url := fmt.Sprintf("/ShowPart?pn=%s", pn.PNString())
+	c.Redirect(303, url)
 
 	// msg := fmt.Sprintf("Submitted Data: <br>")
 	// msg += fmt.Sprintf("Project     = %s<br>", data.Project)

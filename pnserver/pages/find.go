@@ -145,7 +145,7 @@ func handle_find_post(c *gin.Context) {
 	data.DateAfter = sdata.DateAfter
 
 	//partlst, tbltype, err := search_for_parts(sdata)
-	plst, _, err := search_for_parts(sdata)
+	plst, tbltype, err := search_for_parts(sdata)
 	if err != nil {
 		handle_find_with_error(c, fmt.Sprintf("%v", err))
 		return
@@ -156,19 +156,61 @@ func handle_find_post(c *gin.Context) {
 		return
 	}
 
-	data.TableData = new(TableData)
-	data.Head = []string{"PN", "Description", "Designer", "DateIssued"}
-	data.Rows = make([]TColumn, 0, 101)
-	if len(plst) > 100 {
-		data.LimitMsg = fmt.Sprintf("Showing first 100 parts out of %d found.", len(plst))
-	}
-	for i, p := range plst {
-		sdesc := util.FixStrLen(p.Description, 50, "...")
-		lnk := fmt.Sprintf(`<a href="/ShowPart?pn=%s">%s</a>`, p.PartNumber, p.PartNumber)
-		cols := []string{lnk, sdesc, p.Designer, p.DateIssued.Format("2006-01-02")}
-		data.Rows = append(data.Rows, TColumn{Cols: cols})
-		if i >= 99 {
-			break
+	if tbltype == "supplier" {
+		data.TableData = new(TableData)
+		data.Head = []string{"PN", "Description", "Vendor", "Vendor PN", "Designer", "DateIssued"}
+		data.Rows = make([]TColumn, 0, 101)
+		if len(plst) > 100 {
+			data.LimitMsg = fmt.Sprintf("Showing first 100 parts out of %d found.", len(plst))
+		} else {
+			data.LimitMsg = fmt.Sprintf("Number of parts found: %d.", len(plst))
+		}
+		for i, p := range plst {
+			sdesc := util.FixStrLen(p.Description, 50, "...")
+			lnk := fmt.Sprintf(`<a href="/ShowPart?pn=%s">%s</a>`, p.PartNumber, p.PartNumber)
+			cols := []string{lnk, sdesc, p.Vendor, p.VendorPN, p.Designer, p.DateIssued.Format("2006-01-02")}
+			data.Rows = append(data.Rows, TColumn{Cols: cols})
+			if i >= 99 {
+				break
+			}
+		}
+	} else if tbltype == "epic" {
+		data.TableData = new(TableData)
+		data.Head = []string{"PN", "Description", "Project", "Subsystem", "Designer", "DateIssued"}
+		data.Rows = make([]TColumn, 0, 101)
+		if len(plst) > 100 {
+			data.LimitMsg = fmt.Sprintf("Showing first 100 parts out of %d found.", len(plst))
+		} else {
+			data.LimitMsg = fmt.Sprintf("Number of parts found: %d.", len(plst))
+		}
+		for i, p := range plst {
+			sdesc := util.FixStrLen(p.Description, 50, "...")
+			lnk := fmt.Sprintf(`<a href="/ShowPart?pn=%s">%s</a>`, p.PartNumber, p.PartNumber)
+			pdesc := pnsql.GetProjectDescription(p.ProjectId)
+			cdesc := pnsql.GetSubsystemDescription(p.ProjectId, p.SubsystemId)
+			cols := []string{lnk, sdesc, pdesc, cdesc, p.Designer, p.DateIssued.Format("2006-01-02")}
+			data.Rows = append(data.Rows, TColumn{Cols: cols})
+			if i >= 99 {
+				break
+			}
+		}
+	} else {
+		data.TableData = new(TableData)
+		data.Head = []string{"PN", "Description", "Designer", "DateIssued"}
+		data.Rows = make([]TColumn, 0, 101)
+		if len(plst) > 100 {
+			data.LimitMsg = fmt.Sprintf("Showing first 100 parts out of %d found.", len(plst))
+		} else {
+			data.LimitMsg = fmt.Sprintf("Number of parts found: %d.", len(plst))
+		}
+		for i, p := range plst {
+			sdesc := util.FixStrLen(p.Description, 50, "...")
+			lnk := fmt.Sprintf(`<a href="/ShowPart?pn=%s">%s</a>`, p.PartNumber, p.PartNumber)
+			cols := []string{lnk, sdesc, p.Designer, p.DateIssued.Format("2006-01-02")}
+			data.Rows = append(data.Rows, TColumn{Cols: cols})
+			if i >= 99 {
+				break
+			}
 		}
 	}
 

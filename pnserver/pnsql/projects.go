@@ -183,6 +183,22 @@ func GetSubsystem(ProjectId, SubsystemId string) (*Subsystem, error) {
 	return nil, fmt.Errorf("No such subsystem (%s-%s).", ProjectId, SubsystemId)
 }
 
+func GetProjectDescription(ProjectId string) string {
+	prj, err := GetProject(ProjectId)
+	if err != nil {
+		return ""
+	}
+	return prj.Description
+}
+
+func GetSubsystemDescription(ProjectId, SubsystemId string) string {
+	subsys, err := GetSubsystem(ProjectId, SubsystemId)
+	if err != nil {
+		return ""
+	}
+	return subsys.Description
+}
+
 func CheckProjectIdText(ProjectId string) error {
 	s := strings.ToLower(ProjectId)
 	if !util.ContainsOnly(s, "abcdefghijklmnopqrstuvwxyz0123456789") {
@@ -276,6 +292,7 @@ func AddProject(ProjectId, Description, Year0 string) error {
 		log.Errorf("%v", err)
 		return err
 	}
+	log.Infof("New project %s (%q) added to the database.", ProjectId, Description)
 	return nil
 }
 
@@ -324,6 +341,7 @@ func DeleteProject(ProjectId string) error {
 		log.Errorf("%v", err)
 		return err
 	}
+	log.Infof("Project %s deleted from database.", ProjectId)
 	return nil
 }
 
@@ -360,6 +378,7 @@ func SetProjectDescription(ProjectId, Description string) error {
 		log.Errorf("%v", err)
 		return err
 	}
+	log.Infof("Project %s description changed to %q.", ProjectId, Description)
 	return nil
 }
 
@@ -379,6 +398,7 @@ func SetProjectYear0(ProjectId, Year0 string) error {
 	if prj.Year0 == Year0 {
 		return fmt.Errorf("No change to database requested. Year0 equal.")
 	}
+	oldyear0 := prj.Year0
 	stmt, err := m_db.Prepare("update Projects set Year0=? where ProjectId=?")
 	if err != nil {
 		err := fmt.Errorf("Err updating Projects. Err=%v", err)
@@ -397,6 +417,7 @@ func SetProjectYear0(ProjectId, Year0 string) error {
 		log.Errorf("%v", err)
 		return err
 	}
+	log.Infof("Project %s Year0 changed from %s to %s.", prj.ProjectId, oldyear0, Year0)
 	return nil
 }
 
@@ -434,6 +455,7 @@ func SetProjectActive(ProjectId string, Active bool) error {
 		log.Errorf("%v", err)
 		return err
 	}
+	log.Infof("Project %s set to Active=%t", ProjectId, Active)
 	return nil
 }
 
@@ -469,6 +491,7 @@ func AddSubsystem(ProjectId, SubsystemId, Description string) error {
 		log.Errorf("Err inserting into Subsystems. Err=%v", err)
 		return err
 	}
+	log.Infof("New Subsystem %s-%s added to database. Description=%s", ProjectId, SubsystemId, Description)
 	return nil
 }
 
@@ -518,6 +541,7 @@ func DeleteSubsystem(ProjectId, SubsystemId string) error {
 		log.Errorf("%v", err)
 		return err
 	}
+	log.Infof("Subsystem %s-%s deleted from the database.", ProjectId, SubsystemId)
 	return nil
 }
 
@@ -560,5 +584,7 @@ func SetSubsystemDescription(ProjectId, SubsystemId, Description string) error {
 		log.Errorf("%v", err)
 		return err
 	}
+	log.Infof("Subsystem %s-%s description changed to: %q.", prj.ProjectId, subsys.SubsystemId,
+		Description)
 	return nil
 }

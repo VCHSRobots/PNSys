@@ -7,6 +7,7 @@
 package util
 
 import (
+	"fmt"
 	"strings"
 )
 
@@ -139,4 +140,18 @@ func CleanForWeb(s string) string {
 		}
 	}
 	return sout
+}
+
+// StrToBool converts a string into a bool, trying to interpert
+// it as loosely as possible.  If a reasonable value for a bool
+// is not found, the default and an error is returned.
+func StrToBool(s string, defaultval bool) (val bool, err error) {
+	s = strings.ToLower(s)
+	if s == "true" || s == "t" || s == "yes" || s == "y" {
+		return true, nil
+	}
+	if s == "false" || s == "f" || s == "no" || s == "n" {
+		return false, nil
+	}
+	return defaultval, fmt.Errorf("Unrecognizable bool string value.")
 }

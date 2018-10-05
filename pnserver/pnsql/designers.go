@@ -156,6 +156,7 @@ func AddDesigner(Name, Year0 string) error {
 		log.Errorf("%v", err)
 		return err
 	}
+	log.Infof("New designer %q inserted into the database.", Name)
 	return nil
 }
 
@@ -182,6 +183,7 @@ func DeleteDesigner(Name string) error {
 		log.Errorf("%v", err)
 		return err
 	}
+	log.Infof("Designer %s deleted from database.", Name)
 	return nil
 }
 
@@ -216,6 +218,7 @@ func SetDesignerActive(Name string, Active bool) error {
 		log.Errorf("%v", err)
 		return err
 	}
+	log.Infof("Designer %s set to Active=%t.", Name, Active)
 	return nil
 }
 
@@ -250,5 +253,6 @@ func SetDesignerYear0(Name string, Year0 string) error {
 		log.Errorf("%v", err)
 		return err
 	}
+	log.Infof("Designer %s, Year0 set to %s.", Name, Year0)
 	return nil
 }

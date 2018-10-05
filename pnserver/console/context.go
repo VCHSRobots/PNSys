@@ -14,8 +14,8 @@ import (
 type ContextType string
 
 const (
-	Context_Internal = "Internal"
-	Context_External = "External"
+	Context_Internal ContextType = "Internal"
+	Context_External ContextType = "External"
 )
 
 type Context struct {
@@ -25,6 +25,7 @@ type Context struct {
 
 func NewContext(mode ContextType) *Context {
 	c := &Context{}
+	c.mode = mode
 	c.outdata = new(bytes.Buffer)
 	return c
 }

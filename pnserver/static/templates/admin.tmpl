@@ -44,11 +44,46 @@ function checkEnter(e) {
     }
 }
 
+var termfont = 10;
+
+function onTermClear() {
+    document.getElementById("terminal_output").value = "";
+    termfont = 10;
+    setTermFontSize(termfont);
+}
+
+function setTermFontSize(sz) {
+    var box = document.getElementById("terminal_output");
+    var st = sz + "pt";
+    box.style.fontSize = st;
+}
+
+function onTermBigger() {
+    termfont += 1;
+    if (termfont > 30) {
+        termfont = 30;
+    }
+    setTermFontSize(termfont);
+}
+
+function onTermSmaller() {
+    termfont -= 1;
+    if (termfont < 4) {
+        termfont = 4;
+    }
+    setTermFontSize(termfont);
+}
 
 </script>
 
 <div class="content_area">
 <div class="page_title">Administration of the Part Numbering System</div>
+
+<div id="term_control_area">
+    <div class="term_btn_div"><button id="clear_btn" onclick="onTermClear()">Clear</button></div>
+    <div class="term_btn_div"><button id="bigger_btn" onclick="onTermBigger()">Bigger</button></div>
+    <div class="term_btn_div"><button id="smaller_btn" onclick="onTermSmaller()">Smaller</button></div>
+</div>
 
 <div class="terminal_output_area">
     <textarea  id="terminal_output" name="Description"  rows="20" cols="80" > </textarea>

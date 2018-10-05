@@ -9,6 +9,7 @@ package pages
 import (
 	"encoding/base64"
 	"epic/lib/log"
+	"epic/pnserver/console"
 	"github.com/gin-gonic/gin"
 )
 
@@ -56,8 +57,11 @@ func handle_command(c *gin.Context) {
 		log.Infof("Unable to decode base64 for admin command.  Recieved=%q. Err=%v", string(raw), err)
 		sendCmdResponse(c, "")
 	}
-	log.Infof("Admin command received: %s", string(cmd_bytes))
-	sendCmdResponse(c, "Received: \n \""+string(cmd_bytes)+"\"")
+	cmd := string(cmd_bytes)
+	log.Infof("Admin command from %s received: %s", data.Designer, cmd)
+
+	sout := console.ExecuteCommand(cmd)
+	sendCmdResponse(c, sout)
 }
 
 func sendCmdResponse(c *gin.Context, txt string) {

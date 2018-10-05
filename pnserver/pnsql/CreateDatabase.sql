@@ -17,6 +17,18 @@ create table Designers
     Active int                   /* Non zero if active */
 );
 
+create table Passwords 
+(
+  Name varchar(120),   /* Name of user account.  Empty name means universal password */
+  Privilege int,       /* 0=none, 1=guest, 2=user, 3=admin */
+  Hash varchar(512)  
+);
+
+insert into Passwords (Name, Privilege, Hash) values("", 3, "JDJhJDA2JHNHWGt6SkM0RnVJL0EvZ25aNUlZai5wcC4uQWlxL1dNdlJDN2w5dkJJZHluR0xrZEd1djFT");
+insert into Passwords (Name, Privilege, Hash) values("", 2, "JDJhJDA2JHB0S2xmamVtL3k4OHpwZ1JEQzRYLy5qUWc1NjNqQWZzTUxOd3REUVFUM082UDVpTlZiWFpt");
+insert into Passwords (Name, Privilege, Hash) values("", 2, "JDJhJDA2JGJ3Z1hUZW1GaHVxTFhWYnBQb2FyUnVHeEdGdVZhLk9CZTVlWFZuWnpuNE9pSE5BS3RMYXk2");
+insert into Passwords (Name, Privilege, Hash) values("", 2, "JDJhJDA2JEsxNXovdzBaRHhoWVF0N3U1OXlmZU9rU2hQT3VhM3lJa0hBeFNmY3FDMTZhdDliOE90b0Yu");
+
 create table Projects
 (
     ProjectId   char(3) PRIMARY KEY,

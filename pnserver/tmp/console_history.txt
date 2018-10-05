@@ -578,3 +578,110 @@ show-gin
 exit
 show-gin
 exit
+exzit
+exit
+hide-gin
+exit
+help
+pwhash GoRobotics
+exit
+pwhash GoRobotics!
+exit
+help
+list-passwords
+topic import
+help import
+import pnsql/oldpndata.csv type=epic
+import pnsql/SupplierParts.csv type=suppiler
+import pnsql/SupplierParts.csv type=supplier
+list-passwords
+add-password user="D. Brandon" priv=admin pw=lovecarol
+list-passwords
+delete-password name="D. Brandon"
+delete-passwords name="D. Brandon"
+list-passwords
+add-password user="D. Brandon" priv=admin pw=lovecarol
+add-password user="D. Brandon" priv=admin pw=lovebeach
+add-password user="D. Brandon" priv=admin pw=loveeverything
+list-passwords
+delete-passwords name=universal
+list-passwords
+restore-passwords
+list-passwords
+exit
+show-config
+universal-pw true
+show-config
+universal-pw false
+show-config
+list-pw
+list-passwords
+topic set-password
+help
+help add-password
+add-password user="D. Fieldhouse" priv=user pw=a
+list-passwords
+exit
+show-config
+universal-pw=false
+universal-password false
+universal-pw false
+universal-pw ads
+universal-pw true
+list-projects active=true
+help
+list-sessions
+show-sessions
+show-config
+exit
+help
+show-config
+log-on-console false
+git-on-console false
+gin-on-console false
+show-config
+save-config
+show-config
+exit
+show-config
+universal-pw false
+show-config
+save-config
+show-config
+log-on-console true
+show-config
+dev-bypass name="F. Smith"
+set-dev-bypass name="F. Smith"
+show-config
+exit
+show-config
+dev-bypass asdfadsf
+dev-bypass "D. Brandon"
+exit
+show-config
+save-config
+log-on-console true
+show-config
+universal-pw true
+show-config
+dev-bypass "D. Brandon"
+show-config
+save-config
+exit
+show-config
+exit
+show-config
+universal-pw false
+dev-bypass
+show-config
+help show-config
+help log-on-console
+help gin-on-console
+exity
+exit
+show-log
+show-log line0=-40
+show-log line0=-40 date=10/2/18
+log-on-console
+log-on-console true
+exit

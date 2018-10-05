@@ -51,6 +51,12 @@ function setSelectionBox(selid, txt) {
           return true;
       }
     }
+    if (txt == "") {
+        // This means that a correct default was not 
+        // provided, so the current selection is valid.
+        return true
+    }
+    // Return false if no valid selection was found.
     return false;
 }
 

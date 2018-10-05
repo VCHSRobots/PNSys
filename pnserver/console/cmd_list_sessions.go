@@ -1,5 +1,5 @@
 // --------------------------------------------------------------------
-// cmd_show_sessions.go -- Show all the sessions
+// cmd_list_sessions.go -- Lists all the sessions
 //
 // Created 2018-09-21 DLB
 // --------------------------------------------------------------------
@@ -14,10 +14,10 @@ import (
 )
 
 func init() {
-	RegistorCmd("show-sessions", "", "Shows current sessions.", handle_showsessions)
+	RegistorCmd("list-sessions", "", "Lists the current sessions.", handle_listsessions)
 }
 
-func handle_showsessions(c *Context, cmdline string) {
+func handle_listsessions(c *Context, cmdline string) {
 	lst := sessions.GetAllSessions()
 	tbl := util.NewTable("Ref#", "Name", "ClientIP", "Login Time", "Last Access", "Elp (mins)", "Auth Cookie")
 	for i, c := range lst {

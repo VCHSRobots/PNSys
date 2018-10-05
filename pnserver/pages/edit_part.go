@@ -47,17 +47,21 @@ func init() {
 }
 
 func handle_edit_part(c *gin.Context) {
+
+	pn := c.Query("pn")
+	if util.Blank(pn) {
+		SendErrorPagef(c, "EditPart page called without a part number!")
+		return
+	}
+	handle_edit_part_with_error(c, pn, "")
+}
+
+func handle_edit_part_with_error(c *gin.Context, pn, errmsg string) {
 	data := &EditPartData{}
 	data.HeaderData = GetHeaderData(c)
 	data.PageTitle = "EDIT Part Number"
-
+	data.ErrorMessage = errmsg
 	data.OnLoadFuncJS = "startUp"
-	pn := c.Query("pn")
-	if util.Blank(pn) {
-		log.Warnf("EditPart page called without a part number!")
-		c.Redirect(300, "/NewEpicPN")
-		return
-	}
 
 	var err error
 	data.SelectionBoxData, err = GetSelectionBoxData()
@@ -142,11 +146,52 @@ func handle_edit_epic_post(c *gin.Context) {
 		SendErrorPage(c, err)
 		return
 	}
-	msg := fmt.Sprintf("Submitted Data:<br>")
-	msg += fmt.Sprintf("PartNumber  = %s<br>", data.PartNumber)
-	msg += fmt.Sprintf("Designer    = %s<br>", data.Designer)
-	msg += fmt.Sprintf("Description = %s<br>", data.Description)
-	SendMessagePagef(c, msg)
+
+	part, err := pnsql.GetEpicPart(data.PartNumber)
+	if err != nil {
+		SendErrorPage(c, err)
+		return
+	}
+	if part == nil {
+		err = fmt.Errorf("Part %s not found in database on Edit Part, but should be here!", data.PartNumber)
+		SendErrorPage(c, err)
+		return
+	}
+	nchanges := 0
+	if part.Designer != data.Designer {
+		err = pnsql.SetEpicPartDesigner(part, data.Designer)
+		if err != nil {
+			SendErrorPage(c, err)
+			return
+		}
+		log.Infof("Part %s edited by %s. Designer changed to %s.", part.PNString(), GetDesigner(c), data.Designer)
+		nchanges++
+	}
+	if part.Description != data.Description {
+		if util.Blank(data.Description) {
+			handle_edit_part_with_error(c, part.PNString(), "Description cannot be blank.")
+			return
+		}
+		err = pnsql.SetEpicPartDescription(part, data.Description)
+		if err != nil {
+			SendErrorPage(c, err)
+			return
+		}
+		log.Infof("Part %s edited by %s. Description changed to %q.", part.PNString(), GetDesigner(c), data.Description)
+		nchanges++
+	}
+	if nchanges <= 0 {
+		handle_edit_part_with_error(c, part.PNString(), "No changes made.. ?")
+		return
+	}
+	url := fmt.Sprintf("/ShowPart?pn=%s", part.PNString())
+	c.Redirect(303, url)
+
+	// msg := fmt.Sprintf("Submitted Data:<br>")
+	// msg += fmt.Sprintf("PartNumber  = %s<br>", data.PartNumber)
+	// msg += fmt.Sprintf("Designer    = %s<br>", data.Designer)
+	// msg += fmt.Sprintf("Description = %s<br>", data.Description)
+	// SendMessagePagef(c, msg)
 }
 
 func handle_edit_supplier_post(c *gin.Context) {
@@ -165,12 +210,80 @@ func handle_edit_supplier_post(c *gin.Context) {
 		SendErrorPage(c, err)
 		return
 	}
-	msg := fmt.Sprintf("Data:<br>")
-	msg += fmt.Sprintf("PartNumber  = %s<br>", data.PartNumber)
-	msg += fmt.Sprintf("Vendor      = %s<br>", data.Vendor)
-	msg += fmt.Sprintf("VendorPN    = %s<br>", data.VendorPN)
-	msg += fmt.Sprintf("WebLink     = %s<br>", data.WebLink)
-	msg += fmt.Sprintf("Designer    = %s<br>", data.Designer)
-	msg += fmt.Sprintf("Description = %s<br>", data.Description)
-	SendMessagePagef(c, msg)
+
+	part, err := pnsql.GetSupplierPart(data.PartNumber)
+	if err != nil {
+		SendErrorPage(c, err)
+		return
+	}
+	if part == nil {
+		err = fmt.Errorf("Part %s not found in database on Edit Part, but should be here!", data.PartNumber)
+		SendErrorPage(c, err)
+		return
+	}
+	nchanges := 0
+	if part.Designer != data.Designer {
+		err = pnsql.SetSupplierPartDesigner(part, data.Designer)
+		if err != nil {
+			SendErrorPage(c, err)
+			return
+		}
+		log.Infof("Part %s edited by %s. Designer changed to %s.", part.PNString(), GetDesigner(c), data.Designer)
+		nchanges++
+	}
+	if part.Vendor != data.Vendor {
+		err = pnsql.SetSupplierPartVendor(part, data.Vendor)
+		if err != nil {
+			SendErrorPage(c, err)
+			return
+		}
+		log.Infof("Part %s edited by %s. Vendor changed to %s.", part.PNString(), GetDesigner(c), data.Vendor)
+		nchanges++
+	}
+	if part.VendorPN != data.VendorPN {
+		err = pnsql.SetSupplierPartVendorPN(part, data.VendorPN)
+		if err != nil {
+			SendErrorPage(c, err)
+			return
+		}
+		log.Infof("Part %s edited by %s. Vendor PN changed to %s.", part.PNString(), GetDesigner(c), data.VendorPN)
+		nchanges++
+	}
+	if part.WebLink != data.WebLink {
+		err = pnsql.SetSupplierPartWebLink(part, data.WebLink)
+		if err != nil {
+			SendErrorPage(c, err)
+			return
+		}
+		log.Infof("Part %s edited by %s. WebLink changed to %q.", part.PNString(), GetDesigner(c), data.WebLink)
+		nchanges++
+	}
+	if part.Description != data.Description {
+		if util.Blank(data.Description) {
+			handle_edit_part_with_error(c, part.PNString(), "Description cannot be blank.")
+			return
+		}
+		err = pnsql.SetSupplierPartDescription(part, data.Description)
+		if err != nil {
+			SendErrorPage(c, err)
+			return
+		}
+		log.Infof("Part %s edited by %s. Description changed to %q.", part.PNString(), GetDesigner(c), data.Description)
+		nchanges++
+	}
+	if nchanges <= 0 {
+		handle_edit_part_with_error(c, part.PNString(), "No changes made.. ?")
+		return
+	}
+	url := fmt.Sprintf("/ShowPart?pn=%s", part.PNString())
+	c.Redirect(303, url)
+
+	// msg := fmt.Sprintf("Data:<br>")
+	// msg += fmt.Sprintf("PartNumber  = %s<br>", data.PartNumber)
+	// msg += fmt.Sprintf("Vendor      = %s<br>", data.Vendor)
+	// msg += fmt.Sprintf("VendorPN    = %s<br>", data.VendorPN)
+	// msg += fmt.Sprintf("WebLink     = %s<br>", data.WebLink)
+	// msg += fmt.Sprintf("Designer    = %s<br>", data.Designer)
+	// msg += fmt.Sprintf("Description = %s<br>", data.Description)
+	// SendMessagePagef(c, msg)
 }

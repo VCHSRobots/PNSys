@@ -25,7 +25,7 @@ parameters is options, and defaults to the current year.
 
 func init() {
 	RegistorCmd("add-project", "ppp", "Adds a new project (see topic).", handle_add_project)
-	RegistorTopic("handle_add_project", gTopic_add_project)
+	RegistorTopic("add-project", gTopic_add_project)
 	RegistorArg("ppp", "A project Id.")
 }
 

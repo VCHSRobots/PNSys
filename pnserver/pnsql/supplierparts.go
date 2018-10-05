@@ -198,6 +198,7 @@ func DeleteSupplierPart(p *SupplierPart) error {
 		log.Errorf("%v", err)
 		return err
 	}
+	log.Infof("Supplier Part %s deleted from database.", p.PNString())
 	return nil
 }
 
@@ -211,6 +212,7 @@ func SetSupplierPartDesigner(p *SupplierPart, designer string) error {
 	if !IsDesigner(designer) {
 		return fmt.Errorf("%q is not a known designer.")
 	}
+	olddesigner := p.Designer
 	stmt, err := m_db.Prepare("update SupplierParts set Designer=? where PID=?")
 	if err != nil {
 		err := fmt.Errorf("Err updating SupplierParts. Err=%v", err)
@@ -229,6 +231,7 @@ func SetSupplierPartDesigner(p *SupplierPart, designer string) error {
 		log.Errorf("%v", err)
 		return err
 	}
+	log.Infof("Supplier Part %s: Designer changed from %s to %s.", p.PNString(), olddesigner, designer)
 	return nil
 }
 
@@ -239,6 +242,7 @@ func SetSupplierPartVendor(p *SupplierPart, vendor string) error {
 	if p.PID.IsZero() {
 		return fmt.Errorf("Supplier part not identified correctly. PID=0.")
 	}
+	oldvendor := p.Vendor
 	stmt, err := m_db.Prepare("update SupplierParts set Vendor=? where PID=?")
 	if err != nil {
 		err := fmt.Errorf("Err updating SupplierParts. Err=%v", err)
@@ -257,6 +261,7 @@ func SetSupplierPartVendor(p *SupplierPart, vendor string) error {
 		log.Errorf("%v", err)
 		return err
 	}
+	log.Infof("Supplier Part %s: Vendor changed from %s to %s.", p.PNString(), oldvendor, vendor)
 	return nil
 }
 
@@ -267,6 +272,7 @@ func SetSupplierPartVendorPN(p *SupplierPart, vendorpn string) error {
 	if p.PID.IsZero() {
 		return fmt.Errorf("Supplier part not identified correctly. PID=0.")
 	}
+	oldvendorpn := p.VendorPN
 	stmt, err := m_db.Prepare("update SupplierParts set VendorPN=? where PID=?")
 	if err != nil {
 		err := fmt.Errorf("Err updating SupplierParts. Err=%v", err)
@@ -285,6 +291,7 @@ func SetSupplierPartVendorPN(p *SupplierPart, vendorpn string) error {
 		log.Errorf("%v", err)
 		return err
 	}
+	log.Infof("Supplier Part %s: VendorPN changed from %s to %s.", p.PNString(), oldvendorpn, vendorpn)
 	return nil
 }
 
@@ -313,6 +320,7 @@ func SetSupplierPartWebLink(p *SupplierPart, weblink string) error {
 		log.Errorf("%v", err)
 		return err
 	}
+	log.Infof("Supplier Part %s: WebLink changed to %q.", p.PNString(), weblink)
 	return nil
 }
 
@@ -341,6 +349,7 @@ func SetSupplierPartDescription(p *SupplierPart, description string) error {
 		log.Errorf("%v", err)
 		return err
 	}
+	log.Infof("Supplier Part %s: Description changed to %q.", p.PNString(), description)
 	return nil
 }
 
@@ -351,6 +360,7 @@ func SetSupplierPartDateIssued(p *SupplierPart, dateissued time.Time) error {
 	if p.PID.IsZero() {
 		return fmt.Errorf("Supplier part not identified correctly. PID=0.")
 	}
+	olddate := p.DateIssued
 	stmt, err := m_db.Prepare("update SupplierParts set DateIssued=? where PID=?")
 	if err != nil {
 		err := fmt.Errorf("Err updating SupplierParts. Err=%v", err)
@@ -369,6 +379,7 @@ func SetSupplierPartDateIssued(p *SupplierPart, dateissued time.Time) error {
 		log.Errorf("%v", err)
 		return err
 	}
+	log.Infof("Supplier Part %s: DateIssued changed from %s to: %s.", p.PNString(), olddate.Format("2006-01-02"))
 	return nil
 }
 
@@ -409,6 +420,9 @@ func NewSupplierPartInSequence(Designer, Category, Vendor, VendorPN, WebLink, De
 	p.DateIssued = time.Now()
 	err := write_supplier_part(p)
 	InvalidateSupplierPartsCache()
+	if err != nil {
+		log.Infof("NEW Supplier Part: %s added in sequence.", p.PNString())
+	}
 	return p, err
 }
 
@@ -452,6 +466,9 @@ func AddSupplierPart(p *SupplierPart) error {
 		InvalidateSupplierPartsCache()
 	} else {
 		gSupplierParts = append(gSupplierParts, p)
+	}
+	if err != nil {
+		log.Infof("NEW Supplier Part: %s added out-of-sequence.", p.PNString())
 	}
 	return nil
 }

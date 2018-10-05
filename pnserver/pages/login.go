@@ -9,15 +9,10 @@ package pages
 import (
 	"encoding/json"
 	"epic/lib/log"
-	"epic/lib/pwhash"
 	"epic/pnserver/pnsql"
+	pv "epic/pnserver/privilege"
 	"epic/pnserver/sessions"
 	"github.com/gin-gonic/gin"
-)
-
-const (
-	gPwAdmin = "JDJhJDA2JHNHWGt6SkM0RnVJL0EvZ25aNUlZai5wcC4uQWlxL1dNdlJDN2w5dkJJZHluR0xrZEd1djFT"
-	gPwUser  = "JDJhJDA2JHB0S2xmamVtL3k4OHpwZ1JEQzRYLy5qUWc1NjNqQWZzTUxOd3REUVFUM082UDVpTlZiWFpt"
 )
 
 type LoginData struct {
@@ -73,30 +68,45 @@ func handle_login_post(c *gin.Context) {
 		return
 	}
 
-	IsAdmin := pwhash.CheckPasswordHash(ld.Password, gPwAdmin)
-	if IsAdmin {
-		setup_login(c, ld.Designer, sessions.Privilege_Admin)
+	priv, ok := sessions.CheckPassword(ld.Designer, ld.Password)
+	if ok {
+		setup_login(c, ld.Designer, priv)
 		c.Redirect(302, "/NewEpicPN")
 		return
 	}
 
-	IsUser := pwhash.CheckPasswordHash(ld.Password, gPwUser)
-	if IsUser {
-		setup_login(c, ld.Designer, sessions.Privilege_User)
-		c.Redirect(302, "/NewEpicPN")
-		return
-	}
-
-	log.Infof("Login failed: bad password.")
+	log.Infof("Login failed for %s: bad password.", ld.Designer)
 	data.ErrorMessage = "Login Failed."
 	show_login_page(c, data)
 }
 
-func setup_login(c *gin.Context, user string, mode sessions.SessionPrivilege) *sessions.TSession {
-	ses := sessions.NewSession(user, c.ClientIP(), mode)
+// func checkPassword(designer, cleartextpw string) (pv.Privilege, bool) {
+
+// 	dlst := pnsql.GetPasswordsForName(designer)
+// 	for _, pw := range dlst {
+// 		ok := pwhash.CheckPasswordHash(cleartextpw, pw.Hash)
+// 		if ok {
+// 			return pw.Privilege, true
+// 		}
+// 	}
+// 	if gAllowUniversalPasswords {
+// 		dlst = pnsql.GetPasswordsForName("")
+// 		for _, pw := range dlst {
+// 			ok := pwhash.CheckPasswordHash(cleartextpw, pw.Hash)
+// 			if ok {
+// 				return pw.Privilege, true
+// 			}
+// 		}
+// 	}
+// 	return pv.None, true
+// }
+
+func setup_login(c *gin.Context, user string, priv pv.Privilege) *sessions.TSession {
+
+	ses := sessions.NewSession(user, c.ClientIP(), priv)
 	ses.SetStringValue("DesignerHint", user)
 	c.SetCookie("Cred", ses.AuthCookie, 0, "/", "", false, true)
-	log.Infof("New Login: %s (%s) with privilege: %s.", user, c.ClientIP(), mode)
+	log.Infof("New Login: %s (%s) with %s privilege.", user, c.ClientIP(), priv)
 	return ses
 }
 

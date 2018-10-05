@@ -8,24 +8,22 @@ package sessions
 
 import (
 	"epic/lib/log"
+	"epic/lib/pwhash"
 	"epic/lib/uuid"
+	"epic/pnserver/pnsql"
+	pv "epic/pnserver/privilege"
 	"fmt"
+	"strings"
 	"sync"
 	"time"
 )
 
 type SessionPrivilege string
 
-const (
-	Privilege_Guest = "Guest"
-	Privilege_User  = "User"
-	Privilege_Admin = "Admin"
-)
-
 type TSession struct {
 	Name       string
 	ClientIP   string
-	Privilege  SessionPrivilege
+	Privilege  pv.Privilege
 	LastAccess time.Time
 	LoginTime  time.Time
 	Data       map[string]interface{}
@@ -35,6 +33,30 @@ type TSession struct {
 var gSessions []*TSession
 var gSessionLock sync.Mutex
 var gTimeToLive int = 7200 // In Seconds
+
+var gBypassDev string = "" // If this string is empty, developer bypass mode is disabled
+var gAllowUniversalPasswords bool = false
+
+// SetDeveloperBypass sets a mode whereby a given name is used as a Designer at login time
+// and therefore bypasses the normal login procedure.  Use an empty string to
+// disable this feature.
+func SetDeveloperBypass(developer string) {
+	gBypassDev = strings.TrimSpace(developer)
+}
+
+func GetDeveloperBypass() string {
+	return gBypassDev
+}
+
+// SetAllowUniversalPasswords enables or disables a mode whereby all users can use the
+// same "unervisal" password.
+func SetAllowUniversalPasswords(enable bool) {
+	gAllowUniversalPasswords = enable
+}
+
+func GetAllowUniversalPasswords() bool {
+	return gAllowUniversalPasswords
+}
 
 func init() {
 	gSessions = make([]*TSession, 0, 20)
@@ -70,7 +92,7 @@ func GetTimeToLive() int {
 	return gTimeToLive
 }
 
-func NewSession(name, ClientIP string, Privilege SessionPrivilege) *TSession {
+func NewSession(name, ClientIP string, Privilege pv.Privilege) *TSession {
 	session := new(TSession)
 	session.Name = name
 	session.ClientIP = ClientIP
@@ -89,7 +111,7 @@ func NewGuestSession(ipaddr string) *TSession {
 	session := new(TSession)
 	session.Name = "Guest"
 	session.ClientIP = ipaddr
-	session.Privilege = "Privilege_Guest"
+	session.Privilege = pv.Guest
 	session.LoginTime = time.Now()
 	session.LastAccess = time.Now()
 	session.Data = make(map[string]interface{}, 30)
@@ -150,5 +172,44 @@ func (ses *TSession) SetStringValue(key, value string) {
 }
 
 func (ses *TSession) IsAdmin() bool {
-	return ses.Privilege == Privilege_Admin
+	return ses.Privilege.IsAdmin()
+}
+
+func (ses *TSession) IsUser() bool {
+	return ses.Privilege == pv.User
+}
+
+func (ses *TSession) IsGuest() bool {
+	return ses.Privilege == pv.Guest
+}
+
+func (ses *TSession) HasWritePrivilege() bool {
+	return ses.Privilege.HasWritePrivilege()
+}
+
+func (ses *TSession) HasReadPrivilege() bool {
+	return ses.Privilege.HasReadPrivilege()
+}
+
+// CheckPassword will check a cleartext password with the hash table to
+// determine a match.  If there is one, the allowed privilege is returned.
+// This function applies the policy for the allow-universal-password mode.
+func CheckPassword(designer, cleartextpw string) (pv.Privilege, bool) {
+	dlst := pnsql.GetPasswordsForName(designer)
+	for _, pw := range dlst {
+		ok := pwhash.CheckPasswordHash(cleartextpw, pw.Hash)
+		if ok {
+			return pw.Privilege, true
+		}
+	}
+	if gAllowUniversalPasswords {
+		dlst = pnsql.GetPasswordsForName("")
+		for _, pw := range dlst {
+			ok := pwhash.CheckPasswordHash(cleartextpw, pw.Hash)
+			if ok {
+				return pw.Privilege, true
+			}
+		}
+	}
+	return pv.None, false
 }

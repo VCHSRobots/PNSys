@@ -222,6 +222,7 @@ func DeleteEpicPart(p *EpicPart) error {
 		log.Errorf("%v", err)
 		return err
 	}
+	log.Infof("Epic Part %s deleted from database.", p.PNString())
 	return nil
 }
 
@@ -235,6 +236,7 @@ func SetEpicPartDesigner(p *EpicPart, designer string) error {
 	if !IsDesigner(designer) {
 		return fmt.Errorf("%q is not a known designer.")
 	}
+	olddesigner := p.Designer
 	stmt, err := m_db.Prepare("update EpicParts set Designer=? where PID=?")
 	if err != nil {
 		err := fmt.Errorf("Err updating EpicParts. Err=%v", err)
@@ -253,6 +255,7 @@ func SetEpicPartDesigner(p *EpicPart, designer string) error {
 		log.Errorf("%v", err)
 		return err
 	}
+	log.Infof("Epic Part %s: Designer changed from %s to %s.", p.PNString(), olddesigner, designer)
 	return nil
 }
 
@@ -281,6 +284,7 @@ func SetEpicPartDescription(p *EpicPart, description string) error {
 		log.Errorf("%v", err)
 		return err
 	}
+	log.Infof("Epic Part %s: Description changed to: %q.", p.PNString(), description)
 	return nil
 }
 
@@ -291,6 +295,7 @@ func SetEpicPartDateIssued(p *EpicPart, dateissued time.Time) error {
 	if p.PID.IsZero() {
 		return fmt.Errorf("Epic part not identified correctly. PID=0.")
 	}
+	olddate := p.DateIssued
 	stmt, err := m_db.Prepare("update EpicParts set DateIssued=? where PID=?")
 	if err != nil {
 		err := fmt.Errorf("Err updating EpicParts. Err=%v", err)
@@ -309,6 +314,8 @@ func SetEpicPartDateIssued(p *EpicPart, dateissued time.Time) error {
 		log.Errorf("%v", err)
 		return err
 	}
+	log.Infof("Epic Part %s: DateIssued changed from %s to: %s.", p.PNString(), olddate.Format("2006-01-02"),
+		dateissued.Format("2006-01-02"))
 	return nil
 }
 
@@ -358,6 +365,9 @@ func NewEpicPartInSequence(Designer, ProjectId, SubsystemId, PartType, Descripti
 	p.DateIssued = time.Now()
 	err := write_epic_part(p)
 	InvalidateEpicPartsCache()
+	if err != nil {
+		log.Infof("NEW Epic Part: %s added in sequence.", p.PNString())
+	}
 	return p, err
 }
 
@@ -434,6 +444,9 @@ func AddEpicPart(p *EpicPart) error {
 		InvalidateEpicPartsCache()
 	} else {
 		gEpicParts = append(gEpicParts, p)
+	}
+	if err != nil {
+		log.Infof("NEW Epic Part: %s added out-of-sequence.", p.PNString())
 	}
 	return err
 }

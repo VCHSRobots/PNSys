@@ -69,5 +69,5 @@ func handle_list_designers(c *Context, cmdline string) {
 		tbl.AddRow(fmt.Sprintf("%d", i), c.Name, c.Year0, sactive)
 		icount++
 	}
-	c.Printf("\n%s%d desingers found.\n", tbl.Text(), icount)
+	c.Printf("\n%s%d designers found.\n", tbl.Text(), icount)
 }

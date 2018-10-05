@@ -57,7 +57,7 @@ func handle_new_supplier_pn_with_error(c *gin.Context, errmsg string) {
 
 	var sd *SupplierPageDefaults
 	ses := GetSession(c)
-	t, ok := ses.Data["NewSupplierDefaults"]
+	t, ok := ses.Data["SupplierPageDefaults"]
 	if !ok {
 		sd = &SupplierPageDefaults{}
 	} else {
@@ -67,7 +67,9 @@ func handle_new_supplier_pn_with_error(c *gin.Context, errmsg string) {
 			sd = &SupplierPageDefaults{}
 		}
 	}
-	sd.Designer = data.Designer // Override designer default
+	if util.Blank(sd.Designer) {
+		sd.Designer = data.HeaderData.Designer
+	}
 	data.Defaults = sd
 	SendPage(c, data, "header", "menubar", "new_supplier_pn", "footer")
 }
@@ -100,7 +102,7 @@ func handle_new_supplier_pn_post(c *gin.Context) {
 	sd.WebLink = data.WebLink
 	sd.Description = data.Description
 	ses := GetSession(c)
-	ses.Data["NewSupplierDefaults"] = sd
+	ses.Data["SupplierPageDefaults"] = sd
 
 	if util.Blank(data.Description) {
 		handle_new_supplier_pn_with_error(c, "Please provide at least a few words that describes the part.")
@@ -114,12 +116,20 @@ func handle_new_supplier_pn_post(c *gin.Context) {
 		return
 	}
 
+	user := GetDesigner(c)
+	if user == pn.Designer {
+		log.Infof("New part %s designed and and added to database by %s.", pn.PNString(), pn.Designer)
+	} else {
+		log.Infof("New part %s designed by %s and added to database by %s.", pn.PNString(), pn.Designer, user)
+	}
+
 	// Defaults for next time...
 	sd.Description = ""
 	sd.Designer = ses.Name
-	ses.Data["EpicPageDefaults"] = sd
+	ses.Data["SupplierPageDefaults"] = sd
 
-	show_part_page(c, pn.PNString())
+	url := fmt.Sprintf("/ShowPart?pn=%s", pn.PNString())
+	c.Redirect(303, url)
 
 	// msg := fmt.Sprintf("Submitted Data: <br>")
 	// msg += fmt.Sprintf("Category     = %s<br>", data.Category)

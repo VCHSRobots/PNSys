@@ -8,22 +8,11 @@ package pages
 
 import (
 	"epic/lib/log"
+	pv "epic/pnserver/privilege"
 	"epic/pnserver/sessions"
-	//"epic/pnserver/pnsql"
 	"fmt"
 	"github.com/gin-gonic/gin"
-	//"strings"
-	//"time"
 )
-
-var gBypassDev string = ""
-
-// UseByPass sets a mode whereby a given name is used as a Designer at login time
-// and therefore bypasses the normal login procedure.  Use an empty string to
-// disable this feature.
-func UseBypass(developer string) {
-	gBypassDev = developer
-}
 
 func authorizer(c *gin.Context) {
 	// If not logged in, redirect to login page.
@@ -31,13 +20,13 @@ func authorizer(c *gin.Context) {
 	ses, err := sessions.GetSessionByAuth(cookie)
 	if err != nil {
 		// We are not logged in!
-		if gBypassDev != "" {
+		if bypass := sessions.GetDeveloperBypass(); bypass != "" {
 			// Use developer bypass...
 			log.Infof("Developer ByPass Login Mode Triggered...")
-			ses = setup_login(c, gBypassDev, sessions.Privilege_Admin)
+			ses = setup_login(c, bypass, pv.Admin)
 		} else {
 			log.Infof("Invalid auth cookie.. redirecting to Login.")
-			c.Redirect(302, "/Login")
+			c.Redirect(303, "/Login")
 			c.Abort()
 			return
 		}
@@ -112,15 +101,58 @@ func GetSession(c *gin.Context) *sessions.TSession {
 	if !ok {
 		err := fmt.Errorf("Session data not avaliable after authentication!?")
 		log.Errorf("%v\n", err)
-		c.AbortWithError(400, err)
-		return nil
+		log.Infof("Returning an empty session.")
+		return &sessions.TSession{}
 	}
 	ses, ok := x.(*sessions.TSession)
 	if !ok {
 		err := fmt.Errorf("Session Data assert error! Programming BUG.")
 		log.Errorf("%v\n", err)
-		c.AbortWithError(400, err)
-		return nil
+		log.Infof("Returning an empty session.")
+		return &sessions.TSession{}
 	}
 	return ses
+}
+
+// GetDesigner returns the currently logged in designer if possible, otherwise
+// and empty string is returned.
+func GetDesigner(c *gin.Context) string {
+	ses := GetSession(c)
+	return ses.Name
+}
+
+// IsLoggedIn returns the login condition.
+func IsLoggedIn(c *gin.Context) bool {
+	ses := GetSession(c)
+	if ses.IsAdmin() || ses.IsUser() || ses.IsGuest() {
+		return true
+	}
+	return false
+}
+
+// IsAdmin returns true if the current context has admin rights.
+func IsAdmin(c *gin.Context) bool {
+	return GetSession(c).IsAdmin()
+}
+
+// IsUser return true if the current context has user rights.
+func IsUser(c *gin.Context) bool {
+	return GetSession(c).IsUser()
+}
+
+// IsGuest returns true if the current context has guest rights.
+func IsGuest(c *gin.Context) bool {
+	return GetSession(c).IsGuest()
+}
+
+// HasWritePrivilege returns true if current context can write
+// to the database.
+func HasWritePrivilege(c *gin.Context) bool {
+	return GetSession(c).HasWritePrivilege()
+}
+
+// HasReadPrivilege returns true if current context can read
+// from the database.
+func HasReadPrivilege(c *gin.Context) bool {
+	return GetSession(c).HasReadPrivilege()
 }

@@ -24,7 +24,7 @@ parameter, which is required.
 
 func init() {
 	RegistorCmd("add-subsystem", "ppp-ss", "Adds a new subsystem (see topic).", handle_add_subsystem)
-	RegistorTopic("handle_add_subsystem", gTopic_add_project)
+	RegistorTopic("add-subsystem", gTopic_add_subsystem)
 	RegistorArg("ppp-ss", "A subsystem Id, consisting of both the project and subsystem Ids.")
 }
 

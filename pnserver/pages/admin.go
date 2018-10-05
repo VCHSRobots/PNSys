@@ -19,12 +19,13 @@ func init() {
 }
 
 func handle_admin(c *gin.Context) {
-	data := GetHeaderData(c)
-	data.StyleSheets = []string{"admin"}
-	if !data.IsAdmin {
+	if !IsAdmin(c) {
 		SendMessagePagef(c, "How did you get here?<br><br>This page is only for Admin Users!<br>")
 		return
 	}
+	data := GetHeaderData(c)
+	data.StyleSheets = []string{"admin"}
+
 	SendPage(c, data, "header", "menubar", "admin", "footer")
 }
 

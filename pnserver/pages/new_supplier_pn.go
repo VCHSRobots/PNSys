@@ -109,6 +109,11 @@ func handle_new_supplier_pn_post(c *gin.Context) {
 		return
 	}
 
+	if !HasWritePrivilege(c) {
+		handle_new_supplier_pn_with_error(c, "Sorry, users logged in as guest cannot add parts.")
+		return
+	}
+
 	pn, err := pnsql.NewSupplierPartInSequence(data.Designer, data.Category, data.Vendor,
 		data.VendorPN, data.WebLink, data.Description)
 	if err != nil {

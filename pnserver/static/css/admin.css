@@ -6,7 +6,7 @@
 */
 
 .terminal_output_area {border-width: 2px; border-style: solid; border-color: gray; width: 95%;}
-#terminal_output {font-size: 10pt; font-family: monospace; width: 99%; color: black; overflow-y: scroll;}
+#terminal_output {font-size: 7pt; font-family: monospace; width: 99%; color: black; overflow-y: scroll; height: 300px;}
 
 .terminal_input_area {margin-top: 10px; border-width: 2px; border-style: solid; border-color: gray; 
                       height: 35px; clear: both; width: 95%;}

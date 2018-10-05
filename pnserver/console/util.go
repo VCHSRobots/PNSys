@@ -88,30 +88,14 @@ func CreateHistoryFile() (*os.File, error) {
 	return os.Create(gHistoryFile)
 }
 
-func AreYouSure() bool {
-	for {
-		cmd, _ := gConsole.Prompt("Are you sure? (y/n) > ")
-		if cmd == "y" || cmd == "yes" {
-			return true
-		}
-		if cmd == "n" || cmd == "no" {
-			return false
-		}
-		fmt.Printf("You must enter yes or no.\n")
-	}
-}
-
-func ParseActive(params map[string]string) (bool, bool, error) {
+func ParseActive(params map[string]string) (active, doactive bool, err error) {
 	sactive, doactive := util.MapAlias(params, "Active", "active")
 	if doactive {
-		sact := strings.ToLower(sactive)
-		if sact == "true" || sact == "yes" || sact == "t" || sact == "y" {
-			return true, true, nil
-		} else if sact == "false" || sact == "no" || sact == "f" || sact == "n" {
-			return false, true, nil
-		} else {
-			return false, false, fmt.Errorf("Invalid value for active (%q)\n", sactive)
+		active, err = util.StrToBool(sactive, false)
+		if err != nil {
+			return false, false, fmt.Errorf("Value for active unrecognizable (%q)\n", sactive)
 		}
+		return active, true, nil
 	}
 	return false, false, nil
 }

@@ -73,6 +73,7 @@ func handle_new_epic_pn_with_error(c *gin.Context, errmsg string) {
 }
 
 func handle_new_epic_pn_post(c *gin.Context) {
+
 	type submitdata struct {
 		Project     string `form:"Project"`
 		Subsystem   string `form:"Subsystem"`
@@ -99,10 +100,16 @@ func handle_new_epic_pn_post(c *gin.Context) {
 
 	if util.Blank(data.Subsystem) {
 		handle_new_epic_pn_with_error(c, "No Subsystems for the project yet. Have an admin create one.")
+		return
 	}
 
 	if util.Blank(data.Description) {
 		handle_new_epic_pn_with_error(c, "Please provide at least a few words that describes the part.")
+		return
+	}
+
+	if !HasWritePrivilege(c) {
+		handle_new_epic_pn_with_error(c, "Sorry, users logged in as guest cannot add parts.")
 		return
 	}
 

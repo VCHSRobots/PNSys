@@ -20,6 +20,7 @@ function addTextToTerminal(str) {
 }
 
 function execCommand(cmd) {
+
     xhttp.onreadystatechange = function() {
         //console.log("on ready state change.");
         if (this.readyState == 4 && this.status == 200) {
@@ -37,6 +38,7 @@ function checkEnter(e) {
     var cCode = e.which;
     if (cCode == 13) {
         var txt = document.getElementById("terminal_input").value;
+        addTextToTerminal(">" + txt)
         //console.log("calling btoa on ", txt);
         var btxt = btoa(txt);
         //console.log("sending ", btxt);
@@ -44,7 +46,7 @@ function checkEnter(e) {
     }
 }
 
-var termfont = 10;
+var termfont = 7;
 
 function onTermClear() {
     document.getElementById("terminal_output").value = "";
@@ -86,7 +88,7 @@ function onTermSmaller() {
 </div>
 
 <div class="terminal_output_area">
-    <textarea  id="terminal_output" name="Description"  rows="20" cols="80" > </textarea>
+    <textarea  id="terminal_output" name="Description" > </textarea>
 </div>
 
 <div class="terminal_input_area">

@@ -9,13 +9,14 @@ package console
 import (
 	"epic/lib/log"
 	"epic/lib/util"
+	"fmt"
 	"strconv"
 	"strings"
 	"time"
 )
 
 const gTopic_show_log = `
-The show-config command shows (i.e., dumps) the log files on the console. 
+The show-log command shows (i.e., dumps) the log files on the console. 
 The format of the command is:
 
     show-log line0=nnn maxlines=nnn date=yyyy-mm-dd gin=t/f
@@ -36,9 +37,22 @@ By default they are not included.
 
 `
 
+const gTopic_show_log_line = `
+The show-log-line commands shows one line of a log file.  This command
+is useful to see the full contents of a log line when it is truncated on
+in a list output.  The format of the command is:
+
+    show-log-line nnn date=yyyy-mm-dd
+
+where nnn is the line number given in the tabular output of show-log.
+
+`
+
 func init() {
 	RegistorCmd("show-log", "", "Shows (dumps) log files (see topic).", handle_show_log)
+	RegistorCmd("show-log-line", "", "Shows one log message form a log file (see topic).", handle_show_log_line)
 	RegistorTopic("show-log", gTopic_show_log)
+	RegistorTopic("show-log-line", gTopic_show_log_line)
 }
 
 func handle_show_log(c *Context, cmdline string) {
@@ -97,14 +111,23 @@ func handle_show_log(c *Context, cmdline string) {
 		c.Printf("Error on read: %v\n", err)
 		return
 	}
-	lines := strings.Split(content, "\n")
-	n := len(lines)
+	rawlines := strings.Split(content, "\n")
+	n := len(rawlines)
+	type numline struct {
+		line_num int
+		text     string
+	}
+	lines := make([]*numline, 0, len(rawlines))
+	for i, x := range rawlines {
+		x = strings.TrimSpace(x)
+		lines = append(lines, &numline{i, x})
+	}
 	c.Printf("%d lines in the log file.\n", n)
 	if !gin {
 		// filter the gin lines.
-		tmplns := make([]string, 0, len(lines))
+		tmplns := make([]*numline, 0, len(lines))
 		for _, ln := range lines {
-			s := strings.TrimSpace(ln)
+			s := strings.TrimSpace(ln.text)
 			if !strings.HasPrefix(s, "![GIN]") {
 				tmplns = append(tmplns, ln)
 			}
@@ -124,16 +147,70 @@ func handle_show_log(c *Context, cmdline string) {
 		}
 	}
 	c.Printf("Log file of %s, starting at line %d:\n", date.Format("2006-01-02"), iline0)
-	c.Printf("-------------------------------------------------------- (start of dump)\n")
+	tbl := util.NewTable("Line #", "Message")
 	nc := 0
 	for i := iline0; i < n; i++ {
-		ln := strings.TrimSpace(lines[i])
-		c.Printf("%s\n", ln)
+		snum := fmt.Sprintf("%05d", lines[i].line_num)
+		ln := util.FixStrLen(lines[i].text, 125, "...")
+		//ln = strings.TrimSpace(ln)
+		if len(lines[i].text) > 122 {
+			snum += "-"
+		} else {
+			snum += " "
+		}
+		tbl.AddRow(snum, ln)
 		nc++
 		if nc > imax {
 			break
 		}
 	}
-	c.Printf("-------------------------------------------------------- (end of dump)\n")
-	c.Printf("\n")
+	c.Printf("\n%s\n", tbl.Text())
+}
+
+func handle_show_log_line(c *Context, cmdline string) {
+	params := make(map[string]string, 10)
+	args, err := ParseCmdLine(cmdline, params)
+	if err != nil {
+		c.Printf("%v\n", err)
+		return
+	}
+
+	if len(args) < 2 {
+		c.Printf("Line number not provided.\n")
+		return
+	}
+	iline, err := strconv.Atoi(args[1])
+	if err != nil {
+		c.Printf("Unrecognizable line number.\n")
+		return
+	}
+	if iline < 0 {
+		c.Printf("Negative line numbers don't make sense.\n")
+		return
+	}
+
+	sdate, _ := util.MapAlias(params, "date")
+
+	date := time.Now()
+	if !util.Blank(sdate) {
+		date, err = util.ParseGenericTime(sdate)
+		if err != nil {
+			c.Printf("Bad input (%s) for date.\n", sdate)
+			return
+		}
+	}
+
+	// read entire file.
+	content, err := log.ReadLogFile(date)
+	if err != nil {
+		c.Printf("Error on read: %v\n", err)
+		return
+	}
+	rawlines := strings.Split(content, "\n")
+	if iline < 0 || iline >= len(rawlines) {
+		c.Printf("Line number out of range. Only %d lines in the file.", len(rawlines))
+		return
+	}
+	txt := rawlines[iline]
+	c.Printf("Line %d from log %s:\n%s\n", iline, date.Format("2006-01-02"), txt)
 }

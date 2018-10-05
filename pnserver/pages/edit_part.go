@@ -133,6 +133,7 @@ func handle_edit_part_with_error(c *gin.Context, pn, errmsg string) {
 }
 
 func handle_edit_epic_post(c *gin.Context) {
+
 	type submitdata struct {
 		PartNumber  string `form:"PartNumber"`
 		Designer    string `form:"Designer"`
@@ -144,6 +145,11 @@ func handle_edit_epic_post(c *gin.Context) {
 		err = fmt.Errorf("Bind error for EditEpicPNPost. Err=%v", err)
 		log.Errorf("%v", err)
 		SendErrorPage(c, err)
+		return
+	}
+
+	if !HasWritePrivilege(c) {
+		handle_edit_part_with_error(c, data.PartNumber, "Sorry, users logged in as guest cannot change parts.")
 		return
 	}
 
@@ -195,6 +201,7 @@ func handle_edit_epic_post(c *gin.Context) {
 }
 
 func handle_edit_supplier_post(c *gin.Context) {
+
 	type submitdata struct {
 		PartNumber  string `form:"PartNumber"`
 		Vendor      string `form:"Vendor"`
@@ -221,6 +228,12 @@ func handle_edit_supplier_post(c *gin.Context) {
 		SendErrorPage(c, err)
 		return
 	}
+
+	if !HasWritePrivilege(c) {
+		handle_edit_part_with_error(c, data.PartNumber, "Sorry, users logged in as guest cannot change parts.")
+		return
+	}
+
 	nchanges := 0
 	if part.Designer != data.Designer {
 		err = pnsql.SetSupplierPartDesigner(part, data.Designer)

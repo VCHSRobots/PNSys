@@ -35,6 +35,12 @@ insert into Designers (Name, Year0, Active) values("C. Yuan",       "2014", 0);
 insert into Designers (Name, Year0, Active) values("A. Haitz",      "2014", 0);
 insert into Designers (Name, Year0, Active) values("D. OToole",     "2014", 0);
 
+insert into Designers (Name, Year0, Active) values("M. Doom",       "2018", 1);
+insert into Designers (Name, Year0, Active) values("H. Malmsten",   "2018", 1);
+insert into Designers (Name, Year0, Active) values("B. Zhou",       "2018", 1);
+insert into Designers (Name, Year0, Active) values("C. Sun",        "2018", 1);
+insert into Designers (Name, Year0, Active) values("Y. Cai",        "2018", 1);
+
 insert into Projects (ProjectId, Description, Year0, Active) values("G18", "General, Fall 2018",          "2018", 1);
 insert into Projects (ProjectId, Description, Year0, Active) values("X18", "Practice Bot Fall 2018",      "2018", 1);
 insert into Projects (ProjectId, Description, Year0, Active) values("R18", "Competition Prototype 2018",  "2018", 0);

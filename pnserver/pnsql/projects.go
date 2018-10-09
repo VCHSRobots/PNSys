@@ -566,7 +566,7 @@ func SetSubsystemDescription(ProjectId, SubsystemId, Description string) error {
 	if util.Blank(Description) {
 		return fmt.Errorf("Description cannot be blank.")
 	}
-	stmt, err := m_db.Prepare("update Subystems set Description=? where ProjectId=? and SubsystemId=?")
+	stmt, err := m_db.Prepare("update Subsystems set Description=? where ProjectId=? and SubsystemId=?")
 	if err != nil {
 		err := fmt.Errorf("Err updating Subsystems. Err=%v", err)
 		log.Errorf("%v", err)

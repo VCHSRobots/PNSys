@@ -7,6 +7,7 @@
 package pages
 
 import (
+	"encoding/base64"
 	"epic/lib/log"
 	"epic/lib/util"
 	"epic/pnserver/pnsql"
@@ -15,11 +16,12 @@ import (
 )
 
 type EpicPageDefaults struct {
-	Designer    string
-	Project     string
-	Subsystem   string
-	PartType    string
-	Description string
+	Designer          string
+	Project           string
+	Subsystem         string
+	PartType          string
+	Description       string
+	DescriptionBase64 string
 }
 
 type EpicPNData struct {
@@ -69,6 +71,8 @@ func handle_new_epic_pn_with_error(c *gin.Context, errmsg string) {
 		sd.Designer = data.HeaderData.Designer
 	}
 	data.Defaults = sd
+	txt := data.Defaults.Description
+	data.Defaults.DescriptionBase64 = base64.StdEncoding.EncodeToString([]byte(txt))
 	SendPage(c, data, "header", "menubar", "new_epic_pn", "footer")
 }
 

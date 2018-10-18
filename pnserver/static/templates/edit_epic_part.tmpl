@@ -39,7 +39,7 @@ function startUp() {
         toggleActiveDesigners()
         setSelectionBox("ept_designer_field", "{{.Designer}}");
     }
-    setTextBox("ept_desc_field", "{{.Description}}");
+    setTextBox("ept_desc_field", atob("{{.DescriptionBase64}}"));
 }
 
 </script>

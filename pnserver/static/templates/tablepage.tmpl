@@ -6,18 +6,125 @@
 // --------------------------------------------------------------------
 */}}
 
+<script type="application/json" id="sortoptions">
+{{.SortOptionsJson}}
+</script>
+
+<script type="text/javascript">
+
+function getOptions() {
+    var options_json = document.getElementById("sortoptions");
+    if (typeof options_json === "undefined") {
+        console.log("sortoptions json unknown.");
+        return;
+    }
+    var options = JSON.parse(options_json.innerHTML);
+    return options;
+}
+
+function sortTable(fieldnum, lowfirst) {
+  var table, rows, switching, i, x, y, shouldSwitch;
+  table = document.getElementById("sortable_table");
+  switching = true;
+  while (switching) {
+    switching = false;
+    rows = table.rows;
+    for (i = 1; i < (rows.length - 1); i++) {
+      shouldSwitch = false;
+      x = rows[i].getElementsByTagName("TD")[fieldnum];
+      y = rows[i + 1].getElementsByTagName("TD")[fieldnum];
+      if (lowfirst) {
+        if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
+          shouldSwitch = true;
+          break;
+        }
+      } else {
+        if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
+          shouldSwitch = true;
+          break;
+        } 
+      }
+    }
+    if (shouldSwitch) {
+      rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+      switching = true;
+    }
+  }
+}
+
+var lastdir = false;
+
+function sortTableByColumn(colname) {
+    var table, header, cell, name, i;
+    table = document.getElementById("sortable_table");
+    header = table.rows[0];
+    for (i = 0; i < header.cells.length; i++) {
+        cell = header.cells[i];
+        name = cell.textContent.trim(); 
+        if (name == colname) {
+            lastdir = !lastdir; 
+            sortTable(i, lastdir);
+            return;
+        }
+    }
+}
+
+function resort() {
+    var selbox = document.getElementById("table_sort_dropdown");
+    options = getOptions();
+    opt = options[0];
+    for (var i = 0; i < options.length; i++) {
+        if (selbox.value == options[i].Text) {
+            opt = options[i]; 
+            break;
+        }
+    }
+    sortTable(opt.Field, opt.LowFirst);
+}
+
+function startUp() {
+    var options = getOptions()
+    var selbox = document.getElementById("table_sort_dropdown");
+    var i;
+    if (typeof selbox === "undefined") {
+        return;
+    }
+    for (i = 0; i < options.length; i++) {
+        var sortoption = options[i];
+        var opt = document.createElement("option");
+        opt.text = sortoption.Text;
+        opt.label = sortoption.Text;
+        opt.value = sortoption.Text;
+        selbox.add(opt);
+    }
+    sortTableByColumn("Date Issued")
+}
+
+</script>
 
 <div class="content_area">
 <div class="page_title"> {{- .PageTitle -}}</div>
 
 {{if .LimitMsg}}
 <div class="table_limit_msg" id="table_limit_msg"> {{.LimitMsg}} </div>
+{{end}} 
+
+
+<!--
+{{if .Rows}} 
+<div id="table_sort_area">
+    <div id="sort_label">Sort</div>
+    <select id="table_sort_dropdown" onchange="resort()"></select>
+</div>
 {{end}}
+-->
 
 <div id="table_content" class="table_content">
 {{if .Rows}}
-    <table>
-        <thead><tr>{{range .Head}} <th> {{.}} </th> {{end}}</tr></thead>
+    <table id="sortable_table">
+        <thead><tr>{{range .Head}} 
+            <th> <a onclick="sortTableByColumn('{{.}}')"> {{.}} </a> </th> 
+            {{end}}</tr></thead>
         <tbody>
             {{range .Rows}} <tr> {{range .Cols}} <td> {{ . }} </td> {{end}} </tr> {{end}}
         </tbody>

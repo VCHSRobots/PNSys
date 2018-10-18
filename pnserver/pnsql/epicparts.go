@@ -348,6 +348,9 @@ func NewEpicPartInSequence(Designer, ProjectId, SubsystemId, PartType, Descripti
 		if part.SubsystemId != SubsystemId {
 			continue
 		}
+		if part.PartType != PartType {
+			continue
+		}
 		if part.SequenceNum > lastseq {
 			lastseq = part.SequenceNum
 		}

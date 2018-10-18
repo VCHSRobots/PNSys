@@ -72,11 +72,11 @@ function startUp() {
         setSelectionBox("ept_designer_field", "{{.Designer}}");
     }
 
-    setSelectionBox("ept_vendor_field2", "{{.Vendor}}");
-    setTextBox("ept_vendor_field1", "{{.Vendor}}");
-    setTextBox("ept_vendorpn_field", "{{.VendorPN}}");
-    setTextBox("ept_weblink_field", "{{.WebLink}}");
-    setTextBox("ept_desc_field", "{{.Description}}");
+    setSelectionBox("ept_vendor_field2", atob("{{.VendorBase64}}"));
+    setTextBox("ept_vendor_field1", atob("{{.VendorBase64}}"));
+    setTextBox("ept_vendorpn_field", atob("{{.VendorPNBase64}}"));
+    setTextBox("ept_weblink_field", atob("{{.WebLinkBase64}}"));
+    setTextBox("ept_desc_field", atob("{{.DescriptionBase64}}"));
 }
 
 </script>

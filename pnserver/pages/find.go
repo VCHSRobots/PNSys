@@ -7,6 +7,7 @@
 package pages
 
 import (
+	"encoding/json"
 	"epic/lib/log"
 	"epic/lib/util"
 	"epic/pnserver/pnsql"
@@ -131,6 +132,8 @@ func handle_find_post(c *gin.Context) {
 	data.HeaderData = GetHeaderData(c)
 
 	data.PageTitle = "Find Results"
+	data.OnLoadFuncJS = "startUp"
+	data.StyleSheets = []string{"find_results"}
 	data.MainType = sdata.MainType
 	data.FindPartFields.Designer = sdata.Designer
 	data.Project = sdata.Project
@@ -174,9 +177,28 @@ func handle_find_post(c *gin.Context) {
 				break
 			}
 		}
+		SortOptions := make([]*SortOption, 0, 12)
+		SortOptions = append(SortOptions, &SortOption{"Date (New to Old)", 5, true})
+		SortOptions = append(SortOptions, &SortOption{"Date (Old to New)", 5, false})
+		SortOptions = append(SortOptions, &SortOption{"PN (Low to High)", 0, true})
+		SortOptions = append(SortOptions, &SortOption{"PN (High to Low)", 0, false})
+		SortOptions = append(SortOptions, &SortOption{"Designer (A-Z)", 4, true})
+		SortOptions = append(SortOptions, &SortOption{"Designer (Z-A)", 4, false})
+		SortOptions = append(SortOptions, &SortOption{"Description (A-Z)", 1, true})
+		SortOptions = append(SortOptions, &SortOption{"Description (Z-A)", 1, false})
+		SortOptions = append(SortOptions, &SortOption{"Vendor (A-Z)", 2, true})
+		SortOptions = append(SortOptions, &SortOption{"Vendor (Z-A)", 2, false})
+		SortOptions = append(SortOptions, &SortOption{"VendorPN (A-Z)", 3, true})
+		SortOptions = append(SortOptions, &SortOption{"VendorPN (Z-A)", 3, false})
+		sort_bytes, err := json.MarshalIndent(SortOptions, "", "  ")
+		if err != nil {
+			err = fmt.Errorf("Unable to convert to json. Err=%v", err)
+			log.Errorf("%v", err)
+		}
+		data.SortOptionsJson = string(sort_bytes)
 	} else if tbltype == "epic" {
 		data.TableData = new(TableData)
-		data.Head = []string{"PN", "Description", "Project", "Subsystem", "Designer", "DateIssued"}
+		data.Head = []string{"PN", "Description", "Project", "Subsystem", "Designer", "Date Issued"}
 		data.Rows = make([]TColumn, 0, 101)
 		if len(plst) > 100 {
 			data.LimitMsg = fmt.Sprintf("Showing first 100 parts out of %d found.", len(plst))
@@ -194,9 +216,28 @@ func handle_find_post(c *gin.Context) {
 				break
 			}
 		}
+		SortOptions := make([]*SortOption, 0, 12)
+		SortOptions = append(SortOptions, &SortOption{"Date (New to Old)", 5, true})
+		SortOptions = append(SortOptions, &SortOption{"Date (Old to New)", 5, false})
+		SortOptions = append(SortOptions, &SortOption{"PN (Low to High)", 0, true})
+		SortOptions = append(SortOptions, &SortOption{"PN (High to Low)", 0, false})
+		SortOptions = append(SortOptions, &SortOption{"Designer (A-Z)", 4, true})
+		SortOptions = append(SortOptions, &SortOption{"Designer (Z-A)", 4, false})
+		SortOptions = append(SortOptions, &SortOption{"Description (A-Z)", 1, true})
+		SortOptions = append(SortOptions, &SortOption{"Description (Z-A)", 1, false})
+		SortOptions = append(SortOptions, &SortOption{"Project (A-Z)", 2, true})
+		SortOptions = append(SortOptions, &SortOption{"Proejct (Z-A)", 2, false})
+		SortOptions = append(SortOptions, &SortOption{"Subsystem (A-Z)", 3, true})
+		SortOptions = append(SortOptions, &SortOption{"Subsystem (Z-A)", 3, false})
+		sort_bytes, err := json.MarshalIndent(SortOptions, "", "  ")
+		if err != nil {
+			err = fmt.Errorf("Unable to convert to json. Err=%v", err)
+			log.Errorf("%v", err)
+		}
+		data.SortOptionsJson = string(sort_bytes)
 	} else {
 		data.TableData = new(TableData)
-		data.Head = []string{"PN", "Description", "Designer", "DateIssued"}
+		data.Head = []string{"PN", "Description", "Designer", "Date Issued"}
 		data.Rows = make([]TColumn, 0, 101)
 		if len(plst) > 100 {
 			data.LimitMsg = fmt.Sprintf("Showing first 100 parts out of %d found.", len(plst))
@@ -212,6 +253,21 @@ func handle_find_post(c *gin.Context) {
 				break
 			}
 		}
+		SortOptions := make([]*SortOption, 0, 8)
+		SortOptions = append(SortOptions, &SortOption{"Date (New to Old)", 3, true})
+		SortOptions = append(SortOptions, &SortOption{"Date (Old to New)", 3, false})
+		SortOptions = append(SortOptions, &SortOption{"PN (Low to High)", 0, true})
+		SortOptions = append(SortOptions, &SortOption{"PN (High to Low)", 0, false})
+		SortOptions = append(SortOptions, &SortOption{"Designer (A-Z)", 2, true})
+		SortOptions = append(SortOptions, &SortOption{"Designer (Z-A)", 2, false})
+		SortOptions = append(SortOptions, &SortOption{"Description (A-Z)", 1, true})
+		SortOptions = append(SortOptions, &SortOption{"Description (Z-A)", 1, false})
+		sort_bytes, err := json.MarshalIndent(SortOptions, "", "  ")
+		if err != nil {
+			err = fmt.Errorf("Unable to convert to json. Err=%v", err)
+			log.Errorf("%v", err)
+		}
+		data.SortOptionsJson = string(sort_bytes)
 	}
 
 	SendPage(c, data, "header", "menubar", "tablepage", "footer")
@@ -334,7 +390,7 @@ func search_for_parts(spec TFindSubmitData) (parts []*CPart, tabletype string, e
 			blst = append(blst, part)
 		}
 		sorter := func(i, j int) bool {
-			return blst[i].DateIssued.Before(blst[j].DateIssued)
+			return blst[i].DateIssued.After(blst[j].DateIssued)
 		}
 		sort.Slice(blst, sorter)
 		return blst, "both", nil
@@ -356,7 +412,7 @@ func search_for_parts(spec TFindSubmitData) (parts []*CPart, tabletype string, e
 			blst = append(blst, part)
 		}
 		sorter := func(i, j int) bool {
-			return blst[i].DateIssued.Before(blst[j].DateIssued)
+			return blst[i].DateIssued.After(blst[j].DateIssued)
 		}
 		sort.Slice(blst, sorter)
 		return blst, "epic", nil
@@ -379,7 +435,7 @@ func search_for_parts(spec TFindSubmitData) (parts []*CPart, tabletype string, e
 			blst = append(blst, part)
 		}
 		sorter := func(i, j int) bool {
-			return blst[i].DateIssued.Before(blst[j].DateIssued)
+			return blst[i].DateIssued.After(blst[j].DateIssued)
 		}
 		sort.Slice(blst, sorter)
 		return blst, "supplier", nil

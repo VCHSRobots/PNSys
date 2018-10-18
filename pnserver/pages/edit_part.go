@@ -7,6 +7,7 @@
 package pages
 
 import (
+	"encoding/base64"
 	"epic/lib/log"
 	"epic/lib/util"
 	"epic/pnserver/pnsql"
@@ -22,22 +23,27 @@ type EditPartData struct {
 	IsSupplier bool
 	HavePart   bool
 	// Generic Info
-	PartNumber     string
-	Description    string
-	Designer       string
-	DateIssued     string
-	PID            string
-	SequenceNumber string
+	PartNumber        string
+	Description       string
+	DescriptionBase64 string
+	Designer          string
+	DateIssued        string
+	PID               string
+	SequenceNumber    string
 	// For Epic Parts
 	Project   string
 	Subsystem string
 	PartType  string
 	// For Supplier Parts
-	Category    string
-	Vendor      string
-	VendorPN    string
-	WebLink     string
-	WebLinkAddr string
+	Category          string
+	Vendor            string
+	VendorPN          string
+	WebLink           string
+	WebLinkAddr       string
+	VendorBase64      string
+	VendorPNBase64    string
+	WebLinkBase64     string
+	WebLinkAddrBase64 string
 }
 
 func init() {
@@ -87,7 +93,8 @@ func handle_edit_part_with_error(c *gin.Context, pn, errmsg string) {
 		}
 		data.HavePart = true
 		data.PartNumber = part.PNString()
-		data.Description = part.Description
+		data.Description = util.CleanForWeb(part.Description)
+		data.DescriptionBase64 = base64.StdEncoding.EncodeToString([]byte(part.Description))
 		data.Designer = part.Designer
 		data.DateIssued = part.DateIssued.Format("2006-01-02")
 		data.PID = part.PID.String()
@@ -114,15 +121,20 @@ func handle_edit_part_with_error(c *gin.Context, pn, errmsg string) {
 		data.HavePart = true
 		data.PartNumber = part.PNString()
 		data.Description = util.CleanForWeb(part.Description)
+		data.DescriptionBase64 = base64.StdEncoding.EncodeToString([]byte(part.Description))
 		data.Designer = part.Designer
 		data.DateIssued = part.DateIssued.Format("2006-01-02")
 		data.PID = part.PID.String()
 		data.SequenceNumber = fmt.Sprintf("%03d", part.SequenceNum)
 		data.Category = util.CleanForWeb(part.CategoryDesc())
 		data.Vendor = util.CleanForWeb(part.Vendor)
+		data.VendorBase64 = base64.StdEncoding.EncodeToString([]byte(part.Vendor))
 		data.VendorPN = util.CleanForWeb(part.VendorPN)
+		data.VendorPNBase64 = base64.StdEncoding.EncodeToString([]byte(part.VendorPN))
 		data.WebLink = util.CleanForWeb(part.WebLink)
+		data.WebLinkBase64 = base64.StdEncoding.EncodeToString([]byte(part.WebLink))
 		data.WebLinkAddr = FixWebLinkAddr(data.WebLink)
+		data.WebLinkAddrBase64 = base64.StdEncoding.EncodeToString([]byte(data.WebLinkAddr))
 
 		SendPage(c, data, "header", "menubar", "edit_supplier_part", "footer")
 		return

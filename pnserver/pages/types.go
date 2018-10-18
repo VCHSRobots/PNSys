@@ -29,11 +29,18 @@ type TColumn struct {
 	Cols []string
 }
 
+type SortOption struct {
+	Text     string // What is displayed to the user
+	Field    int    // Field number to sort
+	LowFirst bool   // Direction of sort,
+}
+
 type TableData struct {
-	Head         []string
-	Rows         []TColumn
-	EmptyMessage string
-	LimitMsg     string
+	Head            []string
+	Rows            []TColumn
+	SortOptionsJson string
+	EmptyMessage    string
+	LimitMsg        string
 }
 
 type SelectionBoxData struct {

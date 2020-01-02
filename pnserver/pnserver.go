@@ -20,7 +20,7 @@ import (
 	"strings"
 )
 
-var gVersion = "Fall 2018 v1.0"
+var gVersion = "Winter 2020 v1.1"
 var gServer *gin.Engine
 var gHostAddr string = ":8081"
 

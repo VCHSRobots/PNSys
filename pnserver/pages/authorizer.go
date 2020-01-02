@@ -31,6 +31,8 @@ func authorizer(c *gin.Context) {
 			return
 		}
 	}
+	// Reset Session Timeout clock here...
+	ses.ResetTimeoutClock()
 
 	// Session found. Fill up data.
 	c.Set("Session", ses)
@@ -59,6 +61,8 @@ func guest_auth(c *gin.Context) {
 		c.Set("HeaderData", hdrdata)
 		return
 	}
+	// Reset Session Timeout clock here...
+	ses.ResetTimeoutClock()
 
 	// Session found. Fill up data.
 	c.Set("Session", ses)

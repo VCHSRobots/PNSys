@@ -191,6 +191,10 @@ func (ses *TSession) HasReadPrivilege() bool {
 	return ses.Privilege.HasReadPrivilege()
 }
 
+func (ses *TSession) ResetTimeoutClock() {
+	ses.LastAccess = time.Now()
+}
+
 // CheckPassword will check a cleartext password with the hash table to
 // determine a match.  If there is one, the allowed privilege is returned.
 // This function applies the policy for the allow-universal-password mode.

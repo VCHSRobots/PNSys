@@ -163,9 +163,17 @@ Then kill it with:
 
 where nnn is the PID number.  
 
-Make your code changes, rebuild it, and this start it again with pnsys:
-
-    sudo pnsys
+Make your code changes, rebuild it, and this start it again like this:
+    
+    cd ~/dev/src/epic 
+    git status 
+    git add ... 
+    git commit -m "your comments on what you did here."
+    git pull --rebase
+    git push
+    cd ~/dev/src/epic/pnserver
+    go build
+    sudo ./runpn
     
 Log Files
 ---------
